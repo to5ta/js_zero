@@ -18,3 +18,7 @@ Powered by three.js <3
 ## Installation
 
 Run `npm install`, then `npm run dev` to host the app locally
+
+## Demo
+
+https://to5ta.github.io/js_zero/dist/
