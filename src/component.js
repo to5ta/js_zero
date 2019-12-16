@@ -1,0 +1,1 @@
+console.log("Excuting code from component.js");
