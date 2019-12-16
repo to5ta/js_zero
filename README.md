@@ -4,11 +4,15 @@ Small JavaScript App to learn more about proper Web-Development. Maybe this will
 
 Powered by three.js <3
 
-[ ] Debuging-Fly Mode
-[ ] Play Sound-Effects
-[ ] Play Music
-[ ] Load something like a Level
-[ ] Menu Overlay
+[] Debuging-Fly Mode
+
+[] Play Sound-Effects
+
+[] Play Music
+
+[] Load something like a Level
+
+[] Menu Overlay
 
 
 ## Installation
