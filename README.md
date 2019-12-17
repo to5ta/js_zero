@@ -16,9 +16,10 @@ Powered by three.js, npm and github <3
 
 ## Installation
 
-1. Install NPM form https://nodejs.org/de/
+1. Install NPM from https://nodejs.org/de/
 2. `npm install` to install all dependencies
 3. `npm run dev` to host the app locally
+4. open `localhost:8080` in your Browser
 
 ## Online-Demo
 
