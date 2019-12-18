@@ -1,1 +1,3 @@
-console.log("Excuting code from component.js");
+var THREE = require('three');
+
+console.log("Excuting code from component.js...");
