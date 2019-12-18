@@ -1,6 +1,7 @@
-body{
+body {
   margin: 0px;
   overflow: hidden;
+  display: block;
 }
 
 canvas {

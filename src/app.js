@@ -27,7 +27,7 @@ var gridHelper = new THREE.GridHelper( size, divisions, 0x888888, 0x404040 );
 scene.add( gridHelper );
 
 var geometry = new THREE.BoxGeometry( 1, 1, 1 );
-var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+var material = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
 var cube = new THREE.Mesh( geometry, material );
 scene.add( cube );
 
