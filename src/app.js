@@ -1,11 +1,18 @@
-var THREE = require('three');
+import { Environment } from "./environment";
+import { Menu } from "./menu";
 
+var THREE = require('three');
 var Stats = require("stats.js");
 
 import './style.css'
 import './component'
-import './scene'
+// import './scene'
 
+var env = new Environment();
+var menu = new Menu(env);
+
+console.log("Environment:", env);
+console.log("Menu:", menu);
 
 var stats = new Stats();
 stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
@@ -14,10 +21,19 @@ document.body.appendChild( stats.dom );
 var scene = new THREE.Scene();
 var camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
 
+
 var renderer = new THREE.WebGLRenderer();
 renderer.setSize( window.innerWidth, window.innerHeight );
 console.log("Initializing Renderer with Size: ", window.innerWidth, "x", window.innerHeight);
 document.body.appendChild( renderer.domElement );
+
+document.body.addEventListener("keydown", (event) => {
+  // console.log("Keydown:", event);
+  if(event.key == "Escape") {
+    menu.show();
+  }
+});
+
 
 
 // add grid

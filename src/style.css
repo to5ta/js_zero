@@ -5,5 +5,29 @@ body {
 }
 
 canvas {
+  z-index: 0;
+  position: fixed;
   display: block; /* fix necessary to remove space at bottom of canvas */
+}
+
+.menu_background {
+  left: 25%;
+  top: 25%;
+  width: 50%;
+  height: 200px;
+  position: absolute;
+  background-color: #FFaa0055;
+  z-index: 100;
+}
+
+.menu_button {
+  width: 30%;
+  height: 30%;
+  background-color: #FFaa0055;
+}
+
+.menu_button_text {
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
 }
