@@ -11,7 +11,7 @@ Powered by three.js, npm and github <3
 - [ ] Play Sound-Effects
 - [ ] Play Music
 - [ ] Load something like a Level
-- [ ] Menu Overlay
+- [x] Menu Overlay
 
 
 ## Installation
