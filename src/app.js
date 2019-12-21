@@ -8,56 +8,54 @@ import './style.css'
 import './component'
 // import './scene'
 
-var env = new Environment();
-var menu = new Menu(env);
+class App {
+  constructor() {  
+    this.env = new Environment();
+    this.menu = new Menu(this.env);
+    
 
-console.log("Environment:", env);
-console.log("Menu:", menu);
-
-var stats = new Stats();
-stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
-document.body.appendChild( stats.dom );
-
-var scene = new THREE.Scene();
-var camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
+    console.log("Environment:", this.env);
+    console.log("Menu:", this.menu);
 
 
-var renderer = new THREE.WebGLRenderer();
-renderer.setSize( window.innerWidth, window.innerHeight );
-console.log("Initializing Renderer with Size: ", window.innerWidth, "x", window.innerHeight);
-document.body.appendChild( renderer.domElement );
+    this.stats = new Stats();
+    this.stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
+    document.body.appendChild( this.stats.dom );
 
-document.body.addEventListener("keydown", (event) => {
-  // console.log("Keydown:", event);
-  if(event.key == "Escape") {
-    menu.show();
+    this.scene = new THREE.Scene();
+    this.camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
+    this.renderer = new THREE.WebGLRenderer();
+    this.renderer.setSize( window.innerWidth, window.innerHeight );
+    console.log("Initializing Renderer with Size: ", window.innerWidth, "x", window.innerHeight);
+    document.body.appendChild( this.renderer.domElement );
+
+  
+    // add grid
+    var size = 10;
+    var divisions = 10;
+    var gridHelper = new THREE.GridHelper( size, divisions, 0x888888, 0x404040 );
+    this.scene.add( gridHelper );
+
+    var geometry = new THREE.BoxGeometry( 1, 1, 1 );
+    var material = new THREE.MeshBasicMaterial( { color: this.env.isMobile ? 0xff0000 : 0x00ffff } );
+    this. cube = new THREE.Mesh( geometry, material );
+    this.scene.add( this.cube );
+
+    this.camera.position.z = 9;
+    this.camera.position.y = 3;
+    this.camera.rotation.x = -0.3;
+
+    // this.renderer.setAnimationLoop(this.mainloop);
   }
-});
+
+  mainloop () {
+    this.stats.begin();
+    this.cube.rotation.x += 0.01;
+    this.cube.rotation.y += 0.01;
+    this.renderer.render( this.scene, this.camera );
+    this.stats.end();
+  };
+}
 
 
-
-// add grid
-var size = 10;
-var divisions = 10;
-var gridHelper = new THREE.GridHelper( size, divisions, 0x888888, 0x404040 );
-scene.add( gridHelper );
-
-var geometry = new THREE.BoxGeometry( 1, 1, 1 );
-var material = new THREE.MeshBasicMaterial( { color: 0x00ffff } );
-var cube = new THREE.Mesh( geometry, material );
-scene.add( cube );
-
-camera.position.z = 9;
-camera.position.y = 3;
-camera.rotation.x = -0.3;
-
-
-function mainloop () {
-  stats.begin();
-  cube.rotation.x += 0.01;
-  cube.rotation.y += 0.01;
-  renderer.render( scene, camera );
-  stats.end();
-};
-
-renderer.setAnimationLoop(mainloop);
+export { App };
