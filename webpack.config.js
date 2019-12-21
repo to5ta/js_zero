@@ -29,7 +29,7 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      title: "Webpack Output",
+      title: "Project JS_Zero",
     }),
   ],
 };

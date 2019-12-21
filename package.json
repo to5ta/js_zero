@@ -22,7 +22,7 @@
     "webpack": "^4.41.3",
     "webpack-cli": "^3.3.10",
     "webpack-dev-server": "^3.9.0",
-    "stats": "^0.17.0"
+    "stats": "^1.0.0"
   },
   "dependencies": {
     "stats.js": "^0.17.0",
