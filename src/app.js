@@ -17,6 +17,8 @@ class App {
     console.log("Environment:", this.env);
     console.log("Menu:", this.menu);
 
+    this.cameras = [];
+
 
     this.stats = new Stats();
     this.stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
@@ -24,12 +26,27 @@ class App {
 
     this.scene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
+    this.debug_camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
+    
+    this.cameras.push(this.camera, this.debug_camera);
+    // this.cameras.push()
     this.renderer = new THREE.WebGLRenderer();
     this.renderer.setSize( window.innerWidth, window.innerHeight );
     console.log("Initializing Renderer with Size: ", window.innerWidth, "x", window.innerHeight);
     document.body.appendChild( this.renderer.domElement );
 
-  
+    document.body.addEventListener("keydown", (event) => {
+      // console.log(event.key);
+      if(event.key == "c") {
+        this.camera_index = (this.camera_index+1) % this.cameras.length; 
+      }
+      if(event.key == "ArrowLeft") {
+        this.debug_camera.position.x += 0.03;
+      }
+    });
+
+    this.camera_index = 0;
+
     // add grid
     var size = 10;
     var divisions = 10;
@@ -45,6 +62,10 @@ class App {
     this.camera.position.y = 3;
     this.camera.rotation.x = -0.3;
 
+    this.debug_camera.position.z = 9;
+    this.debug_camera.position.y = 3;
+
+
     // this.renderer.setAnimationLoop(this.mainloop);
   }
 
@@ -52,7 +73,8 @@ class App {
     this.stats.begin();
     this.cube.rotation.x += 0.01;
     this.cube.rotation.y += 0.01;
-    this.renderer.render( this.scene, this.camera );
+    this.renderer.render( this.scene, this.cameras[this.camera_index] );
+    console.log(this.camera_index);
     this.stats.end();
   };
 }
