@@ -26,6 +26,9 @@
   },
   "dependencies": {
     "stats.js": "^0.17.0",
-    "three": "^0.111.0"
+    "three": "^0.111.0",
+    "three-full": "^17.1.0",
+    "three-orbit-controls": "^82.1.0",
+    "three-pointer-lock-controls": "^1.0.0"
   }
 }

@@ -1,3 +1,10 @@
+p {
+  top: 40px;
+  position: absolute;
+  color: red;
+  z-index: 100;
+}
+
 body {
   margin: 0px;
   overflow: hidden;

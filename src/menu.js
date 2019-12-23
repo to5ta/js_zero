@@ -25,6 +25,9 @@ class Menu {
         this.menu_opener.setAttribute('id', 'menu_opener');
         this.menu_opener.addEventListener("click", this);
 
+        this.debug_text = document.createElement("p");
+        this.debug_text.textContent = "Debug Messages";
+        document.body.appendChild(this.debug_text);
 
         if(this.env.isMobile == false) {
             this.menu_opener.style.cssText = "display: none;";
