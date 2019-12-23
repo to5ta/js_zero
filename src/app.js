@@ -37,11 +37,21 @@ class App {
 
     document.body.addEventListener("keydown", (event) => {
       // console.log(event.key);
+      var speed = 0.1;
       if(event.key == "c") {
         this.camera_index = (this.camera_index+1) % this.cameras.length; 
       }
       if(event.key == "ArrowLeft") {
-        this.debug_camera.position.x += 0.03;
+        this.debug_camera.position.x -= speed;
+      }
+      if(event.key == "ArrowRight") {
+        this.debug_camera.position.x += speed;
+      }
+      if(event.key == "ArrowUp") {
+        this.debug_camera.position.z -= speed;
+      }
+      if(event.key == "ArrowDown") {
+        this.debug_camera.position.z += speed;
       }
     });
 
