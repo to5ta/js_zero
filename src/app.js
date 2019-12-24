@@ -1,15 +1,15 @@
+var Stats = require("stats.js");
+
 import { Environment } from "./environment";
 import { Menu } from "./menu";
 
 global.THREE = require('three');
 const OrbitControls = require( 'three-orbit-controls' )( THREE );
-const PointerLockControls = require('three-pointer-lock-controls')( global.THREE );
-
-var Stats = require("stats.js");
+// currently no better way
+import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls';
 
 import './style.css'
 import './component'
-
 // import './scene'
 
 class App {
@@ -31,36 +31,31 @@ class App {
     this.debug_camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
     this.cameras.push(this.camera, this.debug_camera);
 
-    console.log("controls:", this.controls);
-    // this.controls.lock();
-    // add event listener to show/hide a UI (e.g. the game's menu)
-    
-    // this.controls.addEventListener( 'lock', function () {
-      //   // menu.style.display = 'none';
-      //   console.log("Cursor locked");
-      // } );
-      
-      // this.controls.addEventListener( 'unlock', function () {
-        //   // menu.style.display = 'block';
-        //   console.log("Cursor unlocked");
-    // } );
-    
     this.renderer = new THREE.WebGLRenderer();
     this.renderer.setSize( window.innerWidth, window.innerHeight );
     console.log("Initializing Renderer with Size: ", window.innerWidth, "x", window.innerHeight);
     document.body.appendChild( this.renderer.domElement );
-    
-    this.orbit = new OrbitControls( this.camera, this.renderer.domElement );
-    console.log(PointerLockControls);
-    // console.log(THREE.PointerLockControls);
-    this.controls = new PointerLockControls( this.debug_camera, document.body );
-    
+
+    this.orbit_controls = new OrbitControls( this.camera, this.renderer.domElement );
+    this.pointerlock_controls = new PointerLockControls( this.debug_camera, document.body );
+
+    document.body.addEventListener("click", (event) => {
+      if(this.camera_index  == 1) {
+        this.pointerlock_controls.lock();
+      }
+    });
+
     document.body.addEventListener("keydown", (event) => {
-      // console.log(event.key);
+      console.log(event.key);
       var speed = 0.1;
       if(event.key == "c") {
         this.camera_index = (this.camera_index+1) % this.cameras.length; 
         this.menu.debug_text.textContent ="Active Camera: " + (this.camera_index);
+        if(this.camera_index == 1){
+          this.pointerlock_controls.lock();
+        } else {
+          this.pointerlock_controls.unlock();
+        }
       }
       if(event.key == "ArrowLeft") {
         this.debug_camera.position.x -= speed;
