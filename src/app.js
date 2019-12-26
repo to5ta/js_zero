@@ -13,7 +13,8 @@ import './component'
 // import './scene'
 
 class App {
-  constructor() {  
+  constructor() { 
+
     this.env = new Environment();
     this.menu = new Menu(this.env);
     
@@ -37,6 +38,7 @@ class App {
     document.body.appendChild( this.renderer.domElement );
 
     this.orbit_controls = new OrbitControls( this.camera, this.renderer.domElement );
+    this.orbit_controls.maxPolarAngle = Math.PI/2;
     this.pointerlock_controls = new PointerLockControls( this.debug_camera, document.body );
 
     document.body.addEventListener("click", (event) => {
@@ -46,28 +48,36 @@ class App {
     });
 
     document.body.addEventListener("keydown", (event) => {
-      console.log(event.key);
+      console.log(event.keyCode);
       var speed = 0.1;
       if(event.key == "c") {
         this.camera_index = (this.camera_index+1) % this.cameras.length; 
         this.menu.debug_text.textContent ="Active Camera: " + (this.camera_index);
+ 
         if(this.camera_index == 1){
           this.pointerlock_controls.lock();
         } else {
           this.pointerlock_controls.unlock();
         }
       }
-      if(event.key == "ArrowLeft") {
-        this.debug_camera.position.x -= speed;
-      }
-      if(event.key == "ArrowRight") {
-        this.debug_camera.position.x += speed;
-      }
-      if(event.key == "ArrowUp") {
-        this.debug_camera.position.z -= speed;
-      }
-      if(event.key == "ArrowDown") {
-        this.debug_camera.position.z += speed;
+
+      if(this.camera_index == 1){
+        var delta_position = new THREE.Vector3();
+        if(event.key == "ArrowLeft") {
+          delta_position.x = -1;
+        }
+        if(event.key == "ArrowRight") {
+          delta_position.x = 1;
+        }
+        if(event.key == "ArrowUp") {
+          delta_position.z = -1;
+        }
+        if(event.key == "ArrowDown") {
+          delta_position.z = 1;
+        }
+        if([37,38,39,40].includes(event.keyCode)){
+          this.debug_camera.position.add(delta_position.transformDirection(this.debug_camera.matrixWorld));
+        }; 
       }
     });
 
