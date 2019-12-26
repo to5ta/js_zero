@@ -7,10 +7,13 @@ Powered by three.js, npm and github <3
 ## TODO
 
 - [ ] npm build on github
-- [ ] Debuging-Fly Mode
+- [x] Debuging-Fly Mode
 - [ ] Play Sound-Effects
 - [ ] Play Music
 - [ ] Load something like a Level
+- [ ] Add Character model
+- [ ] Animate Character model
+- [ ] make a camera that follows the character
 - [x] Menu Overlay
 
 
