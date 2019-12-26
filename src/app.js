@@ -38,7 +38,11 @@ class App {
     document.body.appendChild( this.renderer.domElement );
 
     this.orbit_controls = new OrbitControls( this.camera, this.renderer.domElement );
-    this.orbit_controls.maxPolarAngle = Math.PI/2;
+    
+    this.orbit_controls.target.y = 2;
+    this.orbit_controls.maxPolarAngle = Math.PI/2 - 0.1;
+    this.orbit_controls.enablePan = false;
+
     this.pointerlock_controls = new PointerLockControls( this.debug_camera, document.body );
 
     document.body.addEventListener("click", (event) => {
@@ -48,9 +52,9 @@ class App {
     });
 
     document.body.addEventListener("keydown", (event) => {
-      console.log(event.keyCode);
-      var speed = 0.1;
-      if(event.key == "c") {
+      // console.log(event.keyCode);
+      console.log(this.orbit_controls);
+      if(event.key == "c" || event.key == "C") {
         this.camera_index = (this.camera_index+1) % this.cameras.length; 
         this.menu.debug_text.textContent ="Active Camera: " + (this.camera_index);
  
@@ -60,24 +64,32 @@ class App {
           this.pointerlock_controls.unlock();
         }
       }
-
       if(this.camera_index == 1){
         var delta_position = new THREE.Vector3();
-        if(event.key == "ArrowLeft") {
+        if(event.key == "ArrowLeft" || event.key == "a" || event.key == "A" ) {
           delta_position.x = -1;
         }
-        if(event.key == "ArrowRight") {
+        if(event.key == "ArrowRight" || event.key == "d" || event.key == "D") {
           delta_position.x = 1;
         }
-        if(event.key == "ArrowUp") {
+        if(event.key == "ArrowUp" || event.key == "w" || event.key == "W") {
           delta_position.z = -1;
         }
-        if(event.key == "ArrowDown") {
+        if(event.key == "ArrowDown" || event.key == "s" || event.key == "S") {
           delta_position.z = 1;
         }
-        if([37,38,39,40].includes(event.keyCode)){
-          this.debug_camera.position.add(delta_position.transformDirection(this.debug_camera.matrixWorld));
-        }; 
+        if( event.key == "q" || event.key == "Q") {
+          delta_position.y = 1;
+        }
+        if( event.key == "e" || event.key == "E") {
+          delta_position.y = -1;
+        }
+
+        if([37,38,39,40, 81, 87, 69, 65, 83, 68].includes(event.keyCode)){
+          this.debug_camera.position.add(
+            delta_position.transformDirection(this.debug_camera.matrixWorld).multiplyScalar(0.25)
+          );
+        } 
       }
     });
 
@@ -88,7 +100,7 @@ class App {
     var divisions = 10;
     var gridHelper = new THREE.GridHelper( size, divisions, 0x888888, 0x404040 );
     this.scene.add( gridHelper );
-
+ 
     var geometry = new THREE.BoxGeometry( 1, 1, 1 );
     var material = new THREE.MeshBasicMaterial( { color: this.env.isMobile ? 0xff0000 : 0x00ffff } );
     this. cube = new THREE.Mesh( geometry, material );
