@@ -2,8 +2,6 @@ var Stats = require("stats.js");
 
 var THREE = require('three');
 
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-
 import { Environment } from "./environment";
 import { Menu } from "./menu";
 import { Player } from './player';
@@ -35,6 +33,7 @@ class App {
     document.body.appendChild( this.renderer.domElement );
     
     this.scene = new THREE.Scene();
+    this.scene.add( this.player.model );
 
     this.camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
     this.camera_controls = new PlayerControls( this.player, this.camera, this.renderer.domElement );
@@ -73,7 +72,6 @@ class App {
     var gridHelper = new THREE.GridHelper( size, divisions, 0x888888, 0x404040 );
     this.scene.add( gridHelper );
 
-    this.scene.add( this.player.model );
  
   }
 

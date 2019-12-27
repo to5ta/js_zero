@@ -13,7 +13,6 @@ class PlayerControls {
         this.orbit_controls.target.y = 2;
         this.orbit_controls.maxPolarAngle = Math.PI/2 - 0.1;
         this.orbit_controls.enablePan = false;
-        
 
         this.camera.position.z = 9;
         this.camera.position.y = 3;
@@ -45,7 +44,6 @@ class PlayerControls {
           this.camera.position.add(
               delta_position.transformDirection(this.player.model.matrixWorld).multiplyScalar(0.25)
           );
-          // this.orbit_controls.position = this.player.model.position + THREE.Vector3(0,1,1);
           this.orbit_controls.update();
         } 
     }
