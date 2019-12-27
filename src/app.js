@@ -1,13 +1,13 @@
 var Stats = require("stats.js");
 
-global.THREE = require('three');
+var THREE = require('three');
 import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { FlyControls } from 'three/examples/jsm/controls/FlyControls';
 
 import { Environment } from "./environment";
 import { Menu } from "./menu";
 import { Player } from './player';
-import { states } from './state';
 
 import './style.css'
 import './component'
@@ -21,35 +21,33 @@ class App {
     this.menu = new Menu(this.env);
     this.player = new Player();
 
-    this.state = states.LOADING;
-
     this.cameras = [];
+    this.debug_mode = false;
+    this.paused = false;
 
     this.stats = new Stats();
     this.stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
     document.body.appendChild( this.stats.dom );
-
-    this.scene = new THREE.Scene();
-
-
-    this.camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
-    this.debug_camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
-    this.cameras.push(this.camera, this.debug_camera);
-
 
     this.renderer = new THREE.WebGLRenderer();
     this.renderer.setSize( window.innerWidth, window.innerHeight );
     console.log("Initializing Renderer with Size: ", window.innerWidth, "x", window.innerHeight);
     document.body.appendChild( this.renderer.domElement );
     
+    this.scene = new THREE.Scene();
+
+    this.camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
 
     this.orbit_controls = new OrbitControls( this.camera, this.renderer.domElement );
-    
     this.orbit_controls.target.y = 2;
     this.orbit_controls.maxPolarAngle = Math.PI/2 - 0.1;
     this.orbit_controls.enablePan = false;
-
+    
+    this.debug_camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000);
     this.pointerlock_controls = new PointerLockControls( this.debug_camera, document.body );
+    this.cameras.push(this.camera, this.debug_camera);
+    
+    
 
     document.body.addEventListener("click", (event) => {
       if(this.camera_index  == 1) {
@@ -58,8 +56,12 @@ class App {
     });
 
     document.body.addEventListener("keydown", (event) => {
-      // console.log(event.keyCode);
-      console.log(this.orbit_controls);
+      if(event.key == "c" || event.key == "C") {
+
+      }  
+    });
+
+    document.body.addEventListener("keydown", (event) => {
       if(event.key == "c" || event.key == "C") {
         this.camera_index = (this.camera_index+1) % this.cameras.length; 
         this.menu.debug_text.textContent ="Active Camera: " + (this.camera_index);
@@ -124,7 +126,9 @@ class App {
     this.stats.begin();
     this.cube.rotation.x += 0.01;
     this.cube.rotation.y += 0.01;
+
     this.renderer.render( this.scene, this.cameras[this.camera_index] );
+
     this.stats.end();
   };
 }

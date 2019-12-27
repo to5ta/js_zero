@@ -1,5 +1,4 @@
-
-
+var THREE = require('three');
 
 class Player {
     constructor() {
