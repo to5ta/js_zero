@@ -1,13 +1,13 @@
 var Stats = require("stats.js");
 
 var THREE = require('three');
-import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls';
+
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { FlyControls } from 'three/examples/jsm/controls/FlyControls';
 
 import { Environment } from "./environment";
 import { Menu } from "./menu";
 import { Player } from './player';
+import { DebugControls } from './DebugControls';
 
 import './style.css'
 import './component'
@@ -21,7 +21,6 @@ class App {
     this.menu = new Menu(this.env);
     this.player = new Player();
 
-    this.cameras = [];
     this.debug_mode = false;
     this.paused = false;
 
@@ -36,73 +35,43 @@ class App {
     
     this.scene = new THREE.Scene();
 
+    // @TODO: transform this block to player controls logic soon
     this.camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
-
     this.orbit_controls = new OrbitControls( this.camera, this.renderer.domElement );
     this.orbit_controls.target.y = 2;
     this.orbit_controls.maxPolarAngle = Math.PI/2 - 0.1;
     this.orbit_controls.enablePan = false;
-    
+    this.camera.position.z = 9;
+    this.camera.position.y = 3;
+    this.camera.rotation.x = -0.3;
+
     this.debug_camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000);
-    this.pointerlock_controls = new PointerLockControls( this.debug_camera, document.body );
-    this.cameras.push(this.camera, this.debug_camera);
-    
-    
+    this.debug_controls = new DebugControls( this.debug_camera, document.body );
 
+    
     document.body.addEventListener("click", (event) => {
-      if(this.camera_index  == 1) {
-        this.pointerlock_controls.lock();
+      if(this.debug_mode) {
+        this.debug_controls.lock();
       }
     });
 
     document.body.addEventListener("keydown", (event) => {
       if(event.key == "c" || event.key == "C") {
-
-      }  
-    });
-
-    document.body.addEventListener("keydown", (event) => {
-      if(event.key == "c" || event.key == "C") {
-        this.camera_index = (this.camera_index+1) % this.cameras.length; 
-        this.menu.debug_text.textContent ="Active Camera: " + (this.camera_index);
- 
-        if(this.camera_index == 1){
-          this.pointerlock_controls.lock();
+        this.debug_mode = !this.debug_mode;
+        this.menu.debug_text.textContent ="Debug Mode: " + (!this.debug_mode ? 'false' : 'true');
+        if(this.debug_mode){
+          this.debug_controls.lock();
         } else {
-          this.pointerlock_controls.unlock();
+          this.debug_controls.unlock();
         }
       }
-      if(this.camera_index == 1){
-        var delta_position = new THREE.Vector3();
-        if(event.key == "ArrowLeft" || event.key == "a" || event.key == "A" ) {
-          delta_position.x = -1;
-        }
-        if(event.key == "ArrowRight" || event.key == "d" || event.key == "D") {
-          delta_position.x = 1;
-        }
-        if(event.key == "ArrowUp" || event.key == "w" || event.key == "W") {
-          delta_position.z = -1;
-        }
-        if(event.key == "ArrowDown" || event.key == "s" || event.key == "S") {
-          delta_position.z = 1;
-        }
-        if( event.key == "q" || event.key == "Q") {
-          delta_position.y = 1;
-        }
-        if( event.key == "e" || event.key == "E") {
-          delta_position.y = -1;
-        }
-
-        if([37,38,39,40, 81, 87, 69, 65, 83, 68].includes(event.keyCode)){
-          this.debug_camera.position.add(
-            delta_position.transformDirection(this.debug_camera.matrixWorld).multiplyScalar(0.25)
-          );
-        } 
+      
+      if(this.debug_mode) {
+        this.debug_controls.handleEvent(event);
       }
     });
 
-    this.camera_index = 0;
-
+  
     // add grid
     var size = 10;
     var divisions = 10;
@@ -114,12 +83,7 @@ class App {
     this. cube = new THREE.Mesh( geometry, material );
     this.scene.add( this.cube );
 
-    this.camera.position.z = 9;
-    this.camera.position.y = 3;
-    this.camera.rotation.x = -0.3;
-
-    this.debug_camera.position.z = 9;
-    this.debug_camera.position.y = 3;
+ 
   }
 
   mainloop () {
@@ -127,7 +91,8 @@ class App {
     this.cube.rotation.x += 0.01;
     this.cube.rotation.y += 0.01;
 
-    this.renderer.render( this.scene, this.cameras[this.camera_index] );
+    // this.renderer.render( this.scene, this.cameras[this.camera_index] );
+    this.renderer.render( this.scene, this.debug_mode ? this.debug_camera : this.camera );
 
     this.stats.end();
   };
