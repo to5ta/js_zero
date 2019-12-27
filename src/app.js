@@ -1,25 +1,27 @@
 var Stats = require("stats.js");
 
+global.THREE = require('three');
+import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+
 import { Environment } from "./environment";
 import { Menu } from "./menu";
-
-global.THREE = require('three');
-const OrbitControls = require( 'three-orbit-controls' )( THREE );
-// currently no better way
-import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls';
+import { Player } from './player';
+import { states } from './state';
 
 import './style.css'
 import './component'
 // import './scene'
+
 
 class App {
   constructor() { 
 
     this.env = new Environment();
     this.menu = new Menu(this.env);
-    
-    console.log("Environment:", this.env);
-    console.log("Menu:", this.menu);
+    this.player = new Player();
+
+    this.state = states.LOADING;
 
     this.cameras = [];
 
@@ -28,14 +30,18 @@ class App {
     document.body.appendChild( this.stats.dom );
 
     this.scene = new THREE.Scene();
+
+
     this.camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
     this.debug_camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
     this.cameras.push(this.camera, this.debug_camera);
+
 
     this.renderer = new THREE.WebGLRenderer();
     this.renderer.setSize( window.innerWidth, window.innerHeight );
     console.log("Initializing Renderer with Size: ", window.innerWidth, "x", window.innerHeight);
     document.body.appendChild( this.renderer.domElement );
+    
 
     this.orbit_controls = new OrbitControls( this.camera, this.renderer.domElement );
     
