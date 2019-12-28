@@ -5,13 +5,12 @@ var THREE = require('three');
 import { Environment } from "./environment";
 import { Menu } from "./menu";
 import { Player } from './player';
+import { Level } from './level';
 import { DebugControls } from './DebugControls';
 import { PlayerControls } from './PlayerControls';
 
 import './style.css'
 import './component'
-// import './scene'
-
 
 class App {
   constructor() { 
@@ -19,6 +18,8 @@ class App {
     this.env = new Environment();
     this.menu = new Menu(this.env);
     this.player = new Player();
+    this.level = new Level();
+    this.clock = new THREE.Clock();
 
     this.debug_mode = false;
     this.paused = false;
@@ -29,11 +30,9 @@ class App {
 
     this.renderer = new THREE.WebGLRenderer();
     this.renderer.setSize( window.innerWidth, window.innerHeight );
-    console.log("Initializing Renderer with Size: ", window.innerWidth, "x", window.innerHeight);
     document.body.appendChild( this.renderer.domElement );
     
-    this.scene = new THREE.Scene();
-    this.scene.add( this.player.model );
+    this.level.scene.add( this.player.model );
 
     this.camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
     this.camera_controls = new PlayerControls( this.player, this.camera, this.renderer.domElement );
@@ -53,10 +52,10 @@ class App {
         this.menu.debug_text.textContent ="Debug Mode: " + (!this.debug_mode ? 'false' : 'true');
         if(this.debug_mode){
           this.debug_controls.lock();
-          this.camera_controls.enabled = false;
+          // this.camera_controls.enabled = false;
         } else {
           this.debug_controls.unlock();
-          this.camera_controls.enabled = true;
+          // this.camera_controls.enabled = true;
         }
       }
       if(this.debug_mode) {
@@ -65,19 +64,11 @@ class App {
         this.camera_controls.handleEvent(event);
       }
     });
-
-    // add grid
-    var size = 10;
-    var divisions = 10;
-    var gridHelper = new THREE.GridHelper( size, divisions, 0x888888, 0x404040 );
-    this.scene.add( gridHelper );
-
- 
   }
 
   mainloop () {
     this.stats.begin();
-    this.renderer.render( this.scene, this.debug_mode ? this.debug_camera : this.camera );
+    this.renderer.render( this.level.scene, this.debug_mode ? this.debug_camera : this.camera );
     this.stats.end();
   };
 }
