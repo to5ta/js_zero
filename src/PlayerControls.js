@@ -1,4 +1,5 @@
 var THREE = require('three');
+var CANNON = require('cannon');
 
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
@@ -22,7 +23,7 @@ class PlayerControls {
 
     handleEvent( event ) {
         console.log(event.keyCode);
-        var delta_position = new THREE.Vector3();
+        var delta_position = new CANNON.Vec3(0,0,0);
         if(event.key == "ArrowLeft" || event.key == "a" || event.key == "A" ) {
           delta_position.x = -1;
         }
@@ -36,10 +37,17 @@ class PlayerControls {
           delta_position.z = 1;
         }
 
+        if(event.keyCode == 32) {
+          this.player.jump();
+        }
+
         if([37, 38, 39, 40, 87, 65, 83, 68].includes(event.keyCode)){
-          this.player.model.position.add(
-            delta_position.transformDirection(this.player.model.matrixWorld).multiplyScalar(0.25)
-          );
+          // this.player.model.position.add(
+          //   delta_position.transformDirection(this.player.model.matrixWorld).multiplyScalar(0.25)
+          // );
+
+          this.player.applyForce(delta_position);
+
           this.orbit_controls.target = this.player.model.position;
           this.camera.position.add(
               delta_position.transformDirection(this.player.model.matrixWorld).multiplyScalar(0.25)
