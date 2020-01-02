@@ -10,14 +10,14 @@ class World {
         this.physical_world = new CANNON.World();
         this.physical_world.gravity.set(0, -9.82, 0); // m/s²
 
-        let mat = new CANNON.Material("groundMat");
-        mat.friction = 1000.3;
-
+        
         // Create a plane
         var groundBody = new CANNON.Body({
             mass: 0 // mass == 0 makes the body static
         });
-
+        
+        let mat = new CANNON.Material("groundMat");
+        mat.friction = 0.4;
         groundBody.material = mat;
         
         var gorundBox = new CANNON.Box(new CANNON.Vec3(10, 1, 10));

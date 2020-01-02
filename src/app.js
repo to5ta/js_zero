@@ -23,8 +23,6 @@ class App {
     this.clock = new THREE.Clock();
     console.log(this.world.physical_world);
 
-
-
     this.debug_mode = false;
     this.paused = false;
 
