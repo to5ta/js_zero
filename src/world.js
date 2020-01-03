@@ -17,17 +17,17 @@ class World {
         });
         
         let mat = new CANNON.Material("groundMat");
-        mat.friction = 0.4;
+        mat.friction = 0.3;
         groundBody.material = mat;
         
-        var gorundBox = new CANNON.Box(new CANNON.Vec3(10, 1, 10));
+        var gorundBox = new CANNON.Box(new CANNON.Vec3(100, 1, 100));
         console.log(gorundBox)
 
         groundBody.addShape(gorundBox, new CANNON.Vec3(0,-1,0));
         this.physical_world.addBody(groundBody);
         
-        var size = 10;
-        var divisions = 10;
+        var size = 100;
+        var divisions = 100;
         var gridHelper = new THREE.GridHelper( size, divisions, 0x888888, 0x404040 );
         gridHelper.position.y = 0.1;
         this.scene.add( gridHelper );

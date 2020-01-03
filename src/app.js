@@ -41,15 +41,35 @@ class App {
     this.debug_camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
     this.debug_controls = new DebugControls( this.debug_camera, document.body );
 
+
     document.body.addEventListener("click", (event) => {
       if(this.debug_mode) {
         this.debug_controls.lock();
       }
     });
 
-    document.body.addEventListener("keyup", (event) => {
+    document.body.addEventListener("mousedown", (event) => {
       if(!this.debug_mode) {
-        this.player_controls.handleEvent(event);
+        this.player_controls.onMouseDown(event);
+      }
+    });
+
+    document.body.addEventListener("mouseup", (event) => {
+      if(!this.debug_mode) {
+        this.player_controls.onMouseUp(event);
+      }
+    });
+
+    document.body.addEventListener("mousemove", (event) => {
+      if(!this.debug_mode) {
+        this.player_controls.onMouseMove(event);
+      }
+    });
+    
+
+    document.body.addEventListener("wheel", (event) => {
+      if(!this.debug_mode) {
+        this.player_controls.onMouseWheel(event);
       }
     });
 
@@ -68,7 +88,7 @@ class App {
       if(this.debug_mode) {
         this.debug_controls.handleEvent(event);
       } else {
-        this.player_controls.handleEvent(event);
+        this.player_controls.handleKeyPress(event);
       }
     });
   }
@@ -76,13 +96,12 @@ class App {
   mainloop () {
     this.stats.begin();
     var dt = this.clock.getDelta();
-    // console.log(dt);
 
-
-    this.menu.debug_text.textContent = this.player.infoString(); 
+    this.menu.debug_text.innerHTML = this.player.infoString(); 
     if(!this.paused) {
       this.world.update(dt*1000.);
       this.player.update();
+      this.player_controls.updateCamera();
     }
 
     this.renderer.render( this.world.scene, this.debug_mode ? this.debug_camera : this.camera );
