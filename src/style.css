@@ -3,6 +3,7 @@ p {
   position: absolute;
   color: red;
   z-index: 100;
+  font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
 }
 
 body {

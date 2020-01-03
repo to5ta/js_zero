@@ -86,12 +86,6 @@ class PlayerControls {
       this.right_direction.z = 0;
       this.right_direction.applyEuler( this.euler_rotation );
       this.rightArrowHelper.setDirection(this.right_direction); 
-
-      // this.player.physicalBody.quaterion.copy( new THREE.Quaternion().setFromEuler(this.euler_rotation));
-      // console.log();
-      // var quat = new THREE.Quaternion();
-      // quat.setFromEuler(this.euler_rotation);
-      // this.player.physicalBody.quaternion = quat;
     }
 
     updateCamera() {
@@ -101,6 +95,12 @@ class PlayerControls {
       this.camera.position.z = this.target.z + this.distance_to_player * Math.cos(this.theta * Math.PI / 180) * Math.cos(this.phi * Math.PI / 180);
       this.camera.updateMatrix();
       this.camera.lookAt(this.target);
+    }
+
+    infoString(){
+      var info = "";
+      info += "Theta: " + this.theta.toFixed(3);
+      return info;
     }
 
     handleKeyPress( event ) {
@@ -124,8 +124,9 @@ class PlayerControls {
         }
 
         if([37, 38, 39, 40, 87, 65, 83, 68].includes(event.keyCode)){
+            delta_position.normalize();
             this.moveArrowHelper.setDirection(delta_position);
-            this.player.move(delta_position.multiplyScalar(3));
+            this.player.move(delta_position);
             // this.updateDirection();
         } 
     }

@@ -5,14 +5,28 @@ class Player {
     constructor(world) {
         this.falling = false;
 
-        var geometry = new THREE.BoxGeometry( 1,1,1 );
-        // var geometry = new THREE.SphereGeometry(0.5);
-        var material = new THREE.MeshBasicMaterial( { color:  0xff0000 } );
+        this.MAX_SPEED = 5;
+        this.ACCELERATION = 10;
+
+        // var geometry = new THREE.BoxGeometry( 1,1,1 );
+        var geometry = new THREE.SphereGeometry(0.5);
+        // var material = new THREE.MeshBasicMaterial( { color:  0xff0000 } );
+        var material = new THREE.LineBasicMaterial( { color:  0xff0000 } );
         this.model = new THREE.Mesh( geometry, material );
         this.model.position.y = 3;
 
-        this.MAX_SPEED = 3;
-        this.ACCELERATION = 4;
+
+        var wireframe = new THREE.WireframeGeometry( geometry );
+
+        var line = new THREE.LineSegments( wireframe );
+        line.material.depthTest = false;
+        line.material.opacity = 0.25;
+        line.material.transparent = true;
+
+
+        this.model.add( line );
+
+
 
         world.scene.add( this.model );
 
@@ -45,18 +59,19 @@ class Player {
         this.falling = false;
     }
 
-    move(cannon_vec) {
-        // this.physicalCapsule.force = cannon_vec.scale(100);
-        if(this.physicalBody.velocity.norm() < this.MAX_SPEED) {
-            this.physicalBody.force.x = cannon_vec.x * this.ACCELERATION;
-            this.physicalBody.force.z = cannon_vec.z * this.ACCELERATION;
-        }
+    move(movement_vector) {
+        var dAcc = 1 - (this.physicalBody.velocity.norm() / this.MAX_SPEED);
+        this.physicalBody.force.x = movement_vector.x * this.ACCELERATION * dAcc;
+        this.physicalBody.force.z = movement_vector.z * this.ACCELERATION * dAcc;
+    
     }
 
     infoString() {
         var info = "";
-        info += "Force: " + this.physicalBody.force.toString();
-        info += "<br/>Veloctiy: " + this.physicalBody.velocity.toString();
+        info += "Veloctiy: <br/>";
+        info += "x: "+this.physicalBody.velocity.x.toFixed(2) + "<br/>";
+        info += "y: "+this.physicalBody.velocity.y.toFixed(2) + "<br/>";
+        info += "z: "+this.physicalBody.velocity.z.toFixed(2) + "<br/>";
         return info;
     }
 

@@ -93,11 +93,14 @@ class App {
     });
   }
 
+
   mainloop () {
     this.stats.begin();
     var dt = this.clock.getDelta();
 
     this.menu.debug_text.innerHTML = this.player.infoString(); 
+    this.menu.debug_text.innerHTML += this.player_controls.infoString(); 
+    
     if(!this.paused) {
       this.world.update(dt*1000.);
       this.player.update();
