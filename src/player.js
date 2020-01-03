@@ -8,10 +8,10 @@ class Player {
         this.MAX_SPEED = 5;
         this.ACCELERATION = 10;
 
+        
         // var geometry = new THREE.BoxGeometry( 1,1,1 );
         var geometry = new THREE.SphereGeometry(0.5);
-        // var material = new THREE.MeshBasicMaterial( { color:  0xff0000 } );
-        var material = new THREE.LineBasicMaterial( { color:  0xff0000 } );
+        var material = new THREE.MeshBasicMaterial( { color:  0xff0000 } );
         this.model = new THREE.Mesh( geometry, material );
         this.model.position.y = 3;
 
@@ -43,7 +43,7 @@ class Player {
         this.physicalBody.addEventListener('collide', this);
 
         // Compound shape
-        //let sphereShape = new CANNON.Box(new CANNON.Vec3(0.5,0.5,0.5));
+        // let sphereShape = new CANNON.Box(new CANNON.Vec3(0.5,0.5,0.5));
         let sphereShape = new CANNON.Sphere(0.5);
 
         // Materials
@@ -61,9 +61,8 @@ class Player {
 
     move(movement_vector) {
         var dAcc = 1 - (this.physicalBody.velocity.norm() / this.MAX_SPEED);
-        this.physicalBody.force.x = movement_vector.x * this.ACCELERATION * dAcc;
+        this.physicalBody.force.x = (movement_vector.x) * this.ACCELERATION * dAcc;
         this.physicalBody.force.z = movement_vector.z * this.ACCELERATION * dAcc;
-    
     }
 
     infoString() {

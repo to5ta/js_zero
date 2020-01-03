@@ -48,6 +48,9 @@ class App {
       }
     });
 
+
+ 
+
     document.body.addEventListener("mousedown", (event) => {
       if(!this.debug_mode) {
         this.player_controls.onMouseDown(event);
@@ -66,10 +69,16 @@ class App {
       }
     });
     
-
     document.body.addEventListener("wheel", (event) => {
       if(!this.debug_mode) {
         this.player_controls.onMouseWheel(event);
+      }
+    });
+
+
+    document.body.addEventListener("keypress", (event) => {
+      if(!this.debug_mode) {
+        this.player_controls.handleKeyPress(event);
       }
     });
 

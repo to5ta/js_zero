@@ -22,6 +22,7 @@ class PlayerControls {
         this.euler_rotation = new THREE.Euler(0,0,0,"YXZ");
         this.forward_direction = new THREE.Vector3(0,0,-1);
         this.right_direction = new THREE.Vector3(1,0,0);
+        this.movement_direction = new THREE.Vector3();
 
         this.camera.position.z = 9;
         this.camera.position.y = 3;
@@ -98,25 +99,30 @@ class PlayerControls {
     }
 
     infoString(){
-      var info = "";
-      info += "Theta: " + this.theta.toFixed(3);
+      var info = "<br/>-PlayerControls-<br/>";
+      info += "Theta: " + this.theta.toFixed(3) + "<br/>";
+      info += "Movement: <br/>";
+      info += "__x: "+ this.movement_direction.x.toFixed(3) + "<br/>";
+      info += "__y: "+ this.movement_direction.y.toFixed(3) + "<br/>";
+      info += "__z: "+ this.movement_direction.z.toFixed(3) + "<br/>";
+
       return info;
     }
 
     handleKeyPress( event ) {
-        var delta_position = new THREE.Vector3(0,0,0);
+        this.movement_direction = new THREE.Vector3(0,0,0);
         
         if(event.key == "ArrowLeft" || event.key == "a" || event.key == "A" ) {
-          delta_position.sub(this.right_direction);
+          this.movement_direction.sub(this.right_direction);
         }
         if(event.key == "ArrowRight" || event.key == "d" || event.key == "D") {
-          delta_position.add(this.right_direction);
+          this.movement_direction.add(this.right_direction);
         }
         if(event.key == "ArrowUp" || event.key == "w" || event.key == "W") {
-          delta_position.add(this.forward_direction);
+          this.movement_direction.add(this.forward_direction);
         }
         if(event.key == "ArrowDown" || event.key == "s" || event.key == "S") {
-          delta_position.sub(this.forward_direction);
+          this.movement_direction.sub(this.forward_direction);
         }
 
         if(event.keyCode == 32) {
@@ -124,10 +130,12 @@ class PlayerControls {
         }
 
         if([37, 38, 39, 40, 87, 65, 83, 68].includes(event.keyCode)){
-            delta_position.normalize();
-            this.moveArrowHelper.setDirection(delta_position);
-            this.player.move(delta_position);
-            // this.updateDirection();
+
+       //    this.movement_direction = new THREE.Vector3(5,0,4);
+       
+          this.movement_direction.normalize();
+          this.moveArrowHelper.setDirection(this.movement_direction);
+          this.player.move(this.movement_direction);
         } 
     }
 }
