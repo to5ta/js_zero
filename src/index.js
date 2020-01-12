@@ -1,12 +1,13 @@
 import { App } from "./app";
 
-//import scene from "./scene";
-
 var app = new App();
 
-// ugly workaround to call method as mainloop 
-app.renderer.setAnimationLoop(updateApp);
+// Register a render loop to repeatedly render the scene
+app.engine.runRenderLoop(function () { 
+        app.scene.render();
+});
 
-function updateApp() {
-    app.mainloop();
-}
+// Watch for browser/canvas resize events
+window.addEventListener("resize", function () { 
+        app.engine.resize();
+});

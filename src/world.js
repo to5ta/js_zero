@@ -3,48 +3,28 @@ var CANNON = require('cannon');
 
 class World {
     constructor() {
-        this.scene = new THREE.Scene();
-
-
-        // Setup our world
-        this.physical_world = new CANNON.World();
-        this.physical_world.gravity.set(0, -9.82, 0); // m/s²
-
         
-        // Create a plane
-        var groundBody = new CANNON.Body({
-            mass: 0 // mass == 0 makes the body static
-        });
-        
-        let mat = new CANNON.Material("groundMat");
-        mat.friction = 0.4;
-        groundBody.material = mat;
-        
-        var gorundBox = new CANNON.Box(new CANNON.Vec3(10, 1, 10));
-        console.log(gorundBox)
-
-        groundBody.addShape(gorundBox, new CANNON.Vec3(0,-1,0));
-        this.physical_world.addBody(groundBody);
-        
-        var size = 10;
-        var divisions = 10;
-        var gridHelper = new THREE.GridHelper( size, divisions, 0x888888, 0x404040 );
-        gridHelper.position.y = 0.1;
-        this.scene.add( gridHelper );
-        // gridHelper.visible = false;
+        var canvas = document.getElementById("renderCanvas"); // Get the canvas element 
+        var engine = new BABYLON.Engine(canvas, true); // Generate the BABYLON 3D engine
     
-        var geometry = new THREE.PlaneGeometry( 5,5,5 );
-        var material = new THREE.MeshBasicMaterial( { color:  0x222222 } );
-        var ground = new THREE.Mesh( geometry, material );
-        ground.rotation.x = - Math.PI / 2;
+        // Create the scene space
+        this.scene = new BABYLON.Scene(engine);
 
-        this.scene.add( ground );
-    }
+        // Add a camera to the scene and attach it to the canvas
+        this.camera = new BABYLON.ArcRotateCamera("Camera", 
+                                                Math.PI / 2, 
+                                                Math.PI / 2, 
+                                                2, 
+                                                new BABYLON.Vector3(0,0,5), 
+                                                this.scene);
+        // this.camera.attachControl(canvas, true);
 
-    update(dt) {
-        var fixedTimeStep = 1.0 / 60.0; // seconds
-        var maxSubSteps = 3;
-        this.physical_world.step(fixedTimeStep, dt, maxSubSteps);
+        // Add lights to the scene
+        var light1 = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(1, 1, 0), this.scene);
+        var light2 = new BABYLON.PointLight("light2", new BABYLON.Vector3(0, 1, -1), this.scene);
+
+        // Add and manipulate meshes in the scene
+        var sphere = BABYLON.MeshBuilder.CreateSphere("sphere", {diameter:2}, this.scene);
     }
 }
 

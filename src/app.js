@@ -1,28 +1,58 @@
 var Stats = require("stats.js");
 
-var THREE = require('three');
-
+// var BABYLON = require('babylonjs');
+import * as BABYLON from "babylonjs";
 
 import { Environment } from "./environment";
 import { Menu } from "./menu";
 import { Player } from './player';
-import { World } from './world';
-import { DebugControls } from './DebugControls';
-import { PlayerControls } from './PlayerControls';
+
+// import { World } from './world';
+// import { DebugControls } from './DebugControls';
+// import { PlayerControls } from './PlayerControls';
 
 import './style.css'
-import './component'
 
 class App {
   constructor() { 
-
     this.env = new Environment();
     this.menu = new Menu(this.env);
-    this.world = new World();
-    this.player = new Player(this.world);
-    this.clock = new THREE.Clock();
-    console.log(this.world.physical_world);
+    this.player = new Player();
+    // this.world = new World();
 
+    this.canvas = this.env.canvas;
+    document.body.appendChild(this.canvas);
+
+    // console.log(this.canvas);
+
+    this.engine = new BABYLON.Engine(this.canvas, true); // Generate the BABYLON 3D engine
+
+    // Create the scene space
+    this.scene = new BABYLON.Scene(this.engine);
+
+    // Add a camera to the scene and attach it to the canvas
+    // this.camera = new BABYLON.ArcRotateCamera("Camera", 
+    //                                           Math.PI / 2,
+    //                                           Math.PI / 2, 
+    //                                           5,
+    //                                           new BABYLON.Vector3(0,0,0), 
+    //                                           this.scene);
+
+
+    this.camera = new BABYLON.UniversalCamera("Camera_asdf",
+                                              new BABYLON.Vector3(2, 2, 2), 
+                                              this.scene);
+    this.scene.activeCamera  = this.camera;
+    this.camera.attachControl(this.canvas, true);
+    this.camera.setTarget(BABYLON.Vector3.Zero());
+
+    // Add lights to the scene
+    var light1 = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(1, 1, 0), this.scene);
+    var light2 = new BABYLON.PointLight("light2", new BABYLON.Vector3(0, 1, -1), this.scene);
+
+    // Add and manipulate meshes in the scene
+    var sphere = BABYLON.MeshBuilder.CreateSphere("sphere", {diameter:2}, this.scene);
+    
     this.debug_mode = false;
     this.paused = false;
 
@@ -30,64 +60,7 @@ class App {
     this.stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
     document.body.appendChild( this.stats.dom );
 
-    this.renderer = new THREE.WebGLRenderer();
-    this.renderer.setSize( window.innerWidth, window.innerHeight );
-    document.body.appendChild( this.renderer.domElement );
-    
-    
-    this.camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
-    this.player_controls = new PlayerControls( this.player, this.camera, this.renderer.domElement );
-
-    this.debug_camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
-    this.debug_controls = new DebugControls( this.debug_camera, document.body );
-
-    document.body.addEventListener("click", (event) => {
-      if(this.debug_mode) {
-        this.debug_controls.lock();
-      }
-    });
-
-    document.body.addEventListener("keyup", (event) => {
-      if(!this.debug_mode) {
-        this.player_controls.handleEvent(event);
-      }
-    });
-
-    document.body.addEventListener("keydown", (event) => {
-      if(event.key == "c" || event.key == "C") {
-        this.debug_mode = !this.debug_mode;
-        this.menu.debug_text.textContent ="Debug Mode: " + (!this.debug_mode ? 'false' : 'true');
-        if(this.debug_mode){
-          this.debug_controls.lock();
-          // this.player_controls.enabled = false;
-        } else {
-          this.debug_controls.unlock();
-          // this.player_controls.enabled = true;
-        }
-      }
-      if(this.debug_mode) {
-        this.debug_controls.handleEvent(event);
-      } else {
-        this.player_controls.handleEvent(event);
-      }
-    });
   }
-
-  mainloop () {
-    this.stats.begin();
-    var dt = this.clock.getDelta();
-    // console.log(dt);
-
-
-    this.menu.debug_text.textContent = this.player.infoString(); 
-    if(!this.paused) {
-      this.world.update(dt*1000.);
-      this.player.update();
-    }
-
-    this.renderer.render( this.world.scene, this.debug_mode ? this.debug_camera : this.camera );
-    this.stats.end();
-  };
 }
 
 
