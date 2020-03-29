@@ -39,6 +39,7 @@ class App {
                                               new BABYLON.Vector3(0,0,0), 
                                               this.scene);
 
+    this.camera.position = new BABYLON.Vector3(-5, 2, 0);
 
     // this.camera = new BABYLON.UniversalCamera("Camera_asdf",
     //                                           new BABYLON.Vector3(2, 2, 2), 
@@ -50,8 +51,6 @@ class App {
     this.debug_camera.attachControl(this.canvas, true);
 
     this.camera.setTarget(BABYLON.Vector3.Zero());
-
-    // Add lights to the scene
 
     // Add and manipulate meshes in the scene
     var sphere = BABYLON.MeshBuilder.CreateSphere("sphere", {diameter:1}, this.scene);
