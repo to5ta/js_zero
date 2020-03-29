@@ -26,7 +26,7 @@ class Menu {
         this.menu_opener.addEventListener("click", this);
 
         this.debug_text = document.createElement("p");
-        this.debug_text.textContent = "Debug Messages";
+        this.menu_opener.setAttribute('id', "debug_text");
         document.body.appendChild(this.debug_text);
 
         if(this.env.isMobile == false) {

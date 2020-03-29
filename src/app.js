@@ -1,6 +1,5 @@
 var Stats = require("stats.js");
 
-// var BABYLON = require('babylonjs');
 import * as BABYLON from "babylonjs";
 
 import { Environment } from "./environment";
@@ -12,7 +11,6 @@ import { World } from './world';
 // import { PlayerControls } from './PlayerControls';
 
 import './style.css'
-import { _BabylonLoaderRegistered } from "babylonjs";
 
 class App {
   constructor() { 
