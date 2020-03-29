@@ -2,7 +2,7 @@
 
 -Small- JavaScript App to learn more about proper Web-Development. -Maybe- This will be a third-person online-game.
 
-Powered by three.js, cannon.js npm and github <3
+Powered by babylon.js npm and github <3
 
 Inspired by the awesome 'Sketchbook' Project made by swift502 (https://github.com/swift502/Sketchbook).
 
@@ -11,7 +11,7 @@ Inspired by the awesome 'Sketchbook' Project made by swift502 (https://github.co
 
 ### Infrastructure 
 - [ ] npm build on github
-- [ ] proper use of master/dev branch :D
+- [x] proper use of master/dev branch
 
 ### Imgame-Experience
 - [x] Debuging-Fly Mode
