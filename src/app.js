@@ -7,55 +7,62 @@ import { Environment } from "./environment";
 import { Menu } from "./menu";
 import { Player } from './player';
 
-// import { World } from './world';
+import { World } from './world';
 // import { DebugControls } from './DebugControls';
 // import { PlayerControls } from './PlayerControls';
 
 import './style.css'
+import { _BabylonLoaderRegistered } from "babylonjs";
 
 class App {
   constructor() { 
     this.env = new Environment();
     this.menu = new Menu(this.env);
     this.player = new Player();
-    // this.world = new World();
-
+    
     this.canvas = this.env.canvas;
     document.body.appendChild(this.canvas);
-
+    
     // console.log(this.canvas);
-
+    
     this.engine = new BABYLON.Engine(this.canvas, true); // Generate the BABYLON 3D engine
-
+    
     // Create the scene space
     this.scene = new BABYLON.Scene(this.engine);
+    this.world = new World(this.scene);
 
     // Add a camera to the scene and attach it to the canvas
-    // this.camera = new BABYLON.ArcRotateCamera("Camera", 
-    //                                           Math.PI / 2,
-    //                                           Math.PI / 2, 
-    //                                           5,
-    //                                           new BABYLON.Vector3(0,0,0), 
-    //                                           this.scene);
+    this.camera = new BABYLON.ArcRotateCamera("Camera", 
+                                              Math.PI / 2,
+                                              Math.PI / 2, 
+                                              5,
+                                              null, 
+                                              this.scene);
 
+    this.camera.position = new BABYLON.Vector3(-5,2,0);
 
-    this.camera = new BABYLON.UniversalCamera("Camera_asdf",
+    this.camera_debug = new BABYLON.UniversalCamera("Camera_Debug",
                                               new BABYLON.Vector3(2, 2, 2), 
                                               this.scene);
+
     this.scene.activeCamera  = this.camera;
     this.camera.attachControl(this.canvas, true);
     this.camera.setTarget(BABYLON.Vector3.Zero());
 
     // Add lights to the scene
-    var light1 = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(1, 1, 0), this.scene);
-    var light2 = new BABYLON.PointLight("light2", new BABYLON.Vector3(0, 1, -1), this.scene);
 
     // Add and manipulate meshes in the scene
-    var sphere = BABYLON.MeshBuilder.CreateSphere("sphere", {diameter:2}, this.scene);
-    
+    var sphere = BABYLON.MeshBuilder.CreateSphere("sphere", {diameter:1}, this.scene);
+    sphere.position = new BABYLON.Vector3(0, 0.5, 0);
+    this.camera.setTarget(sphere.position);
+
+    var points = [new BABYLON.Vector3(0,2,0), new BABYLON.Vector3(1,2,0)];
+    // var lines = BABYLON.Mesh.CreateLines("lines", points, this.scene, true);
+    // var line = BABYLON.LinesBuilder.CreateDashedLines('myline', points, null, null, null, this.scene);
     this.debug_mode = false;
     this.paused = false;
 
+    
     this.stats = new Stats();
     this.stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
     document.body.appendChild( this.stats.dom );
