@@ -1,6 +1,6 @@
 import { Environment } from "./environment";
 
-import './style.css'
+require('../css/style.css');
 
 class Menu {
     constructor(env) {
