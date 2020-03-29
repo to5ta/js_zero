@@ -36,17 +36,19 @@ class App {
                                               Math.PI / 2,
                                               Math.PI / 2, 
                                               5,
-                                              null, 
+                                              new BABYLON.Vector3(0,0,0), 
                                               this.scene);
 
-    this.camera.position = new BABYLON.Vector3(-5,2,0);
 
-    this.camera_debug = new BABYLON.UniversalCamera("Camera_Debug",
-                                              new BABYLON.Vector3(2, 2, 2), 
-                                              this.scene);
+    // this.camera = new BABYLON.UniversalCamera("Camera_asdf",
+    //                                           new BABYLON.Vector3(2, 2, 2), 
+    //                                           this.scene);
 
-    this.scene.activeCamera  = this.camera;
+    this.debug_camera = new BABYLON.UniversalCamera("Debug_Camera", new BABYLON.Vector3(0,0,0), this.scene);
+
     this.camera.attachControl(this.canvas, true);
+    this.debug_camera.attachControl(this.canvas, true);
+
     this.camera.setTarget(BABYLON.Vector3.Zero());
 
     // Add lights to the scene
@@ -67,7 +69,19 @@ class App {
     this.stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
     document.body.appendChild( this.stats.dom );
 
+
+    document.body.addEventListener("keydown", (event) => {
+      // c
+      if(event.keyCode == 67) { 
+        this.debug_mode = !this.debug_mode;
+        this.scene.activeCamera = this.debug_mode ? this.debug_camera : this.camera;
+        this.menu.debug_text.innerHTML = this.debug_mode ? "Debug" : "Player";
+      }
+    });
+
   }
+
+
 }
 
 
