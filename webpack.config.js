@@ -3,15 +3,15 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const path = require('path');
 
 module.exports = {
-  mode: 'development',
   entry: './src/js/index.js',
   output: {
     filename: '[name].bundle.js',
     path: path.resolve(__dirname, 'dist')
   },
+  devtool: 'source-map',
   devServer: {
-    port: 8080,
-    contentBase: path.join(__dirname, "src")
+    contentBase: './dist',
+    open: true
   },
   module: {
     rules: [
@@ -26,7 +26,7 @@ module.exports = {
         }
       },
       {
-        test: /\.(png|jpe?g|gif)$/i,
+        test: /\.(png|jpg|jpeg|gif)$/,
         use: [
           {
             loader: 'file-loader',

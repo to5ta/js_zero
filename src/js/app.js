@@ -6,7 +6,7 @@ import { Environment } from "./environment";
 import { Menu } from "./menu";
 import { Player } from './player';
 
-import { World } from './world';
+import World from './world';
 // import { DebugControls } from './DebugControls';
 // import { PlayerControls } from './PlayerControls';
 
