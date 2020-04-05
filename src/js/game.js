@@ -42,17 +42,16 @@ class Game {
             this.debug_mode = !this.debug_mode;
             if (!this.debug_mode) {
                 this.debug_view.deactivate();
-                this.player.camera.activate();
+                this.player.activate();
             } else {
                 this.debug_view.activate();
-                this.player.camera.deactivate();
+                this.player.deactivate();
             }
         }
         if(!this.debug_mode) {
             this.player.handleInput(keyEvent);
         }
     }
-
 
     renderloop(self) {
         this.game.scene.render();
