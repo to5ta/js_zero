@@ -5,10 +5,6 @@ import sky_ny from "../assets/textures/skybox/sky_ny.jpg";
 import sky_pz from "../assets/textures/skybox/sky_pz.jpg";
 import sky_nz from "../assets/textures/skybox/sky_nz.jpg";
 
-// const img = document.createElement("img")
-// img.src = sky_px
-// document.body.appendChild(img)
-
 export default class World {
     constructor(scene) {
         
