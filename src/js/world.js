@@ -1,11 +1,15 @@
-import sky_px from "./assets/textures/skybox/sky_px.jpg";
-import sky_nx from "./assets/textures/skybox/sky_nx.jpg";
-import sky_py from "./assets/textures/skybox/sky_py.jpg";
-import sky_ny from "./assets/textures/skybox/sky_ny.jpg";
-import sky_pz from "./assets/textures/skybox/sky_pz.jpg";
-import sky_nz from "./assets/textures/skybox/sky_nz.jpg";
+import sky_px from "../assets/textures/skybox/sky_px.jpg";
+import sky_nx from "../assets/textures/skybox/sky_nx.jpg";
+import sky_py from "../assets/textures/skybox/sky_py.jpg";
+import sky_ny from "../assets/textures/skybox/sky_ny.jpg";
+import sky_pz from "../assets/textures/skybox/sky_pz.jpg";
+import sky_nz from "../assets/textures/skybox/sky_nz.jpg";
 
-class World {
+// const img = document.createElement("img")
+// img.src = sky_px
+// document.body.appendChild(img)
+
+export default class World {
     constructor(scene) {
         
         // Create the scene space
@@ -37,13 +41,14 @@ class World {
         var assetsManager = new BABYLON.AssetsManager(this.scene);
 
         var imageTasks = [];
-        imageTasks.push(assetsManager.addImageTask("sky_nx", sky_px));
+
+        imageTasks.push(assetsManager.addImageTask("sky_px", sky_px));
         imageTasks.push(assetsManager.addImageTask("sky_nx", sky_nx));
         imageTasks.push(assetsManager.addImageTask("sky_py", sky_py));
         imageTasks.push(assetsManager.addImageTask("sky_ny", sky_ny));
         imageTasks.push(assetsManager.addImageTask("sky_pz", sky_pz));
-        imageTasks.push(assetsManager.addImageTask("sky_nz", sky_nz));
-
+        imageTasks.push(assetsManager.addImageTask("sky_nz", sky_nz)); 
+        
         imageTasks.forEach(imageTask => {
           imageTask.onSuccess = function(task) {
             console.log("Loaded", task.name);
@@ -54,10 +59,8 @@ class World {
         });
         assetsManager.load();
     
-        var envTexture = new BABYLON.CubeTexture("./assets/textures/skybox/sky", this.scene);
+        var envTexture = new BABYLON.CubeTexture("./sky", this.scene);
         this.scene.createDefaultSkybox(envTexture, false, 1000);
-    
+      
     }
 }
-
-export { World };
