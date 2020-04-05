@@ -1,6 +1,7 @@
 /**
  * Class that stores all environment-relevant, device-dependend information
  * Where are we running exactly our App? VR/ Mobile/ Desktop? Should be answered
+ * also global settings like music / sound volume
  */
 class Environment {
     constructor() {

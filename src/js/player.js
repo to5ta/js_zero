@@ -1,24 +1,18 @@
 var BABYLON = require('babylonjs');
 
-
+import { PlayerCamera } from "./player_camera";
 
 class Player {
-    constructor() {
+    constructor(scene, canvas) {
+        this.scene = scene;
+        this.canvas = canvas;
         this.falling = false;
-
-        this.onEvent = (event) => {
-            console.log(event);
-        }
+        this.camera = new PlayerCamera(scene, canvas);
     }
 
-    attachControl( element ) {
-        element.addEventListener("keydown", this.onEvent);
+    handleInput(keyEvent) {
+        console.log("KeyEvent in Player:", event);
     }
-
-    detachControl( element ) {
-        element.removeEventListener("keydown", this.onEvent);
-    }
-
 }
 
 
