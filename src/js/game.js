@@ -1,20 +1,19 @@
 import { Player } from './player';
 import World from './world';
-import Stats from "stats.js";
-
 
 class Game {
-    constructor(engine) { 
-        this.player = new Player();
+    constructor(engine, canvas) { 
         this.engine = engine;
-
-        // this.canvas = this.env.canvas;
-        // document.body.appendChild(this.canvas);
+        this.canvas = canvas;
         
         // Create the scene space
         this.scene = new BABYLON.Scene(this.engine);
         this.world = new World(this.scene);
 
+        // the Level should create the scene, players etc. will be added to that scene / within that
+
+        this.player = new Player();
+        
         // Add a camera to the scene and attach it to the canvas
         this.camera = new BABYLON.ArcRotateCamera("Camera", 
                                                 Math.PI / 2,
@@ -25,8 +24,8 @@ class Game {
 
         this.camera.position = new BABYLON.Vector3(-5, 2, 0);
         this.scene.activeCamera = this.camera;
-        // this.camera.attachControl(this.canvas, true);
-
+        
+        this.camera.attachControl(this.canvas, true);
         // this.camera = new BABYLON.UniversalCamera("Camera_asdf",
         //                                           new BABYLON.Vector3(2, 2, 2), 
         //                                           this.scene);
@@ -51,51 +50,31 @@ class Game {
         this.debug_mode = false;
         this.paused = false;
 
-        
-        this.stats = new Stats();
-        this.stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
-        document.body.appendChild( this.stats.dom );
-
-
-        // document.body.addEventListener("keydown", (event) => {
-        // // c
-        // if(event.keyCode == 67) { 
-        //     this.debug_mode = !this.debug_mode;
-        //     if (this.debug_mode) {
-        //     this.scene.activeCamera =this.debug_camera;
-        //     this.debug_camera.attachControl(this.canvas, true);
-        //     this.camera.detachControl(this.canvas);
-        //     this.player.detachControl(this.canvas);
-        //     } else {
-        //     this.scene.activeCamera =this.camera;
-        //     this.camera.attachControl(this.canvas, true);
-        //     this.debug_camera.detachControl(this.canvas);
-        //     this.player.attachControl(this.canvas);
-        //     }
-        
-
-        //     this.menu.debug_text.innerHTML = this.debug_mode ? "Debug" : "Player";
-        // }
-        // });
-
     }
 
+    //TODO forward to debug camera / player and its camera
     handleInput(event) {
         console.log("Input: ", event);
+        console.log("ME ", this);
+        if(event.keyCode == 67) { 
+            this.debug_mode = !this.debug_mode;
+            if (this.debug_mode) {
+                this.scene.activeCamera = this.debug_camera;
+                this.debug_camera.attachControl(this.canvas, true);
+                this.camera.detachControl(this.canvas);
+                this.player.detachControl(this.canvas);
+            } else {
+                this.scene.activeCamera =this.camera;
+                this.camera.attachControl(this.canvas, true);
+                this.debug_camera.detachControl(this.canvas);
+                this.player.attachControl(this.canvas);
+            }
+            this.menu.debug_text.innerHTML = this.debug_mode ? "Debug" : "Player";
+        }
     }
 
     renderloop(self) {
-        this.game.prerender();
         this.game.scene.render();
-        this.game.postrender();
-    }
-
-    prerender() {
-        this.stats.begin();
-    }
-
-    postrender() {
-        this.stats.end();
     }
 }
   
