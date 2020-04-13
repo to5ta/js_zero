@@ -16,12 +16,17 @@ class Player {
         this.camera.setTarget(BABYLON.Vector3.Zero());
 
         this.box = BABYLON.MeshBuilder.CreateSphere("PlayerSphere", {size: 1}, this.scene);
+     
         this.box.position = new BABYLON.Vector3(0, 5, 0);
         
         this.box.checkCollisions = true;
 
-        this.moveVec = new BABYLON.Vector3(0, -0.1, 0);
-        this.speed = 0.1;
+        this.fallingVel = 0;
+        this.speedMax = 0.1;
+        this.acc = 0.1;
+        this.damp = 0.1;
+
+        this.inputVec = new BABYLON.Vector3(0, 0, 0);
 
         this.box.onCollideObservable.add((others) => {
             this.falling = false;
@@ -32,27 +37,39 @@ class Player {
 
     handleInput(keyEvent) {
         console.log("KeyEvent in Player:", event);
-
-        this.moveVec = new BABYLON.Vector3(0, 0, 0);
-        if (keyEvent.type == "keydown") {
-            if (keyEvent.keyCode == 37){
-                this.moveVec.z += 1;
-            }  if(keyEvent.keyCode == 39){
-                this.moveVec.z -= 1;
-            }  if(keyEvent.keyCode == 38){
-                this.moveVec.x += 1;
-            }  if(keyEvent.keyCode == 40){
-                this.moveVec.x -= 1;
-            }  if(keyEvent.keyCode == 32 && !this.falling){
-                this.falling = true;  
-            }
-            this.moveVec.normalize();
-            this.moveVec = this.moveVec.multiplyByFloats(this.speed, this.speed, this.speed);
+        const keyReleased = keyEvent.type == "keydown";
+        
+        if (keyEvent.keyCode == 37){
+            this.inputVec.z = keyReleased ? 1 : 0;
+        }  if(keyEvent.keyCode == 39){
+            this.inputVec.z = keyReleased ? -1 : 0;
+        }  if(keyEvent.keyCode == 38){
+            this.inputVec.x = keyReleased ? 1 : 0;
+        }  if(keyEvent.keyCode == 40){
+            this.inputVec.x = keyReleased ? -1 : 0;
+        }
+        if (this.inputVec.length > 0.9) {
+            this.inputVec.normalize();
+        }  
+    
+        if(keyEvent.keyCode == 32 && !this.falling){
+            this.falling = true;
+            this.fallingVel = 5;  
+        }
+        
+        else if (keyEvent.type == "keyup") {
+            this.inputVec = new BABYLON.Vector3(0, 0, 0);
         }        
     }
-
-    update() {
-        this.box.moveWithCollisions(this.moveVec);
+    
+    update(dTimeMs) {
+        this.inputVec = this.inputVec.multiplyByFloats(this.speed, this.speed, this.speed);
+        let moveVec = this.inputVec.add(new BABYLON.Vector3(
+            0,
+            -0.1,
+            0,
+        ));
+        this.box.moveWithCollisions(moveVec);
         
     }
 

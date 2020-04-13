@@ -30,7 +30,7 @@ class App {
     // register renderloop
     this.engine.runRenderLoop(() => { 
       this.stats.begin();
-      this.game.mainloop();
+      this.game.mainloop(this.engine.getDeltaTime());
       this.game.scene.render();
       this.stats.end();
     });
