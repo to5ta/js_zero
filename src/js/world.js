@@ -26,12 +26,21 @@ export default class World {
         ground_material.roughness = 0.1;
 
         // Add and manipulate meshes in the scene
-        var plane = BABYLON.MeshBuilder.CreatePlane("Ground", {size: 30}, this.scene);
-        plane.rotation.x = Math.PI / 2;
-        plane.material = ground_material;
-        
-        var box = BABYLON.MeshBuilder.CreateBox("GroundBox", {size: 1}, this.scene);
-        box.position = new BABYLON.Vector3(0,0.5, 3);
+        this.plane = BABYLON.MeshBuilder.CreatePlane("Ground", {size: 30}, this.scene);
+        this.plane.rotation.x = Math.PI / 2;
+        this.plane.material = ground_material;
+      
+        this.plane.physicsImpostor = new BABYLON.PhysicsImpostor(
+          this.plane, 
+          BABYLON.PhysicsImpostor.BoxImpostor, 
+          { 
+            mass: 0, 
+            restitution: 0.1 
+          }, 
+          scene);
+
+        var box = BABYLON.MeshBuilder.CreateBox("GroundBox", {size: 2}, this.scene);
+        box.position = new BABYLON.Vector3(0,0.5, 5);
         box.material = ground_material;
 
         var assetsManager = new BABYLON.AssetsManager(this.scene);

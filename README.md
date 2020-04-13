@@ -2,7 +2,7 @@
 
 -Small- JavaScript App to learn more about proper Web-Development. -Maybe- This will be a third-person online-game.
 
-Powered by babylon.js npm and github <3
+Powered by babylon.js, cannon.js, npm and github.
 
 Inspired by the awesome 'Sketchbook' Project made by swift502 (https://github.com/swift502/Sketchbook).
 
