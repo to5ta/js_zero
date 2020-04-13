@@ -2,6 +2,9 @@ import { Player } from './player';
 import World from './world';
 import { DebugView } from "./debug_view";
 
+window.CANNON = require('cannon');
+// window.Ammo = require('ammo.js');
+
 class Game {
     constructor(engine, canvas) { 
         this.engine = engine;
@@ -9,6 +12,12 @@ class Game {
         
         // Create the scene space
         this.scene = new BABYLON.Scene(this.engine);
+        var gravityVector = new BABYLON.Vector3(0,-9.81, 0);
+        var physicsPlugin = new BABYLON.CannonJSPlugin();
+
+        // var physicsPlugin = new BABYLON.AmmoJSPlugin();
+        this.scene.enablePhysics(gravityVector, physicsPlugin);
+        
         this.world = new World(this.scene);
 
         // the Level should create the scene, players etc. will be added to that scene / within that

@@ -1,4 +1,6 @@
 import * as BABYLON from "babylonjs";
+import CANNON from "cannon";
+
 import Stats from "stats.js";
 
 import { Environment } from "./environment";
