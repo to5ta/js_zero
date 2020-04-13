@@ -12,16 +12,17 @@ class Game {
         
         // Create the scene space
         this.scene = new BABYLON.Scene(this.engine);
-        var gravityVector = new BABYLON.Vector3(0,-9.81, 0);
-        var physicsPlugin = new BABYLON.CannonJSPlugin();
+
+        this.scene.gravity = BABYLON.Vector3(0,-9.81, 0);
+        this.scene.collisionsEnabled = true;
 
         // TODO why does ammo.js not work / fs not found error
         // var physicsPlugin = new BABYLON.AmmoJSPlugin();
-        this.scene.enablePhysics(gravityVector, physicsPlugin);
+        // this.scene.enablePhysics(gravityVector, physicsPlugin);
         
-        this.world = new World(this.scene);
-
+    
         // the Level should create the scene, players etc. will be added to that scene / within that
+        this.world = new World(this.scene);
 
         this.player = new Player(this.scene, canvas, this.world);
         this.debug_view = new DebugView(this.scene, canvas);
@@ -65,9 +66,8 @@ class Game {
         }
     }
 
-    renderloop() {
+    mainloop(){
         this.player.update();
-        this.game.scene.render();
     }
 }
   

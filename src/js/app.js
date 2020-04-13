@@ -30,12 +30,17 @@ class App {
     // register renderloop
     this.engine.runRenderLoop(() => { 
       this.stats.begin();
+      this.game.mainloop();
       this.game.scene.render();
       this.stats.end();
     });
 
     // register input handle
     this.env.canvas.addEventListener("keydown", (event) => {
+      this.game.handleInput(event);
+    });
+
+    this.env.canvas.addEventListener("keyup", (event) => {
       this.game.handleInput(event);
     });
     
