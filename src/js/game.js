@@ -49,7 +49,7 @@ class Game {
 
     //TODO forward to debug camera / player and its camera
     handleInput(keyEvent) {
-        if(keyEvent.keyCode == 67) { 
+        if(keyEvent.keyCode == 67 && keyEvent.type == "keydown") { 
             console.log("Event", keyEvent);
             this.debug_mode = !this.debug_mode;
             if (!this.debug_mode) {

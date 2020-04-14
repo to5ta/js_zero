@@ -11,6 +11,8 @@ export default class World {
         // Create the scene space
         this.scene = scene;
 
+        this.gravity = -9.81;
+
         // Add a camera to the scene and attach it to the canvas
 
         // Add lights to the scene
@@ -20,6 +22,8 @@ export default class World {
         var light2 = new BABYLON.DirectionalLight("light2", new BABYLON.Vector3(-1, -5, -1).normalize(), this.scene);
         light2.intensity = 0.3;
 
+
+        this.collision_meshes = [];
         var ground_material = new BABYLON.StandardMaterial("ground_material", this.scene);
         ground_material.specularPower = 0;
         // ground_material.specularColor = new BABYLON.Color3(0,0,0);
@@ -30,11 +34,13 @@ export default class World {
         this.plane.rotation.x = Math.PI / 2;
         this.plane.material = ground_material;
         this.plane.checkCollisions = true;
+        this.collision_meshes.push(this.plane);
 
-        var box = BABYLON.MeshBuilder.CreateBox("GroundBox", {size: 2}, this.scene);
-        box.position = new BABYLON.Vector3(0,0.5, 5);
-        box.checkCollisions = true;
-        box.material = ground_material;
+        this.box = BABYLON.MeshBuilder.CreateBox("GroundBox", {size: 2}, this.scene);
+        this.box.position = new BABYLON.Vector3(0, 0.5, 5);
+        this.box.checkCollisions = true;
+        this.box.material = ground_material;
+        this.collision_meshes.push(this.box);
 
         var assetsManager = new BABYLON.AssetsManager(this.scene);
 

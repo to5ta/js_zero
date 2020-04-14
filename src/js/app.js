@@ -24,7 +24,9 @@ class App {
 
     // Watch for browser/canvas resize events
     window.addEventListener("resize", function () { 
-      app.engine.resize();
+      if(this.engine) {
+        this.engine.resize();
+      }
     });
 
     // register renderloop
