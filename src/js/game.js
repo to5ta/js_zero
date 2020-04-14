@@ -9,7 +9,6 @@ class Game {
     constructor(engine, canvas) { 
         this.engine = engine;
         this.canvas = canvas;
-        this.canvas.focus();
 
         // Create the scene space
         this.scene = new BABYLON.Scene(this.engine);
