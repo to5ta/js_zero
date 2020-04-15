@@ -16,21 +16,23 @@ class Player {
         this.camera.radius = 10;
         this.camera.heightOffset = 3;
         this.camera.rotationOffset = 0;
-        this.camera.maxCameraSpeed = 1;
+        this.camera.maxCameraSpeed = 0.2;
+        
+        setTimeout(()=>{
+            this.camera.maxCameraSpeed = 1;
+        }, 2500);
 
-        this.camera.lowerHeightOffsetLimit = -0.5;
-        this.camera.upperHeightOffsetLimit = 10;
-
-        this.camera.lowerRotationOffsetLimit = -180;
-        this.camera.upperRotationOffsetLimit = 180;
+        // this.camera.lowerHeightOffsetLimit = -0.5;
+        // this.camera.upperHeightOffsetLimit = 10;
+        // this.camera.lowerRotationOffsetLimit = -180;
+        // this.camera.upperRotationOffsetLimit = 180;
         
         this.camera.rotation = new BABYLON.Vector3(0, 20, 0);
         // this.camera.positdion = new BABYLON.Vector3(10, 2, 0);
         this.camera.position = this.world.camera_start_position;
         
-        this.camera.attachControl(this.canvas, true);
-        this.camera.inputs.remove(this.camera.inputs.attached.keyboard);
-        // this.camera.inputs.removeByType('FollowCameraKeyboardInput');
+        // this.camera.attachControl(this.canvas, true);
+        // this.camera.inputs.remove(this.camera.inputs.attached.keyboard);
         
         this.scene.activeCamera = this.camera;
                 
