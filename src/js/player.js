@@ -1,4 +1,3 @@
-import { _BabylonLoaderRegistered } from 'babylonjs';
 
 var BABYLON = require('babylonjs');
 
@@ -13,17 +12,25 @@ class Player {
         //     new BABYLON.Vector3(5, 5, 0), 
         //     this.scene);
         
-        this.camera = new BABYLON.FollowCamera("FollowCam", new BABYLON.Vector3(0,0,0), this.scene);
+        this.camera = new BABYLON.FollowCamera("FollowCamera", new BABYLON.Vector3(0,0,0), this.scene);
         this.camera.radius = 10;
         this.camera.heightOffset = 3;
         this.camera.rotationOffset = 0;
         this.camera.maxCameraSpeed = 1;
-        // this.camera.position = new BABYLON.Vector3(10, 2, 0);
+
+        this.camera.lowerHeightOffsetLimit = -0.5;
+        this.camera.upperHeightOffsetLimit = 10;
+
+        this.camera.lowerRotationOffsetLimit = -180;
+        this.camera.upperRotationOffsetLimit = 180;
+        
+        this.camera.rotation = new BABYLON.Vector3(0, 20, 0);
         // this.camera.positdion = new BABYLON.Vector3(10, 2, 0);
         this.camera.position = this.world.camera_start_position;
         
-        // this.camera.inputs.removeByType('FollowCamKeyboardInput');
-        // this.camera.attachControl(this.canvas, true);
+        this.camera.attachControl(this.canvas, true);
+        this.camera.inputs.remove(this.camera.inputs.attached.keyboard);
+        // this.camera.inputs.removeByType('FollowCameraKeyboardInput');
         
         this.scene.activeCamera = this.camera;
                 
@@ -38,6 +45,8 @@ class Player {
         
         this.falling = true;
         this.fallingVel = 0;
+
+        this.jumpSpeed = 7;
         
         this.moveVel = 0;
         this.moveSpeedMax = 5;  
@@ -97,9 +106,9 @@ class Player {
         if (keyEvent.keyCode == 40) {
             this.inputMoveVec.z = keyPressed ? 1 : 0;
         }  
-        if (keyEvent.keyCode == 32 && !this.falling){
+        if (keyEvent.keyCode == 32 && !this.falling && keyPressed){
             this.falling = true;
-            this.fallingVel = 7;  
+            this.fallingVel = this.jumpSpeed;  
         }
         if (keyEvent.keyCode == 17) {
             this.strafe = keyPressed ? true : false;

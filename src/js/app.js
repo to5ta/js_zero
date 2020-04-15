@@ -1,5 +1,5 @@
 import * as BABYLON from "babylonjs";
-import CANNON from "cannon";
+// import CANNON from "cannon";
 
 import Stats from "stats.js";
 
