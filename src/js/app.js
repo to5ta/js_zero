@@ -38,11 +38,11 @@ class App {
     });
 
     // register input handle
-    this.env.canvas.addEventListener("keydown", (event) => {
+    document.body.addEventListener("keydown", (event) => {
       this.game.handleInput(event);
     });
 
-    this.env.canvas.addEventListener("keyup", (event) => {
+    document.body.addEventListener("keyup", (event) => {
       this.game.handleInput(event);
     });
     

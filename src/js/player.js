@@ -20,7 +20,7 @@ class Player {
         this.camera.maxCameraSpeed = 1;
         // this.camera.position = new BABYLON.Vector3(10, 2, 0);
         // this.camera.positdion = new BABYLON.Vector3(10, 2, 0);
-        
+        this.camera.position = this.world.camera_start_position;
         
         // this.camera.inputs.removeByType('FollowCamKeyboardInput');
         // this.camera.attachControl(this.canvas, true);
@@ -30,7 +30,7 @@ class Player {
         this.box = BABYLON.MeshBuilder.CreateBox("PlayerSphere", {size: 2}, this.scene);
         this.box.scaling.x = 0.5;
         this.box.scaling.z = 0.5;
-        this.box.position = new BABYLON.Vector3(0,  5, 0);
+        this.box.position = this.world.player_start_position; //new BABYLON.Vector3(0,  5, 0);
         this.box.checkCollisions = true;
         this.box.material = new BABYLON.StandardMaterial();
         
@@ -40,16 +40,21 @@ class Player {
         this.fallingVel = 0;
         
         this.moveVel = 0;
-        this.moveSpeedMax = 0.1;
+        this.moveSpeedMax = 5;  
+        this.sprintSpeedMax = 12;
+        this.rotateSpeedMax = 1.5;
         this.moveAcc = 0.1;
         this.moveDamp = 0.1;
         this.strafe = false;
+        this.sprint = false;
+        
+        this.inputMoveVec = new BABYLON.Vector3(0, 0, 0);
+        this.inputRotateY = 0;
 
         this.contactRay = new BABYLON.Ray(this.box.position,
             new BABYLON.Vector3(0, -1, 0));
         this.contactRay.length = 1.1;
         
-        this.inputVec = new BABYLON.Vector3(0, 0, 0);
         
         this.box.onCollideObservable.add((others) => {
             this.falling = false;
@@ -61,34 +66,53 @@ class Player {
         console.log("KeyEvent in Player:", event);
         
         const keyPressed = keyEvent.type == "keydown";
-        if (keyEvent.keyCode == 37){
-            if (this.strafe) {
-                this.inputVec.x = keyPressed ? 1 : 0;
+        
+        if (keyEvent.keyCode == 37) {
+            if (keyPressed) {
+                if (this.strafe) {
+                    this.inputMoveVec.x = 1;
+                } else {
+                    this.inputRotateY = -1;
+                }
             } else {
-                this.box.rotation.y -= 0.05;
+                this.inputRotateY = 0;
+                this.inputMoveVec.x = 0;
             }
-        }  if(keyEvent.keyCode == 39){
-            if (this.strafe) {
-                this.inputVec.x = keyPressed ? -1 : 0;
+        }  
+        if (keyEvent.keyCode == 39) {
+            if (keyPressed) {
+                if (this.strafe) {
+                    this.inputMoveVec.x = -1;
+                } else {
+                    this.inputRotateY = 1;
+                }
             } else {
-                this.box.rotation.y += 0.05;
+                this.inputRotateY = 0;
+                this.inputMoveVec.x = 0;
             }
-        }  if(keyEvent.keyCode == 38){
-            this.inputVec.z = keyPressed ? -1 : 0;
-        }  if(keyEvent.keyCode == 40){
-            this.inputVec.z = keyPressed ? 1 : 0;
-        }  if(keyEvent.keyCode == 32 && !this.falling){
+        }  
+        if (keyEvent.keyCode == 38) {
+            this.inputMoveVec.z = keyPressed ? -1 : 0;
+        }  
+        if (keyEvent.keyCode == 40) {
+            this.inputMoveVec.z = keyPressed ? 1 : 0;
+        }  
+        if (keyEvent.keyCode == 32 && !this.falling){
             this.falling = true;
             this.fallingVel = 7;  
-        }  if (keyEvent.keyCode == 16) {
+        }
+        if (keyEvent.keyCode == 17) {
             this.strafe = keyPressed ? true : false;
             if (keyPressed) {
-                this.inputVec.x = 0;
+                this.inputMoveVec.x = 0;
             }
         }      
+        if (keyEvent.keyCode == 16) {
+            this.sprint = keyPressed ? true : false;
+        }      
     
-        if (this.inputVec.length > 0.9) {
-            this.inputVec.normalize();
+        if (this.inputMoveVec.length > 0.9) {
+            this.inputMoveVec.normalize();
         }  
     }
     
@@ -111,13 +135,14 @@ class Player {
         //     Math.cos(this.box.rotation.y)
         // );
 
+        this.box.rotation.y += this.inputRotateY * this.rotateSpeedMax * dTimeSec;
+    
         const rotation_matrix = new BABYLON.Matrix.RotationYawPitchRoll(
             this.box.rotation.y,
             0,
             0
         );
         
-
         if (this.falling) {
             this.fallingVel += (this.world.gravity * dTimeSec);
         } else {
@@ -129,10 +154,11 @@ class Player {
             this.fallingVel,
             0);
 
+        let speed = this.sprint ? this.sprintSpeedMax : this.moveSpeedMax;
         this.box.moveWithCollisions(
             this.fallVec.scale(dTimeSec).add(
                 BABYLON.Vector3.TransformCoordinates(
-                    this.inputVec.scale(3*dTimeSec), 
+                    this.inputMoveVec.scale(speed * dTimeSec), 
                     rotation_matrix)));
 
         const pick = this.contactRay.intersectsMeshes(this.world.collision_meshes, false);
@@ -143,7 +169,6 @@ class Player {
             this.box.material.emissiveColor = new BABYLON.Color4(0, 1, 0, 1);
             this.falling = true;
         }
-        
     }
 
     activate() {

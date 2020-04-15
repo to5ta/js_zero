@@ -15,13 +15,15 @@ Inspired by the awesome 'Sketchbook' Project made by swift502 (https://github.co
 
 ### Imgame-Experience
 - [x] Debuging-Fly Mode
+- [x] Player Controls 
+- [x] Faked Player Physics
 - [ ] Play Sound-Effects
 - [ ] Play Music
 - [ ] Load something like a Level
 - [ ] Add Character model
-- [ ] Animate Character model
+- [ ] Animate Character model (mapped to states like run)
 - [x] make a camera that follows the character
-- [x] Menu Overlay
+- [ ] Menu Overlay
 
 ## Manic Roadmap
 - Huge/Open World

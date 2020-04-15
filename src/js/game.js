@@ -39,9 +39,6 @@ class Game {
         new BABYLON.Vector3(0,2,0),
             new BABYLON.Vector3(1,2,0)];
 
-        var line = BABYLON.Mesh.CreateLines("lines", mypoints, this.scene, true);
-        // line.thick;
-        // var dashedline = BABYLON.LinesBuilder.CreateDashedLines('myline', {points: mypoints}, null, null, null, this.scene);
         this.debug_mode = false;
         this.paused = false;
     }

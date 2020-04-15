@@ -13,6 +13,9 @@ export default class World {
 
         this.gravity = -9.81;
 
+        this.player_start_position = new BABYLON.Vector3(0,5,0);
+        this.camera_start_position = new BABYLON.Vector3(30,30,30);
+
         // Add a camera to the scene and attach it to the canvas
 
         // Add lights to the scene
