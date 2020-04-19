@@ -1,10 +1,3 @@
-import sky_px from "../assets/textures/skybox/sky_px.jpg";
-import sky_nx from "../assets/textures/skybox/sky_nx.jpg";
-import sky_py from "../assets/textures/skybox/sky_py.jpg";
-import sky_ny from "../assets/textures/skybox/sky_ny.jpg";
-import sky_pz from "../assets/textures/skybox/sky_pz.jpg";
-import sky_nz from "../assets/textures/skybox/sky_nz.jpg";
-
 export default class World {
     constructor(scene) {
         
@@ -45,27 +38,7 @@ export default class World {
         this.box.material = ground_material;
         this.collision_meshes.push(this.box);
 
-        var assetsManager = new BABYLON.AssetsManager(this.scene);
 
-        var imageTasks = [];
-
-        imageTasks.push(assetsManager.addImageTask("sky_px", sky_px));
-        imageTasks.push(assetsManager.addImageTask("sky_nx", sky_nx));
-        imageTasks.push(assetsManager.addImageTask("sky_py", sky_py));
-        imageTasks.push(assetsManager.addImageTask("sky_ny", sky_ny));
-        imageTasks.push(assetsManager.addImageTask("sky_pz", sky_pz));
-        imageTasks.push(assetsManager.addImageTask("sky_nz", sky_nz)); 
-        
-        imageTasks.forEach(imageTask => {
-          imageTask.onSuccess = function(task) {
-            console.log("Loaded", task.name);
-          }
-          imageTask.onError = function(task) {
-            console.log("FAILED", task);
-          }
-        });
-        assetsManager.load();
-    
         var envTexture = new BABYLON.CubeTexture("./sky", this.scene);
         this.scene.createDefaultSkybox(envTexture, false, 1000);
       

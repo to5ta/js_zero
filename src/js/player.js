@@ -1,8 +1,8 @@
-
-var BABYLON = require('babylonjs');
+import * as BABYLON from "babylonjs";
+import 'babylonjs-loaders';
 
 class Player {
-    constructor(scene, canvas, world) {
+    constructor(scene, canvas, world, mesh) {
         this.scene = scene;
         this.canvas = canvas;
         this.world = world;
@@ -39,9 +39,20 @@ class Player {
         this.box = BABYLON.MeshBuilder.CreateBox("PlayerSphere", {size: 2}, this.scene);
         this.box.scaling.x = 0.5;
         this.box.scaling.z = 0.5;
-        this.box.position = this.world.player_start_position; //new BABYLON.Vector3(0,  5, 0);
+        this.box.position = this.world.player_start_position;
         this.box.checkCollisions = true;
         this.box.material = new BABYLON.StandardMaterial();
+        // this.box.visibility = false;
+
+        
+
+        // BABYLON.SceneLoader.ImportMesh(null, '', 'suz.gltf', this.scene, (meshes, paticles, skeletons, animations) => {
+        //     // console.log('meshes', meshes);
+        //     // console.log('particles', paticles);
+        //     // console.log('skeletons', skeletons);
+        //     // console.log('animations', animations);
+        // });
+
         
         this.camera.lockedTarget = this.box;
         

@@ -26,7 +26,8 @@
     "webpack-dev-server": "^3.10.3"
   },
   "dependencies": {
-    "babylonjs": "^4.0.3",
+    "babylonjs": "^4.1.0",
+    "babylonjs-loaders": "^4.1.0",
     "jquery": "^3.4.1",
     "stats.js": "^0.17.0"
   }

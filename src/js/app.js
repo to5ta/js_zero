@@ -1,7 +1,4 @@
-import * as BABYLON from "babylonjs";
-// import CANNON from "cannon";
-
-import Stats from "stats.js";
+// import Stats from "stats.js";
 
 import { Environment } from "./environment";
 
@@ -18,9 +15,9 @@ class App {
     this.engine = new BABYLON.Engine(this.env.canvas, true);
     this.game = new Game(this.engine, this.env.canvas);  
     
-    this.stats = new Stats();
-    this.stats.showPanel( 0 );
-    document.body.appendChild( this.stats.dom );
+    // this.stats = new Stats();
+    // this.stats.showPanel( 0 );
+    // document.body.appendChild( this.stats.dom );
 
     // Watch for browser/canvas resize events
     window.addEventListener("resize", function () { 
@@ -29,13 +26,13 @@ class App {
       }
     });
 
-    // register renderloop
-    this.engine.runRenderLoop(() => { 
-      this.stats.begin();
-      this.game.mainloop(this.engine.getDeltaTime());
-      this.game.scene.render();
-      this.stats.end();
-    });
+    // // register renderloop
+    // this.engine.runRenderLoop(() => { 
+    //   this.stats.begin();
+    //   this.game.mainloop(this.engine.getDeltaTime());
+    //   this.game.scene.render();
+    //   this.stats.end();
+    // });
 
     // register input handle
     document.body.addEventListener("keydown", (event) => {
