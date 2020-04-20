@@ -42,18 +42,17 @@ class Player {
         this.box.position = this.world.player_start_position;
         this.box.checkCollisions = true;
         this.box.material = new BABYLON.StandardMaterial();
-        // this.box.visibility = false;
-
         
-
-        // BABYLON.SceneLoader.ImportMesh(null, '', 'suz.gltf', this.scene, (meshes, paticles, skeletons, animations) => {
-        //     // console.log('meshes', meshes);
-        //     // console.log('particles', paticles);
-        //     // console.log('skeletons', skeletons);
-        //     // console.log('animations', animations);
-        // });
-
         
+        if(mesh){
+            this.box.visibility = false;
+            this.mesh = mesh;
+            this.mesh.rotation = this.box.rotation;
+            this.mesh.position = this.box.position;
+        }
+
+
+
         this.camera.lockedTarget = this.box;
         
         this.falling = true;

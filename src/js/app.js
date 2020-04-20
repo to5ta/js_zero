@@ -26,13 +26,13 @@ class App {
       }
     });
 
-    // // register renderloop
-    // this.engine.runRenderLoop(() => { 
-    //   this.stats.begin();
-    //   this.game.mainloop(this.engine.getDeltaTime());
-    //   this.game.scene.render();
-    //   this.stats.end();
-    // });
+    // register renderloop
+    this.engine.runRenderLoop(() => { 
+      // this.stats.begin();
+      this.game.mainloop(this.engine.getDeltaTime());
+      this.game.scene.render();
+      // this.stats.end();
+    });
 
     // register input handle
     document.body.addEventListener("keydown", (event) => {
