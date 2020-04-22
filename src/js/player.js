@@ -2,7 +2,7 @@ import * as BABYLON from "babylonjs";
 import 'babylonjs-loaders';
 
 class Player {
-    constructor(scene, canvas, world, mesh) {
+    constructor(scene, canvas, world, skeleton) {
         this.scene = scene;
         this.canvas = canvas;
         this.world = world;
@@ -44,11 +44,11 @@ class Player {
         this.box.material = new BABYLON.StandardMaterial();
         
         
-        if(mesh){
+        if(skeleton){
             this.box.visibility = false;
-            this.mesh = mesh;
-            this.mesh.rotation = this.box.rotation;
-            this.mesh.position = this.box.position;
+            this.skeleton = skeleton;
+            this.skeleton.rotation = this.box.rotation;
+            this.skeleton.position = this.box.position;
         }
 
 

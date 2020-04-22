@@ -16,14 +16,15 @@ export default class World {
         light1.intensity = 0.1;
         // var light2 = new BABYLON.PointLight("light2", new BABYLON.Vector3(0, 1, -1), this.scene);
         var light2 = new BABYLON.DirectionalLight("light2", new BABYLON.Vector3(-1, -5, -1).normalize(), this.scene);
-        light2.intensity = 0.3;
+        light2.intensity = 0.5;
 
 
         this.collision_meshes = [];
-        var ground_material = new BABYLON.StandardMaterial("ground_material", this.scene);
-        ground_material.specularPower = 0;
-        // ground_material.specularColor = new BABYLON.Color3(0,0,0);
-        ground_material.roughness = 0.1;
+        var ground_material = new BABYLON.PBRMetallicRoughnessMaterial("ground_material", this.scene);
+
+        // ground_material.specularPower = 0;
+        // ground_material.emissiveColor = new BABYLON.Color3(1,1,1);
+        // ground_material.roughness = 0.1;
 
         // Add and manipulate meshes in the scene
         this.plane = BABYLON.MeshBuilder.CreatePlane("Ground", {size: 30}, this.scene);
@@ -40,7 +41,7 @@ export default class World {
 
 
         var envTexture = new BABYLON.CubeTexture("./sky", this.scene);
-        this.scene.createDefaultSkybox(envTexture, false, 1000);
+        this.scene.createDefaultSkybox(envTexture, false, 1000, 0, false);
       
     }
 }

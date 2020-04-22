@@ -14,13 +14,13 @@ import player_model from "../assets/models/wache02.gltf";
 
 class AssetManagement {
     constructor(scene) {
-    
+      this.player_skeleton = null;
     }
 
 
     loadAssets(scene){
         
-                    // Load all assets first
+        // Load all assets first
         var assetsManager = new BABYLON.AssetsManager(scene);
         var tasks = [];
         tasks.push(assetsManager.addImageTask("sky_px", sky_px));
@@ -33,8 +33,8 @@ class AssetManagement {
         meshtask.onSuccess = () => {
             console.log("Mesh Task done!");
             console.log("Completed really? ", meshtask.isCompleted);
-            console.log("MESHES:", meshtask.loadedMeshes);
-            // this.player_mesh = meshtask.loadedMeshes[3];
+            console.log("MESHES:", meshtask);
+            meshtask.loadedMeshes[0].position = new BABYLON.Vector3(2,0,2);
         }        
       
         tasks.forEach(imageTask => {

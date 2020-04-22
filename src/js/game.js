@@ -41,7 +41,7 @@ class Game {
         // the Level should create the scene, players etc. will be added to that scene / within that
         this.world = new World(this.scene);
 
-        this.player = new Player(this.scene, canvas, this.world);
+        this.player = new Player(this.scene, canvas, this.world, this.assetManagement.player_skeleton);
         this.debug_view = new DebugView(this.scene, canvas);
         
 
