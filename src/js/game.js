@@ -22,16 +22,14 @@ class Game {
         this.scene.collisionsEnabled = true;
 
         this.assetManagement = new AssetManagement();
+
+        setTimeout(() => {
+            console.log('Scene is ready Finished');
+            this.player.attachMesh(this.assetManagement.player_mesh);
+        }, 2000);
+
         this.assetManagement.loadAssets(this.scene);
 
-        this.initializeWithLoadedAssets(canvas);
-
-
-
-    }
-
-
-    initializeWithLoadedAssets(canvas) {
         
         // TODO why does ammo.js not work / fs not found error
         // var physicsPlugin = new BABYLON.AmmoJSPlugin();
@@ -41,9 +39,9 @@ class Game {
         // the Level should create the scene, players etc. will be added to that scene / within that
         this.world = new World(this.scene);
 
-        this.player = new Player(this.scene, canvas, this.world, this.assetManagement.player_skeleton);
+        this.player = new Player(this.scene, canvas, this.world, this.assetManagement.player_mesh);
         this.debug_view = new DebugView(this.scene, canvas);
-        
+
 
         // Add and manipulate meshes in the scene
         // var sphere = BABYLON.MeshBuilder.CreateSphere("sphere", {diameter:1}, this.scene);

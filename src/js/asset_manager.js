@@ -1,7 +1,6 @@
 import * as BABYLON from "babylonjs";
 import 'babylonjs-loaders';
 
-// outsource to asset-loader-class later
 import sky_px from "../assets/textures/skybox/sky_px.jpg";
 import sky_nx from "../assets/textures/skybox/sky_nx.jpg";
 import sky_py from "../assets/textures/skybox/sky_py.jpg";
@@ -14,7 +13,7 @@ import player_model from "../assets/models/wache02.gltf";
 
 class AssetManagement {
     constructor(scene) {
-      this.player_skeleton = null;
+      this.player_mesh = null;
     }
 
 
@@ -31,15 +30,16 @@ class AssetManagement {
         tasks.push(assetsManager.addImageTask("sky_nz", sky_nz)); 
         let meshtask = assetsManager.addMeshTask("players mesh", null, './', player_model);
         meshtask.onSuccess = () => {
-            console.log("Mesh Task done!");
-            console.log("Completed really? ", meshtask.isCompleted);
-            console.log("MESHES:", meshtask);
-            meshtask.loadedMeshes[0].position = new BABYLON.Vector3(2,0,2);
+            // console.log("Mesh Task done!");
+            // console.log("Completed really? ", meshtask.isCompleted);
+            // console.log("MESHES:", meshtask);
+            this.player_mesh = meshtask.loadedMeshes[0];
+
         }        
       
         tasks.forEach(imageTask => {
           imageTask.onSuccess = function(task) {
-            console.log("Loaded", task.name);
+            // console.log("Loaded", task.name);
           }
           imageTask.onError = function(task) {
             console.log("FAILED", task);
@@ -47,10 +47,13 @@ class AssetManagement {
         });
 
         assetsManager.onTaskSuccessObservable.add(function(task) {
-            console.log('task successful', task)
+            // console.log('task successful', task)
         });
         
-        // assetsManager.onFinish = () => {
+        assetsManager.onFinish = () => {
+          console.log('Asset Loading Finished');
+        }
+
         //     // sceene.init(canvas);
         //     console.log("Loading Finished!");
         //     // register renderloop
@@ -65,8 +68,8 @@ class AssetManagement {
             console.log(text);
         };
         
-        assetsManager.loadAsync();
-        
+        assetsManager.load();
+        console.log("Loading done!");
     };
 }
 

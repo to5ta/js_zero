@@ -2,19 +2,19 @@ import * as BABYLON from "babylonjs";
 import 'babylonjs-loaders';
 
 class Player {
-    constructor(scene, canvas, world, skeleton) {
+    constructor(scene, canvas, world, mesh) {
         this.scene = scene;
         this.canvas = canvas;
         this.world = world;
         
         // this.camera = new BABYLON.UniversalCamera(
-            //     "Camera",
+        //     "Camera",
         //     new BABYLON.Vector3(5, 5, 0), 
         //     this.scene);
         
         this.camera = new BABYLON.FollowCamera("FollowCamera", new BABYLON.Vector3(0,0,0), this.scene);
-        this.camera.radius = 10;
-        this.camera.heightOffset = 3;
+        this.camera.radius = 5;
+        this.camera.heightOffset = 1.7;
         this.camera.rotationOffset = 0;
         this.camera.maxCameraSpeed = 0.2;
         
@@ -44,22 +44,15 @@ class Player {
         this.box.material = new BABYLON.StandardMaterial();
         
         
-        if(skeleton){
-            this.box.visibility = false;
-            this.skeleton = skeleton;
-            this.skeleton.rotation = this.box.rotation;
-            this.skeleton.position = this.box.position;
+        if (mesh) {
+            this.mesh.rotation = this.box.rotation;
+            // this.mesh.position = this.box.position;
         }
 
-
-
-        this.camera.lockedTarget = this.box;
-        
+        this.camera.lockedTarget = this.box;        
         this.falling = true;
         this.fallingVel = 0;
-
         this.jumpSpeed = 7;
-        
         this.moveVel = 0;
         this.moveSpeedMax = 5;  
         this.sprintSpeedMax = 12;
@@ -76,15 +69,21 @@ class Player {
             new BABYLON.Vector3(0, -1, 0));
         this.contactRay.length = 1.1;
         
-        
-        this.box.onCollideObservable.add((others) => {
+                this.box.onCollideObservable.add((others) => {
             this.falling = false;
             console.log("Ground hit!");
         });        
     }
 
+    attachMesh(mesh){
+        this.box.visibility = false;
+        this.mesh = mesh;
+        // mesh.position = this.box.position;
+        mesh.rotation = this.box.rotation;
+    }
+
     handleInput(keyEvent) {
-        console.log("KeyEvent in Player:", event);
+        // console.log("KeyEvent in Player:", event);
         
         const keyPressed = keyEvent.type == "keydown";
         
@@ -140,6 +139,7 @@ class Player {
     update(dTimeMs) {
         const dTimeSec = dTimeMs / 1000;
 
+        // detailed movement model using accelerations
         // console.log("Contact: ", this.contactRay.intersectsMesh(this.world.plane, false));
 
         // this.moveVel += this.inputVec.scale(dTimeSec);
@@ -155,6 +155,12 @@ class Player {
         //     0,
         //     Math.cos(this.box.rotation.y)
         // );
+        if(this.mesh) {
+            this.mesh.rotation = this.box.rotation;
+            this.mesh.position.x = this.box.position.x;
+            this.mesh.position.z = this.box.position.z;
+            this.mesh.position.y = this.box.position.y - 0.9;
+        }
 
         this.box.rotation.y += this.inputRotateY * this.rotateSpeedMax * dTimeSec;
     
