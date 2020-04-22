@@ -20,7 +20,7 @@ class Player {
         
         setTimeout(()=>{
             this.camera.maxCameraSpeed = 1;
-        }, 2500);
+        }, 7000);
 
         // this.camera.lowerHeightOffsetLimit = -0.5;
         // this.camera.upperHeightOffsetLimit = 10;
