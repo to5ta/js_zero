@@ -1,7 +1,6 @@
 import { Player } from './player';
 import World from './world';
 import { DebugView } from "./debug_view";
-import { AssetManagement } from "./asset_manager";
 
 import * as BABYLON from "babylonjs";
 import 'babylonjs-loaders';
@@ -14,50 +13,42 @@ class Game {
     constructor(engine, canvas) { 
         this.engine = engine;
         this.canvas = canvas;
-
-        // Create the scene space
+ 
+        // game state ---------------------------------------------------------
+        this.debug_mode = false;
+        this.paused = false;
+        
+        // Create the scene ---------------------------------------------------
         this.scene = new BABYLON.Scene(this.engine);
-
         this.scene.gravity = BABYLON.Vector3(0,-9.81, 0);
         this.scene.collisionsEnabled = true;
-
-        this.assetManagement = new AssetManagement();
-
-        setTimeout(() => {
-            console.log('Scene is ready Finished');
-            this.player.attachMesh(this.assetManagement.player_mesh);
-        }, 2000);
-
-        this.assetManagement.loadAssets(this.scene);
-
         
+        this.assetManager = new BABYLON.AssetsManager(this.scene);
+
         // TODO why does ammo.js not work / fs not found error
         // var physicsPlugin = new BABYLON.AmmoJSPlugin();
         // this.scene.enablePhysics(gravityVector, physicsPlugin);
         
-    
-        // the Level should create the scene, players etc. will be added to that scene / within that
+
+        // create the level to play in ----------------------------------------
         this.world = new World(this.scene);
 
-        this.player = new Player(this.scene, canvas, this.world, this.assetManagement.player_mesh);
-        this.debug_view = new DebugView(this.scene, canvas);
-
-
-        // Add and manipulate meshes in the scene
-        // var sphere = BABYLON.MeshBuilder.CreateSphere("sphere", {diameter:1}, this.scene);
-        // sphere.position = new BABYLON.Vector3(0, 0.5, 0);
-        // this.camera.setTarget(sphere.position);
-
-
-        var mypoints = [
-        new BABYLON.Vector3(0,2,0),
-            new BABYLON.Vector3(1,2,0)];
-
-        this.debug_mode = false;
-        this.paused = false;
+        this.player = new Player(
+            this.scene, 
+            this.canvas, 
+            this.world, 
+            this.assetManager);
+        
+        // put debug functionality here 
+        this.debug_view = new DebugView(
+            this.scene, 
+            canvas);
+        
+        this.assetManager.load();
     }
 
-    //TODO forward to debug camera / player and its camera
+    // input forwarding -------------------------------------------------------
+    // TODO: if game is not paused....
     handleInput(keyEvent) {
         if(keyEvent.keyCode == 67 && keyEvent.type == "keydown") { 
             console.log("Event", keyEvent);
@@ -72,9 +63,7 @@ class Game {
         }
         if(!this.debug_mode) {
             this.player.handleInput(keyEvent);
-        } else {
-            // forward to debug_view 
-        }
+        } 
     }
 
     mainloop(dTimeMs){
