@@ -22,7 +22,18 @@ class Game {
         this.scene = new BABYLON.Scene(this.engine);
         this.scene.gravity = BABYLON.Vector3(0,-9.81, 0);
         this.scene.collisionsEnabled = true;
-        
+       
+        BABYLON.SceneLoader.OnPluginActivatedObservable.add(function (loader) {
+            if (loader.name === "gltf") {
+                // do something with the loader
+                console.log("GLTF_Loader:", loader);
+                loader.animationStartMode = 0;
+                // loader.animationStartMode = BABYLON.GLTFLoaderAnimationStartMode.NONE;
+                // loader.<option2> = <...>
+            }
+        });
+    
+
         this.assetManager = new BABYLON.AssetsManager(this.scene);
 
         // TODO why does ammo.js not work / fs not found error

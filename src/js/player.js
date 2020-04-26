@@ -92,9 +92,23 @@ class Player {
         
         assetTask.onSuccess = () => {
             console.log("MeshTask", assetTask);
+            
             this.mesh = assetTask.loadedMeshes[0];
+            this.skeleton = assetTask.loadedSkeletons[0];
+
+            this.animationRunning = assetTask.loadedAnimationGroups[0];
+            // this.animationRunning._loopAnimation = false;
+            // this.animationRunning.stop();
+            // this.animationRunning._to = 0.2;
+            console.log('Run Animation', this.animationRunning);
+            
+            this.animationRunningHandle = this.scene.beginWeightedAnimation(this.skeleton, 0, 60, 1.0, true);
+            // assetTask.loadedAnimationGroups[1].stop();
+            
+            // this.animationRunning = assetTask.loadedAnimationGroups[1];
             this.characterBox.visibility = false;
-        }        
+            console.log('this', this);
+        }  
     }
 
     // process player input ---------------------------------------------------
