@@ -91,30 +91,41 @@ class Player {
             player_model);
         
         assetTask.onSuccess = () => {
-            console.log("MeshTask", assetTask);
-            
             this.mesh = assetTask.loadedMeshes[0];
-            this.skeleton = assetTask.loadedSkeletons[0];
+            this.animation = assetTask.loadedAnimationGroups[0];
+            
+            this.walkAni = this.animation.start();
+            this.walkAni.stop();
+            this.jumpAni = this.walkAni.clone();
+            this.jumpAni.stop();
 
-            this.animationRunning = assetTask.loadedAnimationGroups[0];
-            // this.animationRunning._loopAnimation = false;
-            // this.animationRunning.stop();
-            // this.animationRunning._to = 0.2;
-            console.log('Run Animation', this.animationRunning);
-            
-            this.animationRunningHandle = this.scene.beginWeightedAnimation(this.skeleton, 0, 60, 1.0, true);
-            // assetTask.loadedAnimationGroups[1].stop();
-            
-            // this.animationRunning = assetTask.loadedAnimationGroups[1];
+            // this.skeleton = assetTask.loadedSkeletons[0];
+            // this.animation.setWeightForAllAnimatables(1);
+            // this.animationWalking.stop();
+            // this.animationWalking.pause();
+
             this.characterBox.visibility = false;
             console.log('this', this);
         }  
     }
 
+    startWalkAni() {
+        console.log("Start Walking...");
+        this.jumpAni.stop();
+        this.walkAni = this.animation.start(true, 1.0, 0.0, 1.0, false);
+    }
+
+    startJumpAni() {
+        console.log("Start Jumping....");
+        this.walkAni.stop();
+        // this.jumpAni = this.animation.start(true, 1.0, 70/60, 90/60, false);
+        this.jumpAni = this.animation.start(true, 1.0, 0, 1, false);
+    }
+
     // process player input ---------------------------------------------------
     handleInput(keyEvent) {
         const keyPressed = keyEvent.type == "keydown";
-        
+
         if (keyEvent.keyCode == 37) {
             if (keyPressed) {
                 if (this.strafe) {
@@ -147,7 +158,7 @@ class Player {
         }  
         if (keyEvent.keyCode == 32 && !this.falling && keyPressed){
             this.falling = true;
-            this.fallingVel = this.jumpSpeed;  
+            this.fallingVel = this.jumpSpeed; 
         }
         if (keyEvent.keyCode == 17) {
             this.strafe = keyPressed ? true : false;
@@ -198,10 +209,12 @@ class Player {
         const rotation_matrix = new BABYLON.Matrix.RotationYawPitchRoll(
             this.characterBox.rotation.y,
             0,
-            0
-        );
+            0);
         
         if (this.falling) {
+            if (this.animation && !this.jumpAni.isPlaying) {
+                this.startJumpAni();
+            } 
             this.fallingVel += (this.world.gravity * dTimeSec);
         } else {
             this.fallingVel = -0.01;
@@ -211,6 +224,16 @@ class Player {
             0,
             this.fallingVel,
             0);
+
+        if (this.animation) {
+            if(!this.falling && this.inputMoveVec.length() > 0.1) {
+                if(!this.walkAni.isPlaying) {
+                    this.startWalkAni();
+                }
+            } else {
+                this.walkAni.stop();
+            }
+        }
 
         let speed = this.sprint ? this.sprintSpeedMax : this.moveSpeedMax;
         this.characterBox.moveWithCollisions(
