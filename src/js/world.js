@@ -21,10 +21,10 @@ export default class World {
 
         // Add lights to the scene
         var light1 = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(1, 1, 0), this.scene);
-        light1.intensity = 0.1;
+        light1.intensity = 0.25;
         // var light2 = new BABYLON.PointLight("light2", new BABYLON.Vector3(0, 1, -1), this.scene);
         var light2 = new BABYLON.DirectionalLight("light2", new BABYLON.Vector3(-1, -5, -1).normalize(), this.scene);
-        light2.intensity = 0.5;
+        light2.intensity = 0.65;
 
         this.collision_meshes = [];
         var ground_material = new BABYLON.PBRMetallicRoughnessMaterial("ground_material", this.scene);
