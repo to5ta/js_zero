@@ -93,33 +93,35 @@ class Player {
         assetTask.onSuccess = () => {
             this.mesh = assetTask.loadedMeshes[0];
             this.animation = assetTask.loadedAnimationGroups[0];
-            
+
             this.walkAni = this.animation.start();
             this.walkAni.stop();
             this.jumpAni = this.walkAni.clone();
             this.jumpAni.stop();
-
-            // this.skeleton = assetTask.loadedSkeletons[0];
-            // this.animation.setWeightForAllAnimatables(1);
-            // this.animationWalking.stop();
-            // this.animationWalking.pause();
-
+            this.idleAni = this.walkAni.clone();
+            this.idleAni.stop();
+            
             this.characterBox.visibility = false;
-            console.log('this', this);
+            this.startIdleAni();
         }  
     }
 
     startWalkAni() {
-        console.log("Start Walking...");
         this.jumpAni.stop();
-        this.walkAni = this.animation.start(true, 1.0, 0.0, 1.0, false);
+        this.idleAni.stop();
+        this.walkAni = this.walkAni.start(true, 1.5, 0.0, 1.0, false);
     }
 
     startJumpAni() {
-        console.log("Start Jumping....");
         this.walkAni.stop();
-        // this.jumpAni = this.animation.start(true, 1.0, 70/60, 90/60, false);
-        this.jumpAni = this.animation.start(true, 1.0, 0, 1, false);
+        this.idleAni.stop();
+        this.jumpAni = this.jumpAni.start(false, 1.0, 70/60, 90/60, false);
+    }
+
+    startIdleAni() {
+        this.walkAni.stop();
+        this.jumpAni.stop();
+        this.idleAni = this.idleAni.start(true, 0.03, 70/60, 71/60, false);
     }
 
     // process player input ---------------------------------------------------
@@ -158,7 +160,10 @@ class Player {
         }  
         if (keyEvent.keyCode == 32 && !this.falling && keyPressed){
             this.falling = true;
-            this.fallingVel = this.jumpSpeed; 
+            this.fallingVel = this.jumpSpeed;
+            if (this.animation && !this.jumpAni.isPlaying) {
+                this.startJumpAni();
+            } 
         }
         if (keyEvent.keyCode == 17) {
             this.strafe = keyPressed ? true : false;
@@ -204,7 +209,10 @@ class Player {
             this.mesh.position.y = this.characterBox.position.y - 0.9;
         }
 
-        this.characterBox.rotation.y += this.inputRotateY * this.rotateSpeedMax * dTimeSec;
+        this.characterBox.rotation.y += 
+            this.inputRotateY * 
+            this.rotateSpeedMax * 
+            dTimeSec;
     
         const rotation_matrix = new BABYLON.Matrix.RotationYawPitchRoll(
             this.characterBox.rotation.y,
@@ -212,9 +220,6 @@ class Player {
             0);
         
         if (this.falling) {
-            if (this.animation && !this.jumpAni.isPlaying) {
-                this.startJumpAni();
-            } 
             this.fallingVel += (this.world.gravity * dTimeSec);
         } else {
             this.fallingVel = -0.01;
@@ -226,12 +231,14 @@ class Player {
             0);
 
         if (this.animation) {
-            if(!this.falling && this.inputMoveVec.length() > 0.1) {
-                if(!this.walkAni.isPlaying) {
+            if (!this.falling && this.inputMoveVec.length() > 0.1) {
+                if (!this.walkAni.isPlaying) {
                     this.startWalkAni();
                 }
             } else {
-                this.walkAni.stop();
+                if (!this.idleAni.isPlaying && !this.falling) {
+                    this.startIdleAni();
+                }
             }
         }
 
@@ -242,7 +249,10 @@ class Player {
                     this.inputMoveVec.scale(speed * dTimeSec), 
                     rotation_matrix)));
 
-        const pick = this.contactRay.intersectsMeshes(this.world.collision_meshes, false);
+        const pick = this.contactRay.intersectsMeshes(
+            this.world.collision_meshes, 
+            false);
+            
         if (this.characterBox && pick.length) {
             this.characterBox.material.emissiveColor = new BABYLON.Color4(1, 0, 0, 1);
             this.falling = false;
