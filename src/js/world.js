@@ -1,5 +1,13 @@
+// needed for webpack in any way?
+import sky_px from "../assets/textures/skybox/sky_px.jpg";
+import sky_nx from "../assets/textures/skybox/sky_nx.jpg";
+import sky_py from "../assets/textures/skybox/sky_py.jpg";
+import sky_ny from "../assets/textures/skybox/sky_ny.jpg";
+import sky_pz from "../assets/textures/skybox/sky_pz.jpg";
+import sky_nz from "../assets/textures/skybox/sky_nz.jpg";
+
 export default class World {
-    constructor(scene) {
+    constructor(scene, assetManager) {
         
         // Create the scene space
         this.scene = scene;
@@ -17,7 +25,6 @@ export default class World {
         // var light2 = new BABYLON.PointLight("light2", new BABYLON.Vector3(0, 1, -1), this.scene);
         var light2 = new BABYLON.DirectionalLight("light2", new BABYLON.Vector3(-1, -5, -1).normalize(), this.scene);
         light2.intensity = 0.5;
-
 
         this.collision_meshes = [];
         var ground_material = new BABYLON.PBRMetallicRoughnessMaterial("ground_material", this.scene);
@@ -38,7 +45,6 @@ export default class World {
         this.box.checkCollisions = true;
         this.box.material = ground_material;
         this.collision_meshes.push(this.box);
-
 
         var envTexture = new BABYLON.CubeTexture("./sky", this.scene);
         this.scene.createDefaultSkybox(envTexture, false, 1000, 0, false);
