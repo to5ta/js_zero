@@ -12,24 +12,43 @@ class Player {
 
         
         // 3rd person camera for player ---------------------------------------
-        this.camera = new BABYLON.FollowCamera(
-            "FollowCamera", 
-            new BABYLON.Vector3(0,0,0), 
-            this.scene);
+        // this.camera = new BABYLON.FollowCamera(
+        //     "FollowCamera", 
+        //     new BABYLON.Vector3(0,0,0), 
+        //     this.scene);
+
+        // this.camera.radius = 5;
+        // this.camera.heightOffset = 1.7;
+        // this.camera.rotationOffset = 0;
+        // this.camera.maxCameraSpeed = 1;
+        // // this.camera.lowerHeightOffsetLimit = -0.5;
+        // // this.camera.upperHeightOffsetLimit = 10;
+        // // this.camera.lowerRotationOffsetLimit = -180;
+        // // this.camera.upperRotationOffsetLimit = 180;
+        // this.camera.rotation = new BABYLON.Vector3(0, 20, 0);
+        // this.camera.position = this.world.camera_start_position;
         
-        this.camera.radius = 5;
-        this.camera.heightOffset = 1.7;
-        this.camera.rotationOffset = 0;
-        this.camera.maxCameraSpeed = 1;
-        // this.camera.lowerHeightOffsetLimit = -0.5;
-        // this.camera.upperHeightOffsetLimit = 10;
-        // this.camera.lowerRotationOffsetLimit = -180;
-        // this.camera.upperRotationOffsetLimit = 180;
-        this.camera.rotation = new BABYLON.Vector3(0, 20, 0);
-        this.camera.position = this.world.camera_start_position;
+        // // this.camera.attachControl(this.canvas, true);
         
-        // this.camera.attachControl(this.canvas, true);
-        // this.camera.inputs.remove(this.camera.inputs.attached.keyboard);
+        
+        this.camera = new BABYLON.ArcRotateCamera(
+            "PlayerCamera",
+            Math.PI/2,
+            Math.PI/2,
+            5,
+            null,
+            this.scene,
+            true);
+                
+        this.camera.attachControl(this.canvas, true);
+        this.camera.inputs.remove(this.camera.inputs.attached.keyboard);
+        this.camera.inputs.remove(this.camera.inputs.attached.mousewheel);
+
+        this.camera.upperBetaLimit = 1.5 // Math.Pi/6;
+        this.camera.lowerBetaLimit = 0;
+        // console.log("attached inputs", this.camera.inputs.attached);
+
+
         this.scene.activeCamera = this.camera;
         
         
@@ -43,7 +62,7 @@ class Player {
             
         this.characterWidth = 0.7;
         this.characterDepth = 0.3;
-        this.characterHeight = 2;
+        this.characterHeight = 1.8;
 
         this.characterBox.scaling.x = this.characterWidth/2;
         this.characterBox.scaling.z = this.characterDepth/2;
