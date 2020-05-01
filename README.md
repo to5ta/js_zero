@@ -17,13 +17,26 @@ Inspired by the awesome 'Sketchbook' Project made by swift502 (https://github.co
 - [x] Debuging-Fly Mode
 - [x] Player Controls 
 - [x] Faked Player Physics
+- [ ] Load something like a Level
+- [X] Add Character model
+- [X] Animate Character model (mapped to states like run)
+- [x] make a camera that follows the character
+- [ ] Game Menu
+- [ ] GUI Overlay with Image (Health, ...)
+- [ ] Pickable Items 
+- [ ] Item Menu
+- [ ] Rework Character Animations
+- [ ] Fix Pivot in Player Model (share one player base position)
+- [ ] Proper cloths & weapons for character (switchable)
+- [ ] Reflection Texture for metallic stuff
+- [ ] Abstract level concept to enable multiple levels
+- [ ] Constumized loading screen
 - [ ] Play Sound-Effects
 - [ ] Play Music
-- [ ] Load something like a Level
-- [ ] Add Character model
-- [ ] Animate Character model (mapped to states like run)
-- [x] make a camera that follows the character
-- [ ] Menu Overlay
+- [ ] Minimum mobile controls concept
+- [ ] rework and maybe outsource keybinding from player
+- [ ] CI/CD (auto-publish) for dev branch und master 
+
 
 ## Manic Roadmap
 - Huge/Open World

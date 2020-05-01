@@ -56,6 +56,7 @@ class Game {
             canvas);
         
         this.assetManager.load();
+        this.engine.enterPointerlock();
     }
 
     // input forwarding -------------------------------------------------------

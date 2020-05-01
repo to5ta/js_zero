@@ -35,17 +35,21 @@ class Player {
             "PlayerCamera",
             Math.PI/2,
             Math.PI/2,
-            5,
+            7,
             null,
             this.scene,
             true);
-                
+
         this.camera.attachControl(this.canvas, true);
         this.camera.inputs.remove(this.camera.inputs.attached.keyboard);
         this.camera.inputs.remove(this.camera.inputs.attached.mousewheel);
 
-        this.camera.upperBetaLimit = 1.5 // Math.Pi/6;
+        this.camera.inputs.attached.pointers.angularSensibilityX = 1000;
+        this.camera.inputs.attached.pointers.angularSensibilityY = 1000;
+
+        this.camera.upperBetaLimit = 1.5;
         this.camera.lowerBetaLimit = 0;
+        // this.camera.checkCollisions = true;
         // console.log("attached inputs", this.camera.inputs.attached);
 
 
@@ -62,7 +66,7 @@ class Player {
             
         this.characterWidth = 0.7;
         this.characterDepth = 0.3;
-        this.characterHeight = 1.8;
+        this.characterHeight = 1.9;
 
         this.characterBox.scaling.x = this.characterWidth/2;
         this.characterBox.scaling.z = this.characterDepth/2;
@@ -83,14 +87,14 @@ class Player {
         // player internal movement state -------------------------------------
         this.falling = true;
         this.fallingVel = 0;
-        this.jumpSpeed = 7;
+        this.jumpSpeed = 12;
         this.moveVel = 0;
         this.moveSpeedMax = 5;  
         this.sprintSpeedMax = 12;
         this.rotateSpeedMax = 2;
         this.moveAcc = 0.1;
         this.moveDamp = 0.1;
-        this.strafe = false;
+        this.strafe = true; // always strafe
         this.sprint = false;
         
         this.inputMoveVec = new BABYLON.Vector3(0, 0, 0);
@@ -99,7 +103,7 @@ class Player {
         this.contactRay = new BABYLON.Ray(
             this.characterBox.position,
             new BABYLON.Vector3(0, -1, 0));
-        this.contactRay.length = 1.1;
+        this.contactRay.length = this.characterHeight/2 + 0.01;
 
         // visual representation ----------------------------------------------
         this.mesh = null;
@@ -184,12 +188,12 @@ class Player {
                 this.startJumpAni();
             } 
         }
-        if (keyEvent.keyCode == 17) {
-            this.strafe = keyPressed ? true : false;
-            if (keyPressed) {
-                this.inputMoveVec.x = 0;
-            }
-        }      
+        // if (keyEvent.keyCode == 17) {
+        //     this.strafe = keyPressed ? true : false;
+        //     if (keyPressed) {
+        //         this.inputMoveVec.x = 0;
+        //     }
+        // }      
         if (keyEvent.keyCode == 16) {
             this.sprint = keyPressed ? true : false;
         }      
@@ -221,17 +225,13 @@ class Player {
         //     0,
         //     Math.cos(this.box.rotation.y)
         // );
+        
         if(this.mesh) {
             this.mesh.rotation = this.characterBox.rotation;
             this.mesh.position.x = this.characterBox.position.x;
             this.mesh.position.z = this.characterBox.position.z;
             this.mesh.position.y = this.characterBox.position.y - 0.9;
         }
-
-        this.characterBox.rotation.y += 
-            this.inputRotateY * 
-            this.rotateSpeedMax * 
-            dTimeSec;
     
         const rotation_matrix = new BABYLON.Matrix.RotationYawPitchRoll(
             this.characterBox.rotation.y,
@@ -239,7 +239,7 @@ class Player {
             0);
         
         if (this.falling) {
-            this.fallingVel += (this.world.gravity * dTimeSec);
+            this.fallingVel += (this.world.gravity * dTimeSec* 2);
         } else {
             this.fallingVel = -0.01;
         }
@@ -251,6 +251,7 @@ class Player {
 
         if (this.animation) {
             if (!this.falling && this.inputMoveVec.length() > 0.1) {
+                this.mesh.rotation.y = Math.PI/2 -  this.camera.alpha; // copy rotation from camera orientation
                 if (!this.walkAni.isPlaying) {
                     this.startWalkAni();
                 }

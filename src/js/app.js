@@ -42,7 +42,13 @@ class App {
     document.body.addEventListener("keyup", (event) => {
       this.game.handleInput(event);
     });
-    
+
+    // catch the cursor to control the camera
+    if (!this.env.isMobile) {
+      document.body.addEventListener("click", (event) => {
+        this.env.canvas.requestPointerLock();
+      });
+    }
   }
 }
 
