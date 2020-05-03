@@ -35,7 +35,7 @@ class Player {
             "PlayerCamera",
             Math.PI/2,
             Math.PI/2,
-            7,
+            4.5,
             null,
             this.scene,
             true);
