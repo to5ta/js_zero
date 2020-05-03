@@ -248,10 +248,13 @@ class Player {
             0,
             this.fallingVel,
             0);
+        
+        if(this.inputMoveVec.length() > 0.1){
+            this.mesh.rotation.y = Math.PI/2 -  this.camera.alpha; // copy rotation from camera orientation
+        }
 
         if (this.animation) {
             if (!this.falling && this.inputMoveVec.length() > 0.1) {
-                this.mesh.rotation.y = Math.PI/2 -  this.camera.alpha; // copy rotation from camera orientation
                 if (!this.walkAni.isPlaying) {
                     this.startWalkAni();
                 }
