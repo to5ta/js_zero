@@ -1,10 +1,9 @@
-// needed for webpack in any way?
-import sky_px from "../assets/textures/skybox/sky_px.jpg";
-import sky_nx from "../assets/textures/skybox/sky_nx.jpg";
-import sky_py from "../assets/textures/skybox/sky_py.jpg";
-import sky_ny from "../assets/textures/skybox/sky_ny.jpg";
-import sky_pz from "../assets/textures/skybox/sky_pz.jpg";
-import sky_nz from "../assets/textures/skybox/sky_nz.jpg";
+import sky_px from "../assets/textures/skybox3/skybox0000_px.png";
+import sky_nx from "../assets/textures/skybox3/skybox0000_nx.png";
+import sky_py from "../assets/textures/skybox3/skybox0000_py.png";
+import sky_ny from "../assets/textures/skybox3/skybox0000_ny.png";
+import sky_pz from "../assets/textures/skybox3/skybox0000_pz.png";
+import sky_nz from "../assets/textures/skybox3/skybox0000_nz.png";
 
 export default class World {
     constructor(scene, assetManager) {
@@ -46,7 +45,11 @@ export default class World {
         this.box.material = ground_material;
         this.collision_meshes.push(this.box);
 
-        var envTexture = new BABYLON.CubeTexture("./sky", this.scene);
+        var envTexture = new BABYLON.CubeTexture.CreateFromImages(
+            [sky_px, sky_py, sky_pz, sky_nx, sky_ny, sky_nz], 
+            this.scene, 
+            false);
+        
         this.scene.createDefaultSkybox(envTexture, false, 1000, 0, false);
       
     }

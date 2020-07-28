@@ -28,6 +28,7 @@
   "dependencies": {
     "babylonjs": "^4.1.0",
     "babylonjs-loaders": "^4.1.0",
+    "http-server": "^0.12.3",
     "jquery": "^3.4.1",
     "stats.js": "^0.17.0"
   }
