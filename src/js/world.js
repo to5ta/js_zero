@@ -5,6 +5,8 @@ import sky_ny from "../assets/textures/skybox3/skybox0000_ny.png";
 import sky_pz from "../assets/textures/skybox3/skybox0000_pz.png";
 import sky_nz from "../assets/textures/skybox3/skybox0000_nz.png";
 
+import medieval_loop from '../assets/music/alexander-nakarada-medieval-loop-one.mp3';
+
 export default class World {
     constructor(scene, assetManager) {
         
@@ -51,6 +53,13 @@ export default class World {
             false);
         
         this.scene.createDefaultSkybox(envTexture, false, 1000, 0, false);
+
+        this.music = new BABYLON.Sound("Music", medieval_loop, scene, null, {
+            loop: true,
+            autoplay: true
+          });
+
+        this.music.setVolume(0.005);
       
     }
 }

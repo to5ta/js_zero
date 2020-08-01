@@ -123,6 +123,8 @@ class Player {
             this.jumpAni.stop();
             this.idleAni = this.walkAni.clone();
             this.idleAni.stop();
+            this.sprintAni = this.walkAni.clone();
+            this.sprintAni.stop();
             
             this.characterBox.visibility = false;
             this.startIdleAni();
@@ -132,26 +134,36 @@ class Player {
     startWalkAni() {
         this.jumpAni.stop();
         this.idleAni.stop();
-        this.walkAni = this.walkAni.start(true, 1.5, 0.0, 1.0, false);
+        this.sprintAni.stop();
+        this.walkAni = this.walkAni.start(true, 1.3, 0.0, 1.0, false);
     }
 
     startJumpAni() {
         this.walkAni.stop();
         this.idleAni.stop();
+        this.sprintAni.stop();
         this.jumpAni = this.jumpAni.start(false, 1.0, 70/60, 90/60, false);
     }
 
     startIdleAni() {
         this.walkAni.stop();
         this.jumpAni.stop();
-        this.idleAni = this.idleAni.start(true, 0.03, 70/60, 71/60, false);
+        this.sprintAni.stop();
+        this.idleAni = this.idleAni.start(true, 1.0, 100/60, 160/60, false);
+    }
+
+    startSprintAni() {
+        this.walkAni.stop();
+        this.jumpAni.stop();
+        this.idleAni.stop();
+        this.sprintAni = this.sprintAni.start(true, 3.0, 190/60, 289/60, false);
     }
 
     // process player input ---------------------------------------------------
     handleInput(keyEvent) {
         const keyPressed = keyEvent.type == "keydown";
 
-        if (keyEvent.keyCode == 37) {
+        if (keyEvent.keyCode == 37 || keyEvent.keyCode == 65) {
             if (keyPressed) {
                 if (this.strafe) {
                     this.inputMoveVec.x = 1;
@@ -163,7 +175,7 @@ class Player {
                 this.inputMoveVec.x = 0;
             }
         }  
-        if (keyEvent.keyCode == 39) {
+        if (keyEvent.keyCode == 39 || keyEvent.keyCode == 68) {
             if (keyPressed) {
                 if (this.strafe) {
                     this.inputMoveVec.x = -1;
@@ -175,10 +187,10 @@ class Player {
                 this.inputMoveVec.x = 0;
             }
         }  
-        if (keyEvent.keyCode == 38) {
+        if (keyEvent.keyCode == 38 || keyEvent.keyCode == 87) {
             this.inputMoveVec.z = keyPressed ? -1 : 0;
         }  
-        if (keyEvent.keyCode == 40) {
+        if (keyEvent.keyCode == 40 || keyEvent.keyCode == 83) {
             this.inputMoveVec.z = keyPressed ? 1 : 0;
         }  
         if (keyEvent.keyCode == 32 && !this.falling && keyPressed){
@@ -255,9 +267,16 @@ class Player {
 
         if (this.animation) {
             if (!this.falling && this.inputMoveVec.length() > 0.1) {
-                if (!this.walkAni.isPlaying) {
-                    this.startWalkAni();
+                if (this.sprint) {
+                    if (!this.sprintAni.isPlaying) {
+                        this.startSprintAni();
+                    }
+                } else {
+                    if (!this.walkAni.isPlaying) {
+                        this.startWalkAni();
+                    }
                 }
+
             } else {
                 if (!this.idleAni.isPlaying && !this.falling) {
                     this.startIdleAni();
