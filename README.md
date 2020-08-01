@@ -6,7 +6,7 @@ Powered by blender, babylon.js, npm and github.
 
 Inspired by the awesome 'Sketchbook' Project made by swift502 (https://github.com/swift502/Sketchbook).
 
-![Promo](promo.PNG)
+![Promo](promo2.PNG)
 
 ## External Resources
 
