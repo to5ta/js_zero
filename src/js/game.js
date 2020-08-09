@@ -78,6 +78,17 @@ class Game {
         } 
     }
 
+    pause() {
+        this.paused = true;
+        this.world.music.pause();
+        console.log("Pause")
+    }
+
+    resume() {
+        this.paused = false;
+        this.world.music.play();
+    }
+
     mainloop(dTimeMs){
         if(this.player){
             this.player.update(dTimeMs);

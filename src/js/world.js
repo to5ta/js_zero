@@ -56,10 +56,9 @@ export default class World {
 
         this.music = new BABYLON.Sound("Music", medieval_loop, scene, null, {
             loop: true,
-            autoplay: true
+            autoplay: false
           });
 
-        this.music.setVolume(0.005);
-      
+        this.music.setVolume(0.005);      
     }
 }

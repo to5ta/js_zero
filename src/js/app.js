@@ -26,6 +26,17 @@ class App {
       }
     });
 
+    window.addEventListener('focusin', () => {
+      console.log('get focus again');
+      this.game.resume();
+    });
+
+    window.addEventListener('focusout', () => {
+      console.log('lost focus');
+      this.game.pause();
+    });
+
+
     // register renderloop
     this.engine.runRenderLoop(() => { 
       this.stats.begin();
