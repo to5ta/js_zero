@@ -108,7 +108,7 @@ class Player {
         // visual representation ----------------------------------------------
         this.mesh = null;
         var assetTask = assetManager.addMeshTask(
-            "PlayerMesh", 
+            "PlayerModel", 
             null, 
             './', 
             player_model);
@@ -116,7 +116,9 @@ class Player {
         assetTask.onSuccess = () => {
             this.mesh = assetTask.loadedMeshes[0];
             this.animation = assetTask.loadedAnimationGroups[0];
-
+            
+            world.shadowGenerator.addShadowCaster(this.mesh);
+      
             this.walkAni = this.animation.start();
             this.walkAni.stop();
             this.jumpAni = this.walkAni.clone();

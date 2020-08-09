@@ -7,6 +7,8 @@ import sky_nz from "../assets/textures/skybox3/skybox0000_nz.png";
 
 import medieval_loop from '../assets/music/alexander-nakarada-medieval-loop-one.mp3';
 
+// import test_level_model from '../assets/models/test_level.gltf';
+
 export default class World {
     constructor(scene, assetManager) {
         
@@ -15,7 +17,7 @@ export default class World {
 
         this.gravity = -9.81;
 
-        this.player_start_position = new BABYLON.Vector3(0,5,0);
+        this.player_start_position = new BABYLON.Vector3(0,15,0);
         this.camera_start_position = new BABYLON.Vector3(30,30,30);
 
         // Add a camera to the scene and attach it to the canvas
@@ -27,8 +29,15 @@ export default class World {
         var light2 = new BABYLON.DirectionalLight("light2", new BABYLON.Vector3(-1, -5, -1).normalize(), this.scene);
         light2.intensity = 0.65;
 
+        this.shadowGenerator = new BABYLON.ShadowGenerator(1024, light2);
+        this.shadowGenerator.useExponentialShadowMap = true;
+
+        // console.log(light2)
+        // console.log(this.shadowGenerator)
+
         this.collision_meshes = [];
         var ground_material = new BABYLON.PBRMetallicRoughnessMaterial("ground_material", this.scene);
+        // ground_material.wireframe = true;
 
         // ground_material.specularPower = 0;
         // ground_material.emissiveColor = new BABYLON.Color3(1,1,1);
@@ -40,12 +49,60 @@ export default class World {
         this.plane.material = ground_material;
         this.plane.checkCollisions = true;
         this.collision_meshes.push(this.plane);
+        this.plane.receiveShadows = true;
 
-        this.box = BABYLON.MeshBuilder.CreateBox("GroundBox", {size: 2}, this.scene);
+       this.box = BABYLON.MeshBuilder.CreateBox("GroundBox", {size: 2}, this.scene);
         this.box.position = new BABYLON.Vector3(0, 0.5, 5);
         this.box.checkCollisions = true;
         this.box.material = ground_material;
-        this.collision_meshes.push(this.box);
+        this.box.receiveShadows = true;
+        this.collision_meshes.push(this.box); 
+
+        console.log('level_box', this.box)
+
+
+        // var levelLoadTask = assetManager.addMeshTask(
+        //     "LevelModel", 
+        //     null, 
+        //     './', 
+        //     test_level_model);    
+
+        // levelLoadTask.onSuccess = () => {
+            
+        //     // levelLoadTask.loadedMeshes.forEach((mesh) => {
+        //     //     this.collision_meshes.push(mesh);
+        //     //     console.log("loadedbox", mesh);
+        //     //     mesh.material.wireframe = true;
+        //     // });
+        
+        //     levelLoadTask.loadedMeshes.forEach((mesh) => {
+
+        //         // this.collision_meshes.push(mesh);
+                
+        //         mesh.receiveShadows = true;
+        //         console.log("mesh", mesh.name)
+        //         this.collision_meshes.push(mesh);
+
+
+        //         mesh.isVisible = false;
+                   
+        //         var box = BABYLON.MeshBuilder.CreateBox("GroundBox", {size: 2}, this.scene);
+        //         box.position = new BABYLON.Vector3(5, 0.5, 5);
+        //         box.rotationQuaternion = mesh.rotationQuaternion;
+        //         box.scaling = mesh.scaling;
+        //         box.checkCollisions = true;
+        //         console.log(box.scaling)
+        //         console.log(box.position)
+        //         console.log(box.rotationQuaternion)
+        //         box.material = ground_material;
+        //         this.collision_meshes.push(box);
+
+        //         // if (mesh.name.includes('collision')) {
+
+        //         // }
+        //     });
+        // } 
+
 
         var envTexture = new BABYLON.CubeTexture.CreateFromImages(
             [sky_px, sky_py, sky_pz, sky_nx, sky_ny, sky_nz], 

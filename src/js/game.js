@@ -16,7 +16,7 @@ class Game {
  
         // game state ---------------------------------------------------------
         this.debug_mode = false;
-        this.paused = false;
+        this.paused = true;
         
         // Create the scene ---------------------------------------------------
         this.scene = new BABYLON.Scene(this.engine);
@@ -42,20 +42,24 @@ class Game {
         
 
         // create the level to play in ----------------------------------------
-        this.world = new World(this.scene);
+        this.world = new World(this.scene, this.assetManager);
 
         this.player = new Player(
             this.scene, 
             this.canvas, 
             this.world, 
             this.assetManager);
-        
+          
         // put debug functionality here 
         this.debug_view = new DebugView(
             this.scene, 
             canvas);
         
         this.assetManager.load();
+        this.assetManager.onFinish = () => {
+            this.resume();
+        };
+        
         this.engine.enterPointerlock();
     }
 
@@ -90,7 +94,7 @@ class Game {
     }
 
     mainloop(dTimeMs){
-        if(this.player){
+        if(this.player && !this.paused){
             this.player.update(dTimeMs);
         }
     }
