@@ -7,7 +7,7 @@ import sky_nz from "../assets/textures/skybox3/skybox0000_nz.png";
 
 import medieval_loop from '../assets/music/alexander-nakarada-medieval-loop-one.mp3';
 
-// import test_level_model from '../assets/models/test_level.gltf';
+import test_level_model from '../assets/models/test_level.gltf';
 
 export default class World {
     constructor(scene, assetManager) {
@@ -61,20 +61,21 @@ export default class World {
         console.log('level_box', this.box)
 
 
-        // var levelLoadTask = assetManager.addMeshTask(
-        //     "LevelModel", 
-        //     null, 
-        //     './', 
-        //     test_level_model);    
+        var levelLoadTask = assetManager.addMeshTask(
+            "LevelModel", 
+            null, 
+            './', 
+            test_level_model);   
 
-        // levelLoadTask.onSuccess = () => {
-            
-        //     // levelLoadTask.loadedMeshes.forEach((mesh) => {
-        //     //     this.collision_meshes.push(mesh);
-        //     //     console.log("loadedbox", mesh);
-        //     //     mesh.material.wireframe = true;
-        //     // });
-        
+        levelLoadTask.onSuccess = () => {
+            console.log(levelLoadTask);
+            levelLoadTask.loadedMeshes.forEach((mesh) => {
+                this.collision_meshes.push(mesh);
+                console.log("Add Mesh to Collision: ", mesh.name);
+                // mesh.material.wireframe = true;
+            });
+        }
+
         //     levelLoadTask.loadedMeshes.forEach((mesh) => {
 
         //         // this.collision_meshes.push(mesh);
