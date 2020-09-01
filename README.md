@@ -1,6 +1,6 @@
 # Project Zero
 
--Small- JavaScript App to learn more about proper Web-Development. Is about to become a third-person online-game.
+A third-person medieval online-game.
 
 Powered by blender, babylon.js, npm and github.
 
@@ -40,8 +40,8 @@ https://creativecommons.org/licenses/by/4.0/
 - [ ] Reflection Texture for metallic stuff
 - [ ] Abstract level concept to enable multiple levels
 - [ ] Constumized loading screen
-- [ ] Play Sound-Effects
-- [ ] Play Music
+- [x] Play Sound-Effects
+- [x] Play Music
 - [ ] Minimum mobile controls concept
 - [ ] rework and maybe outsource keybinding from player
 - [X] CI/CD (auto-publish) master 
