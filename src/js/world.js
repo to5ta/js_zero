@@ -5,7 +5,8 @@ import sky_ny from "../assets/textures/skybox3/skybox0000_ny.png";
 import sky_pz from "../assets/textures/skybox3/skybox0000_pz.png";
 import sky_nz from "../assets/textures/skybox3/skybox0000_nz.png";
 
-import medieval_loop from '../assets/music/alexander-nakarada-medieval-loop-one.mp3';
+import medieval_theme_01 from '../assets/music/medieval_theme_01.mp3';
+import medieval_theme_02 from '../assets/music/medieval_theme_02.mp3';
 
 import test_level_model from '../assets/models/test_level.gltf';
 
@@ -112,11 +113,17 @@ export default class World {
         
         this.scene.createDefaultSkybox(envTexture, false, 1000, 0, false);
 
-        this.music = new BABYLON.Sound("Music", medieval_loop, scene, null, {
+        this.music2 = new BABYLON.Sound("Music1", medieval_theme_01, scene, null, {
             loop: true,
             autoplay: false
           });
+          this.music2.setVolume(0.05);      
 
-        this.music.setVolume(0.005);      
+          this.music = new BABYLON.Sound("Music2", medieval_theme_02, scene, null, {
+            loop: true,
+            autoplay: false
+          });
+          this.music.setVolume(0.05);      
+
     }
 }

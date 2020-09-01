@@ -3,6 +3,9 @@ import 'babylonjs-loaders';
 
 import player_model from "../assets/models/wache02.gltf";
 
+import steps_sound from '../assets/sound/simple_steps.mp3';
+import sprint_sound from '../assets/sound/simple_sprint.mp3';
+
 
 class Player {
     constructor(scene, canvas, world, assetManager) {
@@ -47,7 +50,7 @@ class Player {
         this.camera.inputs.attached.pointers.angularSensibilityX = 1000;
         this.camera.inputs.attached.pointers.angularSensibilityY = 1000;
 
-        this.camera.upperBetaLimit = 1.5;
+        this.camera.upperBetaLimit = 1.9; // 1.5;
         this.camera.lowerBetaLimit = 0;
         // this.camera.checkCollisions = true;
         // console.log("attached inputs", this.camera.inputs.attached);
@@ -105,6 +108,17 @@ class Player {
             new BABYLON.Vector3(0, -1, 0));
         this.contactRay.length = this.characterHeight/2 + 0.01;
 
+        // sounds
+        this.sound_steps = new BABYLON.Sound("Steps", steps_sound, scene, null, {
+            loop: true,
+            autoplay: false
+          });
+        
+        this.sound_sprint = new BABYLON.Sound("Sprint", sprint_sound, scene, null, {
+            loop: true,
+            autoplay: false
+        });
+
         // visual representation ----------------------------------------------
         this.mesh = null;
         var assetTask = assetManager.addMeshTask(
@@ -130,7 +144,8 @@ class Player {
             
             this.characterBox.visibility = false;
             this.startIdleAni();
-        }  
+        }
+
     }
 
     startWalkAni() {
@@ -138,6 +153,8 @@ class Player {
         this.idleAni.stop();
         this.sprintAni.stop();
         this.walkAni = this.walkAni.start(true, 1.3, 0.0, 1.0, false);
+        this.sound_steps.play();  
+        this.sound_sprint.pause();      
     }
 
     startJumpAni() {
@@ -145,6 +162,8 @@ class Player {
         this.idleAni.stop();
         this.sprintAni.stop();
         this.jumpAni = this.jumpAni.start(false, 1.0, 70/60, 90/60, false);
+        this.sound_steps.pause();
+        this.sound_sprint.pause();
     }
 
     startIdleAni() {
@@ -152,6 +171,8 @@ class Player {
         this.jumpAni.stop();
         this.sprintAni.stop();
         this.idleAni = this.idleAni.start(true, 1.0, 100/60, 160/60, false);
+        this.sound_steps.pause();
+        this.sound_sprint.pause();
     }
 
     startSprintAni() {
@@ -159,6 +180,8 @@ class Player {
         this.jumpAni.stop();
         this.idleAni.stop();
         this.sprintAni = this.sprintAni.start(true, 3.0, 190/60, 289/60, false);
+        this.sound_steps.pause();
+        this.sound_sprint.play();
     }
 
     // process player input ---------------------------------------------------
