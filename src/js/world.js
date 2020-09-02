@@ -1,9 +1,9 @@
-import sky_px from "../assets/textures/skybox3/skybox0000_px.png";
-import sky_nx from "../assets/textures/skybox3/skybox0000_nx.png";
-import sky_py from "../assets/textures/skybox3/skybox0000_py.png";
-import sky_ny from "../assets/textures/skybox3/skybox0000_ny.png";
-import sky_pz from "../assets/textures/skybox3/skybox0000_pz.png";
-import sky_nz from "../assets/textures/skybox3/skybox0000_nz.png";
+import sky_px from "../assets/textures/skybox/skybox0000_px.png";
+import sky_nx from "../assets/textures/skybox/skybox0000_nx.png";
+import sky_py from "../assets/textures/skybox/skybox0000_py.png";
+import sky_ny from "../assets/textures/skybox/skybox0000_ny.png";
+import sky_pz from "../assets/textures/skybox/skybox0000_pz.png";
+import sky_nz from "../assets/textures/skybox/skybox0000_nz.png";
 
 import medieval_theme_01 from '../assets/music/medieval_theme_01.mp3';
 import medieval_theme_02 from '../assets/music/medieval_theme_02.mp3';

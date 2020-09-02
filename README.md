@@ -18,8 +18,7 @@ https://creativecommons.org/licenses/by/4.0/
 ## TODO
 
 ### Infrastructure 
-- [ ] npm build on github
-- [x] proper use of master/dev branch
+- [ ] Deploy online to Github Pages
 
 ### Imgame-Experience
 - [x] Debuging-Fly Mode
