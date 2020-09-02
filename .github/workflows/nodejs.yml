@@ -28,7 +28,7 @@ jobs:
       with:
         ACCESS_TOKEN: ${{ secrets.GHTOKEN }}  
         BASE_BRANCH: master
-        BRANCH: master
+        BRANCH: gh-pages
         FOLDER: dist
         CLEAN: true
         SSH: false
