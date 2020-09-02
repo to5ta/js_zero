@@ -113,12 +113,12 @@ export default class World {
         
         this.scene.createDefaultSkybox(envTexture, false, 1000, 0, false);
 
-        this.music = new BABYLON.Sound("Music1", medieval_theme_01, scene, null, {
+        this.music2 = new BABYLON.Sound("Music1", medieval_theme_01, scene, null, {
             loop: true,
             autoplay: false
         });
           
-        this.music2 = new BABYLON.Sound("Music2", medieval_theme_02, scene, null, {
+        this.music = new BABYLON.Sound("Music2", medieval_theme_02, scene, null, {
             loop: true,
             autoplay: false
         });

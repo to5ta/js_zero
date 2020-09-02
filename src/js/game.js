@@ -90,7 +90,9 @@ class Game {
 
     resume() {
         this.paused = false;
-        this.world.music.play();
+        if(!this.world.music.isPlaying){
+            this.world.music.play();
+        }
     }
 
     mainloop(dTimeMs){
