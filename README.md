@@ -4,21 +4,16 @@ A third-person medieval online-game.
 
 Powered by blender, babylon.js, npm and github.
 
+All assets created by my own (expect the one donated song).
+
 Inspired by the awesome 'Sketchbook' Project made by swift502 (https://github.com/swift502/Sketchbook).
 
 ![Promo](promo2.PNG)
 
-## External Resources
-
-'Medieval Loop One' by Alexander Nakarada | https://www.serpentsoundstudios.com
-Music promoted by https://www.free-stock-music.com
-Attribution 4.0 International (CC BY 4.0)
-https://creativecommons.org/licenses/by/4.0/
-
 ## TODO
 
 ### Infrastructure 
-- [ ] Deploy online to Github Pages
+- [X] Deploy online to Github Pages
 
 ### Imgame-Experience
 - [x] Debuging-Fly Mode
