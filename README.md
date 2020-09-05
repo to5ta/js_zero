@@ -4,7 +4,7 @@ A third-person medieval online-game.
 
 Powered by blender, babylon.js, npm and github.
 
-All assets created by my own (expect the one donated song).
+All assets created by my own - expect the current song that was donated for that game :).
 
 Inspired by the awesome 'Sketchbook' Project made by swift502 (https://github.com/swift502/Sketchbook).
 
@@ -14,31 +14,36 @@ Inspired by the awesome 'Sketchbook' Project made by swift502 (https://github.co
 
 ### Infrastructure 
 - [X] Deploy online to Github Pages
+- [ ] -CI-/CD deploy master to homepage 
 
-### Imgame-Experience
-- [x] Debuging-Fly Mode
+### Structure
+- [ ] Abstract level concept to enable multiple levels
+- [ ] rework and maybe outsource keybinding from player
+- [ ] Load something like a Level
+- [ ] Fix Pivot in Player Model (share one player base position)
+
+### Appearance
+- [X] Add Character model
+- [x] Make a camera that follows the character
+- [X] Animate Character model (mapped to states like 'run')
+- [X] Self-made skybox / 6 images rendered with Blender
+- [x] Play Music
+- [x] Play Sound-Effects
+- [ ] Constumized loading screen
+- [ ] Rework Character Animations
+- [ ] GUI Overlay with Image (Health, ...)
+- [ ] Reflection Texture for metallic stuff
+
+### Interaction
 - [x] Player Controls 
 - [x] Faked Player Physics
-- [X] Add Character model
-- [X] Animate Character model (mapped to states like 'run')
-- [x] Make a camera that follows the character
-- [X] Self-made skybox / 6 images rendered with Blender
-- [ ] Rework Character Animations
-- [ ] Fix Pivot in Player Model (share one player base position)
-- [ ] Proper cloths & weapons for character (switchable)
-- [ ] Load something like a Level
+- [x] Debuging-Fly Mode
 - [ ] Game Menu
-- [ ] GUI Overlay with Image (Health, ...)
-- [ ] Pickable Items 
 - [ ] Item Menu
-- [ ] Reflection Texture for metallic stuff
-- [ ] Abstract level concept to enable multiple levels
-- [ ] Constumized loading screen
-- [x] Play Sound-Effects
-- [x] Play Music
+- [ ] Pickable Items 
+- [ ] Proper cloths & weapons for character (switchable)
 - [ ] Minimum mobile controls concept
-- [ ] rework and maybe outsource keybinding from player
-- [X] CI/CD (auto-publish) master 
+- [ ] Player Actions like fighting, interacting...
 
 
 ## Roadmap
