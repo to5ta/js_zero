@@ -70,6 +70,7 @@ class Player {
         this.characterWidth = 0.7;
         this.characterDepth = 0.3;
         this.characterHeight = 1.9;
+        this.characterWeight = 75.0; //kg
 
         this.characterBox.scaling.x = this.characterWidth/2;
         this.characterBox.scaling.z = this.characterDepth/2;
@@ -90,7 +91,7 @@ class Player {
         // player internal movement state -------------------------------------
         this.falling = true;
         this.fallingVel = 0;
-        this.jumpSpeed = 12;
+        this.jumpSpeed = 10;
         this.moveVel = 0;
         this.moveSpeedMax = 5;  
         this.sprintSpeedMax = 12;
@@ -146,6 +147,10 @@ class Player {
             this.startIdleAni();
         }
 
+    }
+
+    getTotalWeight() {
+        return this.characterWeight; // + items later
     }
 
     startWalkAni() {
@@ -220,7 +225,7 @@ class Player {
         }  
         if (keyEvent.keyCode == 32 && !this.falling && keyPressed){
             this.falling = true;
-            this.fallingVel = this.jumpSpeed;
+            this.fallingVel = this.jumpSpeed * 80 / this.getTotalWeight();
             if (this.animation && !this.jumpAni.isPlaying) {
                 this.startJumpAni();
             } 
