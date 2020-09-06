@@ -8,7 +8,7 @@ import sky_nz from "../assets/textures/skybox/skybox0000_nz.png";
 import medieval_theme_01 from '../assets/music/medieval_theme_01.mp3';
 import medieval_theme_02 from '../assets/music/medieval_theme_02.mp3';
 
-import test_level_model from '../assets/models/test_level.gltf';
+import test_level_model from '../assets/models/test_level_2.gltf';
 
 export default class World {
     constructor(scene, assetManager) {
@@ -45,21 +45,20 @@ export default class World {
         // ground_material.roughness = 0.1;
 
         // Add and manipulate meshes in the scene
-        this.plane = BABYLON.MeshBuilder.CreatePlane("Ground", {size: 30}, this.scene);
-        this.plane.rotation.x = Math.PI / 2;
-        this.plane.material = ground_material;
-        this.plane.checkCollisions = true;
-        this.collision_meshes.push(this.plane);
-        this.plane.receiveShadows = true;
+        // this.plane = BABYLON.MeshBuilder.CreatePlane("Ground", {size: 30}, this.scene);
+        // this.plane.rotation.x = Math.PI / 2;
+        // this.plane.material = ground_material;
+        // this.plane.checkCollisions = true;
+        // this.collision_meshes.push(this.plane);
+        // this.plane.receiveShadows = true;
 
-       this.box = BABYLON.MeshBuilder.CreateBox("GroundBox", {size: 2}, this.scene);
-        this.box.position = new BABYLON.Vector3(0, 0.5, 5);
-        this.box.checkCollisions = true;
-        this.box.material = ground_material;
-        this.box.receiveShadows = true;
-        this.collision_meshes.push(this.box); 
+        // this.box = BABYLON.MeshBuilder.CreateBox("GroundBox", {size: 2}, this.scene);
+        // this.box.position = new BABYLON.Vector3(0, 0.5, 5);
+        // this.box.checkCollisions = true;
+        // this.box.material = ground_material;
+        // this.box.receiveShadows = true;
+        // this.collision_meshes.push(this.box); 
 
-        console.log('level_box', this.box)
 
 
         var levelLoadTask = assetManager.addMeshTask(
@@ -70,9 +69,11 @@ export default class World {
 
         levelLoadTask.onSuccess = () => {
             console.log(levelLoadTask);
+            console.log("levelTask: ", levelLoadTask);
             levelLoadTask.loadedMeshes.forEach((mesh) => {
                 this.collision_meshes.push(mesh);
-                console.log("Add Mesh to Collision: ", mesh.name);
+                console.log("Add Mesh to Collision: ", mesh);
+                mesh.checkCollisions = true;
                 // mesh.material.wireframe = true;
             });
         }
