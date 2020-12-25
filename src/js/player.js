@@ -330,6 +330,9 @@ class Player {
             this.falling = false;
         } else {
             this.characterBox.material.emissiveColor = new BABYLON.Color4(0, 1, 0, 1);
+            if (!this.falling) {
+                this.startJumpAni();
+            }
             this.falling = true;
         }
     }

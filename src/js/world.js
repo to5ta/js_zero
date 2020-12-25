@@ -10,6 +10,7 @@ import medieval_theme_01 from '../assets/music/medieval_theme_01.mp3';
 import medieval_theme_02 from '../assets/music/medieval_theme_02.mp3';
 
 import test_level_model from '../assets/models/test_level_2.gltf';
+import box_model from '../assets/models/box.gltf';
 
 export default class World {
     constructor(scene, assetManager) {
@@ -53,12 +54,12 @@ export default class World {
         // this.collision_meshes.push(this.plane);
         // this.plane.receiveShadows = true;
 
-        // this.box = BABYLON.MeshBuilder.CreateBox("GroundBox", {size: 2}, this.scene);
-        // this.box.position = new BABYLON.Vector3(0, 0.5, 5);
-        // this.box.checkCollisions = true;
-        // this.box.material = ground_material;
-        // this.box.receiveShadows = true;
-        // this.collision_meshes.push(this.box); 
+        this.box = BABYLON.MeshBuilder.CreateBox("GroundBox", {size: 2}, this.scene);
+        this.box.position = new BABYLON.Vector3(0, 1, 5);
+        this.box.checkCollisions = true;
+        this.box.material = ground_material;
+        this.box.receiveShadows = true;
+        this.collision_meshes.push(this.box); 
 
 
 
@@ -70,8 +71,30 @@ export default class World {
 
         levelLoadTask.onSuccess = () => {
             console.log(levelLoadTask);
+
+            // start ambient animations
+            levelLoadTask.loadedAnimationGroups.forEach(animation => {
+                animation.start(true);
+            });
             console.log("levelTask: ", levelLoadTask);
             levelLoadTask.loadedMeshes.forEach((mesh) => {
+                this.collision_meshes.push(mesh);
+                console.log("Add Mesh to Collision: ", mesh);
+                mesh.checkCollisions = true;
+                // mesh.material.wireframe = true;
+            });
+        }
+
+        var boxLoadTask = assetManager.addMeshTask(
+            "BoxModel", 
+            null, 
+            './', 
+            box_model);   
+
+            boxLoadTask.onSuccess = () => {
+            console.log(boxLoadTask);
+            console.log("boxTask: ", boxLoadTask);
+            boxLoadTask.loadedMeshes.forEach((mesh) => {
                 this.collision_meshes.push(mesh);
                 console.log("Add Mesh to Collision: ", mesh);
                 mesh.checkCollisions = true;
