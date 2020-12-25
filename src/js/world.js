@@ -4,6 +4,7 @@ import sky_py from "../assets/textures/skybox/skybox0000_py.png";
 import sky_ny from "../assets/textures/skybox/skybox0000_ny.png";
 import sky_pz from "../assets/textures/skybox/skybox0000_pz.png";
 import sky_nz from "../assets/textures/skybox/skybox0000_nz.png";
+import evnMap from "../assets/textures/skybox/kloppenheim_06_2k.png";
 
 import medieval_theme_01 from '../assets/music/medieval_theme_01.mp3';
 import medieval_theme_02 from '../assets/music/medieval_theme_02.mp3';
@@ -106,13 +107,14 @@ export default class World {
         //     });
         // } 
 
+        // self-made skybox, currently ugly
+        // var envTexture = new BABYLON.CubeTexture.CreateFromImages(
+        //     [sky_px, sky_py, sky_pz, sky_nx, sky_ny, sky_nz], 
+        //     this.scene, 
+        //     false);    
+        // this.scene.createDefaultSkybox(envTexture, false, 1000, 0, false);
 
-        var envTexture = new BABYLON.CubeTexture.CreateFromImages(
-            [sky_px, sky_py, sky_pz, sky_nx, sky_ny, sky_nz], 
-            this.scene, 
-            false);
-        
-        this.scene.createDefaultSkybox(envTexture, false, 1000, 0, false);
+        var photoDome = new BABYLON.PhotoDome("envMapDome", evnMap, {}, scene);
 
         this.music2 = new BABYLON.Sound("Music1", medieval_theme_01, scene, null, {
             loop: true,
