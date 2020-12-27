@@ -19,9 +19,9 @@ Technical notes and documentation
         * sound effects are lame
         * No Action, no fighting, no enemies, no items to collect
     * TODO:
-        * build extensible and beautiful (yards with gate and levers)
+        * build extensible and beautiful (yards with gate and levers) level
         * fix skybox
-        * fix controls (sprinting only forward, allowing to turn character without turning camera)
+        * [x] fix controls (sprinting only forward, allowing to turn character without turning camera)
         * animations: turning, strafing (left, right)
         * model plate boots
         * evalute if controls cant get rid of mouse input (just simple tombraider controls?)

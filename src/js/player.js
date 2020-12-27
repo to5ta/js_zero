@@ -6,6 +6,9 @@ import player_model from "../assets/models/wache02.gltf";
 import steps_sound from '../assets/sound/simple_steps.mp3';
 import sprint_sound from '../assets/sound/simple_sprint.mp3';
 
+import { KEYCODE } from "./key_codes";
+import { BabylonFileLoaderConfiguration } from "babylonjs";
+
 
 class Player {
     constructor(scene, canvas, world, assetManager) {
@@ -13,13 +16,11 @@ class Player {
         this.canvas = canvas;
         this.world = world;
 
-        
         // 3rd person camera for player ---------------------------------------
         // this.camera = new BABYLON.FollowCamera(
         //     "FollowCamera", 
         //     new BABYLON.Vector3(0,0,0), 
         //     this.scene);
-
         // this.camera.radius = 5;
         // this.camera.heightOffset = 1.7;
         // this.camera.rotationOffset = 0;
@@ -30,15 +31,18 @@ class Player {
         // // this.camera.upperRotationOffsetLimit = 180;
         // this.camera.rotation = new BABYLON.Vector3(0, 20, 0);
         // this.camera.position = this.world.camera_start_position;
-        
         // // this.camera.attachControl(this.canvas, true);
         
+
+
+        // we can tweak that value later for narrow parts of the map / indoor scenes
+        this.distanceToCharacter = 4.5;
         
         this.camera = new BABYLON.ArcRotateCamera(
             "PlayerCamera",
             Math.PI/2,
             Math.PI/2,
-            4.5,
+            this.distanceToCharacter,
             null,
             this.scene,
             true);
@@ -47,17 +51,17 @@ class Player {
         this.camera.inputs.remove(this.camera.inputs.attached.keyboard);
         this.camera.inputs.remove(this.camera.inputs.attached.mousewheel);
 
-        this.camera.inputs.attached.pointers.angularSensibilityX = 1000;
-        this.camera.inputs.attached.pointers.angularSensibilityY = 1000;
+        this.camera.inputs.attached.pointers.angularSensibilityX = 1500;
+        this.camera.inputs.attached.pointers.angularSensibilityY = 1500;
 
-        this.camera.upperBetaLimit = 1.9; // 1.5;
-        this.camera.lowerBetaLimit = 0;
-        // this.camera.checkCollisions = true;
-        // console.log("attached inputs", this.camera.inputs.attached);
+        this.camera.upperBetaLimit = 1.7;       // ca. horizont
+        this.camera.lowerBetaLimit = 0;         // zenit
 
+        // works but not completely satisfying 
+        this.camera.checkCollisions = true;
+        this.camera.collisionRadius = new BABYLON.Vector3(0.2, 0.2, 0.2);
 
         this.scene.activeCamera = this.camera;
-        
         
         // physical representation --------------------------------------------
         this.characterBox = BABYLON.MeshBuilder.CreateBox(
@@ -80,12 +84,14 @@ class Player {
             this.characterWidth/2, 
             this.characterHeight/2, 
             this.characterDepth/2);
-        this.characterBox.material = new BABYLON.StandardMaterial();
+            this.characterBox.material = new BABYLON.StandardMaterial();
+            this.characterBox.material.wireframe = true;
+            
+        this.characterBox.visibility = true;
         this.camera.lockedTarget = this.characterBox;        
         
         this.characterBox.onCollideObservable.add((others) => {
             this.falling = false;
-            // console.log("Ground hit!");
         });        
     
         // player internal movement state -------------------------------------
@@ -95,7 +101,7 @@ class Player {
         this.moveVel = 0;
         this.moveSpeedMax = 5;  
         this.sprintSpeedMax = 12;
-        this.rotateSpeedMax = 2;
+        this.turningRate = 0.05;
         this.moveAcc = 0.1;
         this.moveDamp = 0.1;
         this.strafe = true; // always strafe
@@ -143,7 +149,6 @@ class Player {
             this.sprintAni = this.walkAni.clone();
             this.sprintAni.stop();
             
-            this.characterBox.visibility = false;
             this.startIdleAni();
         }
 
@@ -193,56 +198,54 @@ class Player {
     handleInput(keyEvent) {
         const keyPressed = keyEvent.type == "keydown";
 
-        if (keyEvent.keyCode == 37 || keyEvent.keyCode == 65) {
+        if (keyEvent.keyCode == KEYCODE.LEFT || keyEvent.keyCode == KEYCODE.A) {
             if (keyPressed) {
                 if (this.strafe) {
-                    this.inputMoveVec.x = 1;
+                    this.inputMoveVec.x = 0.5;
                 } else {
-                    this.inputRotateY = -1;
+                    this.inputRotateY = this.turningRate;
                 }
             } else {
                 this.inputRotateY = 0;
                 this.inputMoveVec.x = 0;
             }
         }  
-        if (keyEvent.keyCode == 39 || keyEvent.keyCode == 68) {
+        if (keyEvent.keyCode == KEYCODE.RIGHT || keyEvent.keyCode == KEYCODE.D) {
             if (keyPressed) {
                 if (this.strafe) {
-                    this.inputMoveVec.x = -1;
+                    this.inputMoveVec.x = -0.5;
                 } else {
-                    this.inputRotateY = 1;
+                    this.inputRotateY = -this.turningRate;
                 }
             } else {
                 this.inputRotateY = 0;
                 this.inputMoveVec.x = 0;
             }
         }  
-        if (keyEvent.keyCode == 38 || keyEvent.keyCode == 87) {
+        if (keyEvent.keyCode == KEYCODE.UP || keyEvent.keyCode == KEYCODE.W) {
             this.inputMoveVec.z = keyPressed ? -1 : 0;
         }  
-        if (keyEvent.keyCode == 40 || keyEvent.keyCode == 83) {
+        if (keyEvent.keyCode == KEYCODE.DOWN || keyEvent.keyCode == KEYCODE.S) {
             this.inputMoveVec.z = keyPressed ? 1 : 0;
         }  
-        if (keyEvent.keyCode == 32 && !this.falling && keyPressed){
+        if (keyEvent.keyCode == KEYCODE.SPACEBAR && !this.falling && keyPressed){
             this.falling = true;
-            this.fallingVel = this.jumpSpeed * 80 / this.getTotalWeight();
             if (this.animation && !this.jumpAni.isPlaying) {
                 this.startJumpAni();
+                this.fallingVel = this.jumpSpeed * 80 / this.getTotalWeight();
             } 
         }
-        // if (keyEvent.keyCode == 17) {
+
+        // if (keyEvent.keyCode == KEYCODE.CTRL) {
         //     this.strafe = keyPressed ? true : false;
         //     if (keyPressed) {
-        //         this.inputMoveVec.x = 0;
+        //         // this.inputMoveVec.x = 0;
         //     }
         // }      
-        if (keyEvent.keyCode == 16) {
+
+        if (keyEvent.keyCode == KEYCODE.SHIFT) {
             this.sprint = keyPressed ? true : false;
-        }      
-    
-        if (this.inputMoveVec.length > 0.9) {
-            this.inputMoveVec.normalize();
-        }  
+        }          
     }
     
 
@@ -250,30 +253,13 @@ class Player {
     update(dTimeMs) {
         const dTimeSec = dTimeMs / 1000;
 
-        // TODO
-        // detailed movement model using accelerations
-        // console.log("Contact: ", this.contactRay.intersectsMesh(this.world.plane, false));
+        var sprintValid = this.sprint && this.inputMoveVec.z == -1 && this.inputMoveVec.x == 0;
 
-        // this.moveVel += this.inputVec.scale(dTimeSec);
-
-        // if (this.moveVel > this.moveSpeedMax) {
-        //     this.moveVel.normalize().scale(this.moveSpeedMax);
+        /// if we enable character turning by keys one day...
+        // if (this.inputRotateY != 0) {
+        //     this.characterBox.rotate( new BABYLON.Vector3(0,1,0), this.turningRate );
         // }
 
-        // if(this.moveAcc > 0)
-
-        // const localInput = new BABYLON.Vector3(
-        //     Math.sin(this.box.rotation.y),
-        //     0,
-        //     Math.cos(this.box.rotation.y)
-        // );
-        
-        if(this.mesh) {
-            this.mesh.rotation = this.characterBox.rotation;
-            this.mesh.position.x = this.characterBox.position.x;
-            this.mesh.position.z = this.characterBox.position.z;
-            this.mesh.position.y = this.characterBox.position.y - 0.9;
-        }
     
         const rotation_matrix = new BABYLON.Matrix.RotationYawPitchRoll(
             this.characterBox.rotation.y,
@@ -291,13 +277,10 @@ class Player {
             this.fallingVel,
             0);
         
-        if(this.inputMoveVec.length() > 0.1){
-            this.mesh.rotation.y = Math.PI/2 -  this.camera.alpha; // copy rotation from camera orientation
-        }
 
         if (this.animation) {
             if (!this.falling && this.inputMoveVec.length() > 0.1) {
-                if (this.sprint) {
+                if (sprintValid) {
                     if (!this.sprintAni.isPlaying) {
                         this.startSprintAni();
                     }
@@ -314,7 +297,8 @@ class Player {
             }
         }
 
-        let speed = this.sprint ? this.sprintSpeedMax : this.moveSpeedMax;
+        let speed = sprintValid ? this.sprintSpeedMax : this.moveSpeedMax;
+        
         this.characterBox.moveWithCollisions(
             this.fallVec.scale(dTimeSec).add(
                 BABYLON.Vector3.TransformCoordinates(
@@ -334,6 +318,28 @@ class Player {
                 this.startJumpAni();
             }
             this.falling = true;
+        }
+
+        // update the character mesh
+        if(this.mesh) {
+            this.mesh.rotation = this.characterBox.rotation;
+            this.mesh.position.x = this.characterBox.position.x;
+            this.mesh.position.z = this.characterBox.position.z;
+            this.mesh.position.y = this.characterBox.position.y - this.characterHeight/2;
+        }
+        if(this.inputMoveVec.length() > 0.1){
+            this.mesh.rotation.y = Math.PI/2 - this.camera.alpha; // copy rotation from camera orientation
+        }
+        
+
+        console.log( "cam radius", this.camera.radius );
+
+        if (this.camera.radius > 4.5) {
+            this.camera.radius -= 0.1;
+        }
+
+        if (this.camera.radius < 4.5) {
+            this.camera.radius += 0.1;
         }
     }
 
