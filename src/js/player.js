@@ -7,7 +7,6 @@ import steps_sound from '../assets/sound/simple_steps.mp3';
 import sprint_sound from '../assets/sound/simple_sprint.mp3';
 
 import { KEYCODE } from "./key_codes";
-import { BabylonFileLoaderConfiguration } from "babylonjs";
 
 
 class Player {
@@ -58,8 +57,8 @@ class Player {
         this.camera.lowerBetaLimit = 0;         // zenit
 
         // works but not completely satisfying 
-        this.camera.checkCollisions = true;
-        this.camera.collisionRadius = new BABYLON.Vector3(0.2, 0.2, 0.2);
+        // this.camera.checkCollisions = true;
+        // this.camera.collisionRadius = new BABYLON.Vector3(0.2, 0.2, 0.2);
 
         this.scene.activeCamera = this.camera;
         
