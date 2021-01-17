@@ -4,10 +4,7 @@ import { DebugView } from "./debug_view";
 
 import * as BABYLON from "babylonjs";
 import 'babylonjs-loaders';
-
-// window.CANNON = require('cannon');
-// window.Ammo = require('ammo.js');
-
+import { KEYCODE } from './key_codes';
 
 class Game {
     constructor(engine, canvas) { 
@@ -15,7 +12,8 @@ class Game {
         this.canvas = canvas;
  
         // game state ---------------------------------------------------------
-        this.debug_mode = false;
+        this.debug_fly_mode = false;
+        this.showDebugInfo = false;
         this.paused = true;
         
         // Create the scene ---------------------------------------------------
@@ -26,20 +24,14 @@ class Game {
         BABYLON.SceneLoader.OnPluginActivatedObservable.add(function (loader) {
             if (loader.name === "gltf") {
                 // do something with the loader
-                console.log("GLTF_Loader:", loader);
+                // console.log("GLTF_Loader:", loader);
                 loader.animationStartMode = 0;
                 // loader.animationStartMode = BABYLON.GLTFLoaderAnimationStartMode.NONE;
                 // loader.<option2> = <...>
             }
         });
     
-
         this.assetManager = new BABYLON.AssetsManager(this.scene);
-
-        // TODO why does ammo.js not work / fs not found error
-        // var physicsPlugin = new BABYLON.AmmoJSPlugin();
-        // this.scene.enablePhysics(gravityVector, physicsPlugin);
-        
 
         // create the level to play in ----------------------------------------
         this.world = new World(this.scene, this.assetManager);
@@ -66,10 +58,18 @@ class Game {
     // input forwarding -------------------------------------------------------
     // TODO: if game is not paused....
     handleInput(keyEvent) {
-        if(keyEvent.keyCode == 67 && keyEvent.type == "keydown") { 
+
+        if(keyEvent.keyCode == KEYCODE.F1 && keyEvent.type == "keydown") {
+            this.showDebugInfo= !this.showDebugInfo;
+            this.player.setDebug(this.showDebugInfo);
+            this.world.setDebug(this.showDebugInfo);
+        }
+
+
+        if(keyEvent.keyCode == KEYCODE.C && keyEvent.type == "keydown") { 
             console.log("Event", keyEvent);
-            this.debug_mode = !this.debug_mode;
-            if (!this.debug_mode) {
+            this.debug_fly_mode = !this.debug_fly_mode;
+            if (!this.debug_fly_mode) {
                 this.debug_view.deactivate();
                 this.player.activate();
             } else {
@@ -77,7 +77,7 @@ class Game {
                 this.player.deactivate();
             }
         }
-        if(!this.debug_mode) {
+        if(!this.debug_fly_mode) {
             this.player.handleInput(keyEvent);
         } 
     }

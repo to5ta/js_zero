@@ -76,31 +76,31 @@ export default class World {
             levelLoadTask.loadedAnimationGroups.forEach(animation => {
                 animation.start(true);
             });
-            console.log("levelTask: ", levelLoadTask);
+            // console.log("levelTask: ", levelLoadTask);
             levelLoadTask.loadedMeshes.forEach((mesh) => {
                 this.collision_meshes.push(mesh);
-                console.log("Add Mesh to Collision: ", mesh);
+                // console.log("Add Mesh to Collision: ", mesh);
                 mesh.checkCollisions = true;
                 // mesh.material.wireframe = true;
             });
         }
 
-        var boxLoadTask = assetManager.addMeshTask(
-            "BoxModel", 
-            null, 
-            './', 
-            box_model);   
+        // var boxLoadTask = assetManager.addMeshTask(
+        //     "BoxModel", 
+        //     null, 
+        //     './', 
+        //     box_model);   
 
-            boxLoadTask.onSuccess = () => {
-            console.log(boxLoadTask);
-            console.log("boxTask: ", boxLoadTask);
-            boxLoadTask.loadedMeshes.forEach((mesh) => {
-                this.collision_meshes.push(mesh);
-                console.log("Add Mesh to Collision: ", mesh);
-                mesh.checkCollisions = true;
-                // mesh.material.wireframe = true;
-            });
-        }
+        //     boxLoadTask.onSuccess = () => {
+        //     // console.log(boxLoadTask);
+        //     // console.log("boxTask: ", boxLoadTask);
+        //     boxLoadTask.loadedMeshes.forEach((mesh) => {
+        //         this.collision_meshes.push(mesh);
+        //         // console.log("Add Mesh to Collision: ", mesh);
+        //         mesh.checkCollisions = true;
+        //         // mesh.material.wireframe = true;
+        //     });
+        // }
 
         //     levelLoadTask.loadedMeshes.forEach((mesh) => {
 
@@ -151,6 +151,9 @@ export default class World {
     
         this.music2.setVolume(0.05);      
         this.music.setVolume(0.05);      
+    }
+
+    setDebug(debug) {
 
     }
 }

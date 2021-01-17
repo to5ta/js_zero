@@ -1,0 +1,41 @@
+function Vec3toString(vec3, fixed = 2) {
+    return "{"+ vec3.x.toFixed(fixed) +
+           " "+ vec3.y.toFixed(fixed) + 
+           " "+ vec3.z.toFixed(fixed) + "}";
+}
+
+function NormaltoSlopeXZ(vec3) {
+    var vecXY = new BABYLON.Vector3(vec3.x, vec3.y, 0); vecXY.normalize();
+    var vecYZ = new BABYLON.Vector3(0, vec3.y, vec3.z); vecYZ.normalize();
+    var pitch = Math.acos(
+            BABYLON.Vector3.Dot(vecYZ, new BABYLON.Vector3.Up()));
+    var roll = Math.acos(
+            BABYLON.Vector3.Dot(vecXY, new BABYLON.Vector3.Up()));
+    return [
+        vec3.z<0 ? -pitch : pitch,
+        vec3.x<0 ? -roll : roll
+    ];
+}
+
+function toDeg(rad) {
+    return rad / Math.PI * 180;
+}
+
+function toRad(deg) {
+    return deg / 180 * Math.PI;
+}
+
+function InjectVec3toLine(vec3, line) {
+    // console.log("vec3", vec3);
+    // console.log("line", line);
+    line.updateVerticesData(BABYLON.VertexBuffer.PositionKind, [0,0,0,vec3.x, vec3.z, vec3.z]);
+}
+
+
+export {
+    Vec3toString,
+    NormaltoSlopeXZ,
+    toDeg,
+    toRad,
+    InjectVec3toLine
+};
