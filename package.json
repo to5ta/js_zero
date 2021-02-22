@@ -2,7 +2,7 @@
   "name": "js_zero",
   "version": "1.0.0",
   "description": "A simple JavaScript Web-App to learn stuff",
-  "main": "index.js",
+  "main": "index.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "webpack-dev-server --mode development",
@@ -20,10 +20,11 @@
     "html-webpack-plugin": "^3.2.0",
     "stats": "^1.0.0",
     "style-loader": "^1.0.1",
+    "ts-loader": "^8.0.17",
+    "typescript": "^4.1.5",
     "webpack": "^4.41.3",
     "webpack-cli": "^3.3.10",
-    "webpack-dev-server": "^3.11.0",
-    "node-forge": ">=0.10.0"
+    "webpack-dev-server": "^3.11.0"
   },
   "dependencies": {
     "babylonjs": "^4.2.0",

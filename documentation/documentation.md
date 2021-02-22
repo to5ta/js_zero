@@ -4,6 +4,21 @@ Technical notes and documentation
 
 # Game Design
 
+
+## Vision: 
+Prototype for common 3rd-person-game. Closed Maps, rather riddles than quests, little npcs, a little melee and bow-shooting, a little, linear, closed story.
+
+## Story Proposal
+
+**Start by escaping own execution, breaking out from a prison, gather stuff, escape an evil castle**
+
+by 
+* heavy melee
+* later: stealthy shooting
+* later: clever planning and riddle solving
+
+
+
 ## Overall-Target
 
 Show some interesting game mechanics and capabilities: 
@@ -15,6 +30,7 @@ Show some interesting game mechanics and capabilities:
 * Moving Elements such as platforms, pitfalls, lifts
 * Melee
 * Ranged 
+
 
 
 
