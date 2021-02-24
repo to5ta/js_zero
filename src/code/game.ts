@@ -1,9 +1,12 @@
+import * as BABYLON from "@babylonjs/core";
+import "@babylonjs/loaders";
+
 import { Player } from './player';
 import GameWorld from './world';
 import { DebugView } from "./debug_view";
 
-import * as BABYLON from "babylonjs";
-import 'babylonjs-loaders';
+
+// import 'babylonjs-loaders';
 import { KEYCODE } from './key_codes';
 
 class Game {
@@ -35,7 +38,7 @@ class Game {
         BABYLON.SceneLoader.OnPluginActivatedObservable.add(function (loader) {
             if (loader.name === "gltf") {
                 // do something with the loader
-                // console.log("GLTF_Loader:", loader);
+                console.log("GLTF_Loader:", loader);
                 
                 // does not work ???
                 // loader.animationStartMode = 0;

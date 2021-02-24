@@ -3,7 +3,7 @@ import { Environment } from "./environment";
 import { Game } from "./game";
 import '../css/style.css'
 
-import * as BABYLON from "babylonjs";
+import * as BABYLON from "@babylonjs/core";
 
 import Stats from "stats-js";
 

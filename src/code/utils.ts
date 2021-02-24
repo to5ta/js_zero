@@ -1,4 +1,5 @@
-import * as BABYLON from "babylonjs";
+// import * as BABYLON from "babylonjs";
+import * as BABYLON from "@babylonjs/core";
 
 function Vec3toString(vec3: BABYLON.Vector3, fixed = 2) {
     return "{"+ vec3.x.toFixed(fixed) +

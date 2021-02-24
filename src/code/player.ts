@@ -1,6 +1,12 @@
-import * as BABYLON from "babylonjs";
-import * as BABYLONGUI from "babylonjs-gui";
-import 'babylonjs-loaders';
+// import * as BABYLON from "babylonjs";
+// import * as BABYLON from "babylonjs-gui";
+// import 'babylonjs-loaders';
+import * as BABYLON from "@babylonjs/core";
+import * as BABYLONGUI from "@babylonjs/gui";
+import "@babylonjs/loaders";
+
+// import * as BABYLONLOADERS from "@babylonjs/loaders";
+
 
 import steps_sound from '../assets/sound/simple_steps.mp3';
 import sprint_sound from '../assets/sound/simple_sprint.mp3';
@@ -10,7 +16,7 @@ import { KEYCODE } from "./key_codes";
 
 import * as utils from "./utils";
 
-import GameWorld from "./world";
+import GameWorld from './world';
 import * as Utils from "./utils";
 
 class Player {
@@ -434,24 +440,26 @@ class Player {
 
         // collision detection for player ------------------------------------------------------------------------------------
         var externalPhysicalImpact = false;
-        var pitch, roll; 
+        var pitch = 0;
+        var roll = 0;
         var dist;
 
-        let meshes = this.world.collision_meshes as BABYLON.DeepImmutableArray<BABYLON.Mesh>; 
+        let meshes = this.world.collision_meshes;
         var rayCastResults : BABYLON.PickingInfo[] = Array();
         
 
-        this.contactRay.intersectsMesh(meshes[0]);
+        this.contactRay.intersectsMeshes(
+            meshes as BABYLON.DeepImmutableObject<BABYLON.AbstractMesh>[], 
+            false,
+            rayCastResults );
 
-
-        for (let index = 0; index < meshes.length; index++) {
-            const pick = this.contactRay.intersectsMesh(meshes[index], false);
-            if (pick.hit) {
-                rayCastResults.push(pick);
-                break;
-            }
-            
-        }
+        // for (let index = 0; index < meshes.length; index++) {
+        //     const pick = this.contactRay.intersectsMesh(meshes[index] as BABYLON.DeepImmutableObject<BABYLON.AbstractMesh>, false);
+        //     if (pick.hit) {
+        //         rayCastResults.push(pick);
+        //         break;
+        //     }
+        // }
 
         // const pick = this.contactRay.intersectsMeshes(
         //     meshes, //  as BABYLON.DeepImmutableArray<BABYLON.AbstracMesh>[], 
@@ -475,16 +483,19 @@ class Player {
 
         if (rayCastToGroundHit) {
             dist = rayCastResults[0].distance;
-            var normal = rayCastResults[0].getNormal(true) ?? BABYLON.Vector3.Zero();
-            this.normal = normal;
+            var normal = rayCastResults[0].getNormal(true);
+            if(normal){
+                this.normal = normal;
+            }
             utils.InjectVec3toLine(this.normal, this.charNormal);
             var slope = 
                 Math.acos(BABYLON.Vector3.Dot(
                     this.normal, BABYLON.Vector3.Up()));
-            
-            [pitch, roll] = utils.NormaltoSlopeXZ(normal);
-            this.charNormal.rotationQuaternion = BABYLON.Quaternion.RotationYawPitchRoll(-this.character.rotation.y, pitch, -roll);
+            if(normal){
+                [pitch, roll] = utils.NormaltoSlopeXZ(normal);
+            }
 
+            this.charNormal.rotationQuaternion = BABYLON.Quaternion.RotationYawPitchRoll(-this.character.rotation.y, pitch, -roll);
 
             // we could also use slope here or other surface attributes such as "marked-as-sticky"
             if(dist - 0.05 <= this.characterHeight/2) {
@@ -511,8 +522,6 @@ class Player {
             this.falling = true;
             this.velocity.y = this.jumpSpeed;
         }
-
-
 
 
         // copy rotation from camera orientation if camera was turned and player is about to be moved ---------------
@@ -606,35 +615,36 @@ class Player {
         }
 
         // gui update only ----------------------------------------------------------------------------------------
-        this.guiText01.text = "";
-        var elapsedTime = (new Date().getTime() - this.startTime.getTime());
-        this.guiText01.text = "Elapsed Time          (ms): " + (elapsedTime).toFixed(2)+"\n";
-        this.guiText01.text += "Frame         (ms) / (FPS): " + dTimeMs+" / "+ (1000/dTimeMs).toFixed(2) + "\n";
 
-        this.guiText01.text += "Physics' Velocity    (m/s): " + Utils.Vec3toString(velocityPhysics) + "\n";
-        this.guiText01.text += "Vel.Input            (m/s): "+ Utils.Vec3toString(velocityIntended, 2) + "\n";
-        this.guiText01.text += "Vel.Combined         (m/s): "+ Utils.Vec3toString(moveCombined, 2) + "\n";
-        this.guiText01.text += "Position               (m): "+ Utils.Vec3toString(this.character.position) + "\n";
-        this.guiText01.text += "Anzimuth             (deg): "+ ((this.character.rotation.y/Math.PI*180)%360).toFixed(2) +"°\n";
-        this.guiText01.text += "Falling                   : "+ this.falling + "\n";
-        this.guiText01.text += "Climbing                  : "+ this.climbing + "\n";
-        this.guiText01.text += "Sprinting                 : "+ this.sprinting + "\n";
-        this.guiText01.text += "Jump                      : "+ this.jump + "\n";
+        // this.guiText01.text = "";
+        // var elapsedTime = (new Date().getTime() - this.startTime.getTime());
+        // this.guiText01.text = "Elapsed Time          (ms): " + (elapsedTime).toFixed(2)+"\n";
+        // this.guiText01.text += "Frame         (ms) / (FPS): " + dTimeMs+" / "+ (1000/dTimeMs).toFixed(2) + "\n";
+
+        // this.guiText01.text += "Physics' Velocity    (m/s): " + Utils.Vec3toString(velocityPhysics) + "\n";
+        // this.guiText01.text += "Vel.Input            (m/s): "+ Utils.Vec3toString(velocityIntended, 2) + "\n";
+        // this.guiText01.text += "Vel.Combined         (m/s): "+ Utils.Vec3toString(moveCombined, 2) + "\n";
+        // this.guiText01.text += "Position               (m): "+ Utils.Vec3toString(this.character.position) + "\n";
+        // this.guiText01.text += "Anzimuth             (deg): "+ ((this.character.rotation.y/Math.PI*180)%360).toFixed(2) +"°\n";
+        // this.guiText01.text += "Falling                   : "+ this.falling + "\n";
+        // this.guiText01.text += "Climbing                  : "+ this.climbing + "\n";
+        // this.guiText01.text += "Sprinting                 : "+ this.sprinting + "\n";
+        // this.guiText01.text += "Jump                      : "+ this.jump + "\n";
         
-        if(rayCastToGroundHit) {
-            this.guiText01.text += "Raycast Results           : " + rayCastResults.length + " \n";
+        // if(rayCastToGroundHit) {
+        //     this.guiText01.text += "Raycast Results           : " + rayCastResults.length + " \n";
 
-            let rcr = rayCastResults[0];
-            let pMesh = rcr!.pickedMesh;
-            if(pMesh!=null){
-                this.guiText01.text += "Standing on               : "+ pMesh.name + "\n";
-            }
-            this.guiText01.text += "Normal                    : "+ Utils.Vec3toString(this.normal) + "\n";
-            this.guiText01.text += "Slope/-x /-y         (deg): "+ Utils.toDeg(this.slope).toFixed(1) + "°/ "+
-                                                      Utils.toDeg(pitch!=undefined? pitch : 0).toFixed(1) + "°/ "+ 
-                                                      Utils.toDeg(roll!=undefined? roll: 0).toFixed(1) + "°\n";
-            this.guiText01.text += "Distance               (m): "+ (dist!=undefined ? dist : 0).toFixed(1) + "\n";
-        }
+        //     let rcr = rayCastResults[0];
+        //     let pMesh = rcr!.pickedMesh;
+        //     if(pMesh!=null){
+        //         this.guiText01.text += "Standing on               : "+ pMesh.name + "\n";
+        //     }
+        //     this.guiText01.text += "Normal                    : "+ Utils.Vec3toString(this.normal) + "\n";
+        //     this.guiText01.text += "Slope/-x /-y         (deg): "+ Utils.toDeg(this.slope).toFixed(1) + "°/ "+
+        //                                               Utils.toDeg(pitch!=undefined? pitch : 0).toFixed(1) + "°/ "+ 
+        //                                               Utils.toDeg(roll!=undefined? roll: 0).toFixed(1) + "°\n";
+            // this.guiText01.text += "Distance               (m): "+ (dist!=undefined ? dist : 0).toFixed(1) + "\n";
+        // }
 
         // guiText01.text += "   lastAction     : "+ platform.lastAction.getTime() + "\n";
 
