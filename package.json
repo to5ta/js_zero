@@ -27,10 +27,12 @@
     "webpack-dev-server": "^3.11.0"
   },
   "dependencies": {
+    "@types/stats": "^0.16.30",
     "babylonjs": "^4.2.0",
     "babylonjs-gui": "^4.2.0",
     "babylonjs-loaders": "^4.2.0",
     "jquery": "^3.4.1",
+    "stats-js": "^1.0.1",
     "stats.js": "^0.17.0"
   }
 }

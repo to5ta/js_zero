@@ -222,6 +222,7 @@ class Player {
         this.guiText01.verticalAlignment = BABYLONGUI.Control.VERTICAL_ALIGNMENT_TOP;
         this.guiText01.fontFamily = "Courier New";
         this.guiText01.fontSize = "15pt"; 
+        this.guiText01.paddingTopInPixels = 60;
 
         var slider = new BABYLONGUI.Slider("Hello");
         slider.horizontalAlignment = BABYLONGUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
@@ -607,9 +608,10 @@ class Player {
         // gui update only ----------------------------------------------------------------------------------------
         this.guiText01.text = "";
         var elapsedTime = (new Date().getTime() - this.startTime.getTime());
-        this.guiText01.text = "Elapsed Time  (ms): " + (elapsedTime).toFixed(2)+"\n";
+        this.guiText01.text = "Elapsed Time          (ms): " + (elapsedTime).toFixed(2)+"\n";
+        this.guiText01.text += "Frame         (ms) / (FPS): " + dTimeMs+" / "+ (1000/dTimeMs).toFixed(2) + "\n";
 
-        this.guiText01.text += "Physics              (m/s): " + Utils.Vec3toString(velocityPhysics) + "\n";
+        this.guiText01.text += "Physics' Velocity    (m/s): " + Utils.Vec3toString(velocityPhysics) + "\n";
         this.guiText01.text += "Vel.Input            (m/s): "+ Utils.Vec3toString(velocityIntended, 2) + "\n";
         this.guiText01.text += "Vel.Combined         (m/s): "+ Utils.Vec3toString(moveCombined, 2) + "\n";
         this.guiText01.text += "Position               (m): "+ Utils.Vec3toString(this.character.position) + "\n";
