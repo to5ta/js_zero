@@ -11,6 +11,7 @@ import { KEYCODE } from "./key_codes";
 import * as utils from "./utils";
 
 import GameWorld from "./world";
+import * as Utils from "./utils";
 
 class Player {
     scene: BABYLON.Scene;
@@ -63,12 +64,17 @@ class Player {
     turningRate: any;
     fallingVel: number = 0;
 
+    startTime: Date;
+
     constructor(scene: BABYLON.Scene, canvas: HTMLCanvasElement, world: GameWorld, assetManager: BABYLON.AssetsManager ) {
         this.scene = scene;
         this.canvas = canvas;
         this.world = world;
 
         this.debug_mode = false;
+
+        this.startTime = new Date();
+
 
 
         // 3rd person camera for player ---------------------------------------
@@ -269,6 +275,7 @@ class Player {
             console.log("loaded player content ", assetTask);
             this.mesh = assetTask.loadedMeshes[0] as BABYLON.Mesh;
             this.animation = assetTask.loadedAnimationGroups[0];
+            console.log(assetTask.loadedAnimationGroups);
             
             world.shadowGenerator.addShadowCaster(this.mesh);
       
@@ -429,16 +436,21 @@ class Player {
         var pitch, roll; 
         var dist;
 
-        let meshes = this.world.collision_meshes as BABYLON.DeepImmutableArray<BABYLON.Mesh>; //Array<BABYLON.DeepImmutableArray<BABYLON.AbstractMesh>>; 
-        var rayCastResults : BABYLON.PickingInfo[] = [];
+        let meshes = this.world.collision_meshes as BABYLON.DeepImmutableArray<BABYLON.Mesh>; 
+        var rayCastResults : BABYLON.PickingInfo[] = Array();
         
 
         this.contactRay.intersectsMesh(meshes[0]);
 
-        meshes.forEach(mesh => {
-            const pick = this.contactRay.intersectsMesh(mesh, false);
-            pick ?? rayCastResults.push(pick);
-        });
+
+        for (let index = 0; index < meshes.length; index++) {
+            const pick = this.contactRay.intersectsMesh(meshes[index], false);
+            if (pick.hit) {
+                rayCastResults.push(pick);
+                break;
+            }
+            
+        }
 
         // const pick = this.contactRay.intersectsMeshes(
         //     meshes, //  as BABYLON.DeepImmutableArray<BABYLON.AbstracMesh>[], 
@@ -591,6 +603,39 @@ class Player {
             //         results[0].getNormal(true))
             // };
         }
+
+        // gui update only ----------------------------------------------------------------------------------------
+        this.guiText01.text = "";
+        var elapsedTime = (new Date().getTime() - this.startTime.getTime());
+        this.guiText01.text = "Elapsed Time  (ms): " + (elapsedTime).toFixed(2)+"\n";
+
+        this.guiText01.text += "Physics              (m/s): " + Utils.Vec3toString(velocityPhysics) + "\n";
+        this.guiText01.text += "Vel.Input            (m/s): "+ Utils.Vec3toString(velocityIntended, 2) + "\n";
+        this.guiText01.text += "Vel.Combined         (m/s): "+ Utils.Vec3toString(moveCombined, 2) + "\n";
+        this.guiText01.text += "Position               (m): "+ Utils.Vec3toString(this.character.position) + "\n";
+        this.guiText01.text += "Anzimuth             (deg): "+ ((this.character.rotation.y/Math.PI*180)%360).toFixed(2) +"°\n";
+        this.guiText01.text += "Falling                   : "+ this.falling + "\n";
+        this.guiText01.text += "Climbing                  : "+ this.climbing + "\n";
+        this.guiText01.text += "Sprinting                 : "+ this.sprinting + "\n";
+        this.guiText01.text += "Jump                      : "+ this.jump + "\n";
+        
+        if(rayCastToGroundHit) {
+            this.guiText01.text += "Raycast Results           : " + rayCastResults.length + " \n";
+
+            let rcr = rayCastResults[0];
+            let pMesh = rcr!.pickedMesh;
+            if(pMesh!=null){
+                this.guiText01.text += "Standing on               : "+ pMesh.name + "\n";
+            }
+            this.guiText01.text += "Normal                    : "+ Utils.Vec3toString(this.normal) + "\n";
+            this.guiText01.text += "Slope/-x /-y         (deg): "+ Utils.toDeg(this.slope).toFixed(1) + "°/ "+
+                                                      Utils.toDeg(pitch!=undefined? pitch : 0).toFixed(1) + "°/ "+ 
+                                                      Utils.toDeg(roll!=undefined? roll: 0).toFixed(1) + "°\n";
+            this.guiText01.text += "Distance               (m): "+ (dist!=undefined ? dist : 0).toFixed(1) + "\n";
+        }
+
+        // guiText01.text += "   lastAction     : "+ platform.lastAction.getTime() + "\n";
+
     }
 
 

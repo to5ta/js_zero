@@ -158,7 +158,7 @@ export default class GameWorld {
             autoplay: false
         });
           
-        this.music = new BABYLON.Sound("Music2", medieval_theme_01, scene, null, {
+        this.music = new BABYLON.Sound("Music2", medieval_theme_02, scene, null, {
             loop: true,
             autoplay: false
         });
