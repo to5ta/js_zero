@@ -1,14 +1,15 @@
-var envMap : string =  "../assets/textures/skybox/kloppenheim_06_2k.png";
-var sky_px :string =  "../assets/textures/skybox/skybox0000_px.png";
-var sky_nx :string =  "../assets/textures/skybox/skybox0000_nx.png";
-var sky_py :string =  "../assets/textures/skybox/skybox0000_py.png";
-var sky_ny :string =  "../assets/textures/skybox/skybox0000_ny.png";
-var sky_pz :string =  "../assets/textures/skybox/skybox0000_pz.png";
-var sky_nz :string =  "../assets/textures/skybox/skybox0000_nz.png";
-var medieval_theme_01 :string =  '../assets/music/medieval_theme_01.mp3';
-var medieval_theme_02 :string =  '../assets/music/medieval_theme_02.mp3';
-var test_level_model :string =  '../assets/models/test_level_2.gltf';
-var box_model :string =  '../assets/models/box.gltf';
+import envMap from  "../assets/textures/skybox/kloppenheim_06_2k.png";
+
+import sky_px from  "../assets/textures/skybox/skybox0000_px.png";
+import sky_nx from  "../assets/textures/skybox/skybox0000_nx.png";
+import sky_py from  "../assets/textures/skybox/skybox0000_py.png";
+import sky_ny from  "../assets/textures/skybox/skybox0000_ny.png";
+import sky_pz from  "../assets/textures/skybox/skybox0000_pz.png";
+import sky_nz from  "../assets/textures/skybox/skybox0000_nz.png";
+import medieval_theme_01 from  '../assets/music/medieval_theme_01.mp3';
+import medieval_theme_02 from  '../assets/music/medieval_theme_02.mp3';
+import test_level_model from  '../assets/models/test_level_2.gltf';
+import box_model from  '../assets/models/box.gltf';
 
 import * as BABYLON from "babylonjs";
 
@@ -157,7 +158,7 @@ export default class GameWorld {
             autoplay: false
         });
           
-        this.music = new BABYLON.Sound("Music2", medieval_theme_02, scene, null, {
+        this.music = new BABYLON.Sound("Music2", medieval_theme_01, scene, null, {
             loop: true,
             autoplay: false
         });

@@ -2,9 +2,9 @@ import * as BABYLON from "babylonjs";
 import * as BABYLONGUI from "babylonjs-gui";
 import 'babylonjs-loaders';
 
-var player_model: string = "../assets/models/wache02.gltf";
-var steps_sound: string = '../assets/sound/simple_steps.mp3';
-var sprint_sound: string = '../assets/sound/simple_sprint.mp3';
+import steps_sound from '../assets/sound/simple_steps.mp3';
+import sprint_sound from '../assets/sound/simple_sprint.mp3';
+import player_model from "../assets/models/wache02.gltf";
 
 import { KEYCODE } from "./key_codes";
 
@@ -435,12 +435,18 @@ class Player {
 
         this.contactRay.intersectsMesh(meshes[0]);
 
+        meshes.forEach(mesh => {
+            const pick = this.contactRay.intersectsMesh(mesh, false);
+            pick ?? rayCastResults.push(pick);
+        });
+
         // const pick = this.contactRay.intersectsMeshes(
         //     meshes, //  as BABYLON.DeepImmutableArray<BABYLON.AbstracMesh>[], 
         //     false,
         //     rayCastResults);
 
-        // var rayCastToGroundHit = rayCastResults.length>0;
+
+        var rayCastToGroundHit = rayCastResults.length>0;
 
         // var standOnMovingPlatform = rayCastToGroundHit && rayCastResults[0].pickedMesh == platform && platform.moving != "pause";
 
@@ -454,8 +460,7 @@ class Player {
         // "collision response" for player -----------------------------------------------------------------------------------
         const velocityPhysics =  new BABYLON.Vector3(0,0,0);
 
-        // if (rayCastToGroundHit) {
-        if (true) {
+        if (rayCastToGroundHit) {
             dist = rayCastResults[0].distance;
             var normal = rayCastResults[0].getNormal(true) ?? BABYLON.Vector3.Zero();
             this.normal = normal;
