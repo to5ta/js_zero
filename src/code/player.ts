@@ -17,7 +17,8 @@ import { KEYCODE } from "./key_codes";
 import * as utils from "./utils";
 
 import GameWorld from './world';
-import * as Utils from "./utils";
+
+import { CharacterVisualization } from "./CharacterVisualization";
 
 class Player {
     scene: BABYLON.Scene;
@@ -27,6 +28,9 @@ class Player {
     distanceToCharacter: number;
     camera: BABYLON.ArcRotateCamera;
     
+    mCharacter: CharacterVisualization;
+
+
     characterWidth: number;
     characterDepth: number;
     characterHeight: number;
@@ -58,13 +62,6 @@ class Player {
     sound_steps: BABYLON.Sound;
     sound_sprint: BABYLON.Sound;
 
-    mesh: BABYLON.Mesh;
-    animation: BABYLON.AnimationGroup;
-    walkAni: BABYLON.AnimationGroup;
-    jumpAni: BABYLON.AnimationGroup;
-    idleAni: BABYLON.AnimationGroup;
-    sprintAni: BABYLON.AnimationGroup;
-
     debugInputEnd: BABYLON.Mesh;
     debugStandingNormalEnd: BABYLON.Mesh;
     turningRate: any;
@@ -81,7 +78,21 @@ class Player {
 
         this.startTime = new Date();
 
+        
 
+        this.mCharacter = new CharacterVisualization(
+            player_model,
+            assetManager,
+            scene,
+            {
+                "walk": {loop: true, speed: 1.3, from: 0.0, to: 1.0},
+                "jump": {loop: false, speed: 1.0, from: 70/60, to: 90/60},
+                "idle": {loop: true, speed: 1.0, from: 100/60, to: 160/60},
+                "sprint": {loop: true, speed: 3.0, from: 190/60, to: 289/60}
+            }
+        ) 
+
+        
 
         // 3rd person camera for player ---------------------------------------
         // this.camera = new BABYLON.FollowCamera(
@@ -259,6 +270,10 @@ class Player {
         this.contactRay.length = this.characterHeight/2 + 0.01;
 
 
+
+
+
+
         // sounds
         this.sound_steps = new BABYLON.Sound("Steps", steps_sound, scene, null, {
             loop: true,
@@ -271,32 +286,7 @@ class Player {
         });
 
 
-        // visual representation ----------------------------------------------
-        var assetTask = assetManager.addMeshTask(
-            "PlayerModel", 
-            null, 
-            './', 
-            player_model);
-        
-        assetTask.onSuccess = () => {
-            console.log("loaded player content ", assetTask);
-            this.mesh = assetTask.loadedMeshes[0] as BABYLON.Mesh;
-            this.animation = assetTask.loadedAnimationGroups[0];
-            console.log(assetTask.loadedAnimationGroups);
-            
-            world.shadowGenerator.addShadowCaster(this.mesh);
-      
-            this.walkAni = this.animation.start();
-            this.walkAni.stop();
-            this.jumpAni = this.walkAni.clone("jumpAni");
-            this.jumpAni.stop();
-            this.idleAni = this.walkAni.clone("idleAni");
-            this.idleAni.stop();
-            this.sprintAni = this.walkAni.clone("sprintAni");
-            this.sprintAni.stop();
-            
-            this.startIdleAni();
-        }
+
  
         // debugging visualization ----------------------------------------------------------------
         this.debugInputEnd = BABYLON.MeshBuilder.CreateBox("debugInputDirBox", {
@@ -335,41 +325,46 @@ class Player {
         return this.characterWeight; // + items later
     }
 
-    startWalkAni() {
-        this.jumpAni.stop();
-        this.idleAni.stop();
-        this.sprintAni.stop();
-        this.walkAni = this.walkAni.start(true, 1.3, 0.0, 1.0, false);
-        this.sound_steps.play();  
-        this.sound_sprint.pause();      
-    }
 
-    startJumpAni() {
-        this.walkAni.stop();
-        this.idleAni.stop();
-        this.sprintAni.stop();
-        this.jumpAni = this.jumpAni.start(false, 1.0, 70/60, 90/60, false);
-        this.sound_steps.pause();
-        this.sound_sprint.pause();
-    }
 
-    startIdleAni() {
-        this.walkAni.stop();
-        this.jumpAni.stop();
-        this.sprintAni.stop();
-        this.idleAni = this.idleAni.start(true, 1.0, 100/60, 160/60, false);
-        this.sound_steps.pause();
-        this.sound_sprint.pause();
-    }
 
-    startSprintAni() {
-        this.walkAni.stop();
-        this.jumpAni.stop();
-        this.idleAni.stop();
-        this.sprintAni = this.sprintAni.start(true, 3.0, 190/60, 289/60, false);
-        this.sound_steps.pause();
-        this.sound_sprint.play();
-    }
+
+
+    // startWalkAni() {
+    //     this.jumpAni.stop();
+    //     this.idleAni.stop();
+    //     this.sprintAni.stop();
+    //     this.walkAni = this.walkAni.start(true, 1.3, 0.0, 1.0, false);
+    //     this.sound_steps.play();  
+    //     this.sound_sprint.pause();      
+    // }
+
+    // startJumpAni() {
+    //     this.walkAni.stop();
+    //     this.idleAni.stop();
+    //     this.sprintAni.stop();
+    //     this.jumpAni = this.jumpAni.start(false, 1.0, 70/60, 90/60, false);
+    //     this.sound_steps.pause();
+    //     this.sound_sprint.pause();
+    // }
+
+    // startIdleAni() {
+    //     this.walkAni.stop();
+    //     this.jumpAni.stop();
+    //     this.sprintAni.stop();
+    //     this.idleAni = this.idleAni.start(true, 1.0, 100/60, 160/60, false);
+    //     this.sound_steps.pause();
+    //     this.sound_sprint.pause();
+    // }
+
+    // startSprintAni() {
+    //     this.walkAni.stop();
+    //     this.jumpAni.stop();
+    //     this.idleAni.stop();
+    //     this.sprintAni = this.sprintAni.start(true, 3.0, 190/60, 289/60, false);
+    //     this.sound_steps.pause();
+    //     this.sound_sprint.play();
+    // }
 
     // process player input ---------------------------------------------------
     handleInput(keyEvent: KeyboardEvent) {
@@ -407,8 +402,8 @@ class Player {
         }  
         if (keyEvent.keyCode == KEYCODE.SPACEBAR && !this.falling && keyPressed){
             this.falling = true;
-            if (this.animation && !this.jumpAni.isPlaying) {
-                this.startJumpAni();
+            if (this.mCharacter.finishedLoading() && !this.mCharacter.isPlaying("jump")) {
+                this.mCharacter.play("jump"); //this.startJumpAni();
                 this.jump = true;
                 this.fallingVel = this.jumpSpeed * 80 / this.getTotalWeight();
             } 
@@ -557,37 +552,37 @@ class Player {
 
 
 
-        if (this.animation) {
+        if (this.mCharacter.finishedLoading()) {
             if (!this.falling && this.inputDirection.length() > 0.1) {
                 if (sprintValid) {
-                    if (!this.sprintAni.isPlaying) {
-                        this.startSprintAni();
+                    if (!this.mCharacter.isPlaying("sprint")) {
+                        this.mCharacter.play("sprint"); //this.startSprintAni();
                     }
                 } else {
-                    if (!this.walkAni.isPlaying) {
-                        this.startWalkAni();
+                    if (!this.mCharacter.isPlaying("walk")) {
+                        this.mCharacter.play("walk"); //this.startWalkAni();
                     }
                 }
 
             } else {
-                if (!this.idleAni.isPlaying && !this.falling) {
-                    this.startIdleAni();
+                if (!this.mCharacter.isPlaying("idle") && !this.falling) {
+                    this.mCharacter.play("idle");  //this.startIdleAni();
                 }
             }
         }
 
 
 
-
         // update the character mesh
-        if(this.mesh) {
-            this.mesh.rotation = this.character.rotation;
-            this.mesh.position.x = this.character.position.x;
-            this.mesh.position.z = this.character.position.z;
-            this.mesh.position.y = this.character.position.y - this.characterHeight/2;
+        if(this.mCharacter.finishedLoading()) {
+            console.log("did load")
+            this.mCharacter.mMesh.rotation = this.character.rotation;
+            this.mCharacter.mMesh.position.x = this.character.position.x;
+            this.mCharacter.mMesh.position.z = this.character.position.z;
+            this.mCharacter.mMesh.position.y = this.character.position.y - this.characterHeight/2;
         }
         if(this.inputDirection.length() > 0.1){
-            this.mesh.rotation.y = Math.PI/2 - this.camera.alpha; // copy rotation from camera orientation
+            this.mCharacter.mMesh.rotation.y = Math.PI/2 - this.camera.alpha; // copy rotation from camera orientation
             //this.mesh.rotation.y = this.camera.alpha; // copy rotation from camera orientation
         }
         

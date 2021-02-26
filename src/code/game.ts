@@ -5,7 +5,6 @@ import { Player } from './player';
 import GameWorld from './world';
 import { DebugView } from "./debug_view";
 
-
 // import 'babylonjs-loaders';
 import { KEYCODE } from './key_codes';
 
