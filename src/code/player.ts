@@ -33,43 +33,38 @@ class Player {
     mPhysics: CharacterPhysics;
 
     rotation: BABYLON.Vector3;
-    position: BABYLON.Vector3; 
+    private position: BABYLON.Vector3; 
 
-
-    characterWidth: number;
-    characterDepth: number;
-    characterHeight: number;
-    characterWeight: number;
-
-    character: BABYLON.Mesh;
     charNormal: BABYLON.LinesMesh;
     checkCollisions: boolean;
     ellipsoid: BABYLON.Vector3;
     contactRay: BABYLON.Ray;
 
     inputDirection: BABYLON.Vector3 = BABYLON.Vector3.Zero();
-    velocity: BABYLON.Vector3;
+
     normal: BABYLON.Vector3;
     slope: number;
     
-    falling: boolean;
-    climbing: boolean;
-    sprinting: boolean;
-    jump: boolean;
     jumpSpeed: number;
     moveSpeed: number;
     sprintSpeed: number;
+
     strafe: boolean;
     
     inputRotateY: number;
-
     turningRate: any;
-    fallingVel: number = 0;
 
-    startTime: Date;
+
+    setPosition(rotation: BABYLON.Vector3) {
+        // TODO
+    }
+
+    setRotation(rotation: BABYLON.Vector3) {
+        // TODO
+    }
 
     onGroundContact(speed: number) {
-        console.log(`Player hits the ground with ${speed} m/s`);
+        console.log(`Player has hit the ground at ${speed} m/s`);
     }
 
     constructor(scene: BABYLON.Scene, canvas: HTMLCanvasElement, world: GameWorld, assetManager: BABYLON.AssetsManager ) {
@@ -78,8 +73,6 @@ class Player {
         this.world = world;
 
         this.debug_mode = false;
-
-        this.startTime = new Date();
 
         this.mCharacter = new CharacterVisualization(
             player_model,
@@ -93,19 +86,13 @@ class Player {
             }
         ) 
 
-
-        // state
-        this.falling = true;
-        this.climbing = false;
-        this.sprinting = false;
-        this.jump = false;
     
         // settings
         this.jumpSpeed = 7;
         this.moveSpeed = 6;
         this.sprintSpeed = 10;
-        this.strafe = true; // always strafe
 
+        this.strafe = true; // always strafe
 
 
         this.mPhysics = new CharacterPhysics(this.moveSpeed, this.sprintSpeed, this.jumpSpeed, this.onGroundContact, world, this.mCharacter);
@@ -166,7 +153,6 @@ class Player {
 
     setDebug(debug : boolean) {
         this.debug_mode = debug;
-        this.character.visibility = Number(debug);
 
         if (debug) {
         } else {
@@ -175,7 +161,7 @@ class Player {
 
 
     getTotalWeight() {
-        return this.characterWeight; // + items later
+        return this.mPhysics.weight; // + items later
     }
 
 
@@ -225,13 +211,10 @@ class Player {
         // }      
 
         if (keyEvent.keyCode == KEYCODE.SHIFT) {
-            this.sprinting = keyPressed ? true : false;
+            this.mPhysics.sprinting = keyPressed ? true : false;
         }
         
-        
         this.mPhysics.normalizedLocalDirection = this.inputDirection;
-        this.mPhysics.sprinting =  this.sprinting;
-
     }
 
 
