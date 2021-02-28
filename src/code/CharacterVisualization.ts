@@ -27,17 +27,13 @@ export class CharacterVisualization {
             
         assetTask.onSuccess = () => {
             this.mMesh = assetTask.loadedMeshes[0] as BABYLON.Mesh;
+            this.mMesh.rotation = BABYLON.Vector3.Zero();
             let animation = assetTask.loadedAnimationGroups[0];      
             animation.start();
             animation.stop();        
             console.log(Object.keys(namedAnimationProperties));    
             Object.keys(namedAnimationProperties).forEach(animationName => {
-                animation.start();
-                console.log(`add ${animationName}`);
                 this.mNamedAnimations[animationName] = animation.clone(animationName);
-                console.log(this.mNamedAnimations[animationName]);
-                // console.log("char did LOAD");
-                animation.stop();
             });
             
             this.meshLoaded = true;
@@ -50,8 +46,9 @@ export class CharacterVisualization {
             
     play(animationName: string): void 
     {
-        console.log(`Start animation: ${animationName}`);
-        if (!this.meshLoaded || !Object.keys(this.mNamedAnimations).includes(animationName)) {
+        if (!this.meshLoaded || 
+            !Object.keys(this.mNamedAnimations).includes(animationName) ||
+            this.isPlaying(animationName)) {
             return;
         } else {
             Object.keys(this.mNamedAnimationProperties).forEach(animationName => { this.mNamedAnimations[animationName].stop() });
@@ -63,14 +60,26 @@ export class CharacterVisualization {
                 false);                
         }
     }
+
+    setPosition(position: BABYLON.Vector3) {
+        this.mMesh.position = position;
+    }
+
+    setRotation(rotation: BABYLON.Vector3) {
+        this.mMesh.rotation = rotation;
+    }
+
+    setOrientation(anzimuth: number) {
+        this.mMesh.rotation.y = anzimuth;
+    }
             
 
-    mMesh: BABYLON.Mesh;
     mNamedAnimations: {[key: string]: BABYLON.AnimationGroup} = {};
     mNamedAnimationProperties: {[key: string]: animationProperties};
     
     private meshLoaded = false;
     private scene: BABYLON.Scene;
+    private mMesh: BABYLON.Mesh;
 
     finishedLoading(): boolean {return this.meshLoaded};
 } 
