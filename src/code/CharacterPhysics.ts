@@ -110,7 +110,6 @@ export class CharacterPhysics {
     }
 
 
-
     update(dTimeMs: number) {
         const dTimeSec = dTimeMs / 1000;
 
@@ -135,6 +134,10 @@ export class CharacterPhysics {
 
         if (rayCastToGroundHit) {
             let dist = rayCastResults[0].distance;
+
+            if(this.falling) {
+                this.onGroundContact(this.velocity.y);
+            }
 
             // we could also use slope here or other surface attributes such as "marked-as-sticky"
             if(dist - 0.05 <= this.height/2) {
@@ -164,13 +167,12 @@ export class CharacterPhysics {
         if (this.falling || externalPhysicalImpact) {
             velocityPhysics.y = this.velocity.y - 9.81 * dTimeSec;
             this.velocity.y = velocityPhysics.y;
-            console.log("calc falling")
         } else {
             this.velocity.y = 0.01;
         }
 
         const toWorld = BABYLON.Matrix.RotationYawPitchRoll(
-            this.anzimuth, // this.imposter.rotation.y,
+            this.anzimuth,
             0,
             0); 
         

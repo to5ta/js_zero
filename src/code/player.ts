@@ -63,16 +63,13 @@ class Player {
     
     inputRotateY: number;
 
-    sound_steps: BABYLON.Sound;
-    sound_sprint: BABYLON.Sound;
-
     turningRate: any;
     fallingVel: number = 0;
 
     startTime: Date;
 
     onGroundContact(speed: number) {
-        // TODO calc damage
+        console.log(`Player hits the ground with ${speed} m/s`);
     }
 
     constructor(scene: BABYLON.Scene, canvas: HTMLCanvasElement, world: GameWorld, assetManager: BABYLON.AssetsManager ) {
@@ -89,10 +86,10 @@ class Player {
             assetManager,
             scene,
             {
-                "walk": {loop: true, speed: 1.3, from: 0.0, to: 1.0},
+                "walk": {loop: true, speed: 1.3, from: 0.0, to: 1.0, soundfile: steps_sound},
                 "jump": {loop: false, speed: 1.0, from: 70/60, to: 90/60},
                 "idle": {loop: true, speed: 1.0, from: 100/60, to: 160/60},
-                "sprint": {loop: true, speed: 3.0, from: 190/60, to: 289/60}
+                "sprint": {loop: true, speed: 3.0, from: 190/60, to: 289/60, soundfile: sprint_sound}
             }
         ) 
 

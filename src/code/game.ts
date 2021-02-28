@@ -1,7 +1,7 @@
 import * as BABYLON from "@babylonjs/core";
 import "@babylonjs/loaders";
 
-import { Player } from './player';
+import { Player } from './Player';
 import GameWorld from './world';
 import { DebugView } from "./debug_view";
 
@@ -37,7 +37,7 @@ class Game {
         BABYLON.SceneLoader.OnPluginActivatedObservable.add(function (loader) {
             if (loader.name === "gltf") {
                 // do something with the loader
-                console.log("GLTF_Loader:", loader);
+                // console.log("GLTF_Loader:", loader);
                 
                 // does not work ???
                 // loader.animationStartMode = 0;
@@ -65,10 +65,12 @@ class Game {
         
         this.assetManager.load();
         this.assetManager.onFinish = () => {
-            this.resume();
+            this.onFinishedLoading();
         };
+        this.pause();  
         
         this.engine.enterPointerlock();
+
     }
 
     // input forwarding -------------------------------------------------------
@@ -83,7 +85,7 @@ class Game {
 
 
         if(keyEvent.keyCode == KEYCODE.C && keyEvent.type == "keydown") { 
-            console.log("Event", keyEvent);
+            // console.log("Event", keyEvent);
             this.debug_fly_mode = !this.debug_fly_mode;
             if (!this.debug_fly_mode) {
                 this.debug_view.deactivate();
@@ -98,10 +100,15 @@ class Game {
         } 
     }
 
+    onFinishedLoading() {
+        console.log("Finished loading resources! Starting game...");
+        this.resume();
+    }
+
     pause() {
         this.paused = true;
         this.world.music.pause();
-        console.log("Pause")
+        console.log("Game paused!")
     }
 
     resume() {

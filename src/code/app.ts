@@ -35,12 +35,12 @@ class App {
     });
 
     window.addEventListener('focusin', () => {
-      console.log('get focus again');
+      console.log('App gets focus again...');
       this.game.resume();
     });
 
     window.addEventListener('focusout', () => {
-      console.log('lost focus');
+      console.log('App lost focus...');
       this.game.pause();
     });
 
