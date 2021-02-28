@@ -1,12 +1,10 @@
 # JS-Zero, a Online-RPG Prototype
 Technical notes and documentation
-
-
 # Game Design
+* TODO
 
-
-## Vision: 
-Prototype for common 3rd-person-game. Closed Maps, rather riddles than quests, little npcs, a little melee and bow-shooting, a little, linear, closed story.
+## Vision
+Prototype for common 3rd-person-game. Closed Maps, rather riddles than quests, only little npcs, a little melee and bow-shooting. A little, linear, closed story.
 
 ## Story Proposal
 
@@ -84,6 +82,7 @@ Show some interesting game mechanics and capabilities:
 ## Infrastructure 
 - [X] Deploy online to Github Pages
 - [ ] -CI-/CD deploy master to homepage 
+- [X] Use typescript as programming language
 
 ## Structure
 - [ ] Abstract level concept to enable multiple levels

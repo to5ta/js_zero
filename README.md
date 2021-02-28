@@ -1,25 +1,23 @@
 # Project Zero
 
-A third-person medieval online-game.
+**Project JS_Zero** is third-person medieval online-game prototype, inspired by the awesome 'Sketchbook' Project made by swift502 (https://github.com/swift502/Sketchbook).
 
-Powered by blender, babylon.js, npm and github.
+Powered by blender, babylon.js, typescript, npm and github.
 
-All assets created by my own - expect the current background song that was donated for that game :).
-
-Basic Texture Sets used in the assets might refer to https://texturehaven.com/textures/.
-**Please consider to support Robs' awesome work!**
-
-Inspired by the awesome 'Sketchbook' Project made by swift502 (https://github.com/swift502/Sketchbook).
 
 ![Promo](promo2.PNG)
 
 ## Installation
 
-1. Install NPM from https://nodejs.org/de/
+1. Install NPM from https://nodejs.org/de/, then run the following commands where your checked out repository resides 
 2. `npm install` to install all dependencies
 3. `npm run dev` to host the app locally
 4. open `localhost:8080` in your Browser
 
 ## Online-Demo
 
-https://to5ta.github.io/js_zero/dist/
+https://to5ta.github.io/js_zero/
+
+## Credits
+
+* Some Texture Sets used refer to the awesome work published on (https://texturehaven.com/textures/ and https://hdrihaven.com/)
