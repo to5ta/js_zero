@@ -12,35 +12,26 @@ import steps_sound from '../assets/sound/simple_steps.mp3';
 import sprint_sound from '../assets/sound/simple_sprint.mp3';
 import player_model from "../assets/models/wache02.gltf";
 
-import { KEYCODE } from "./key_codes";
-
-import * as utils from "./utils";
-
-import GameWorld from './world';
+import { GameWorld } from './world';
 
 import { CharacterVisualization } from "./CharacterVisualization";
 import { CharacterPhysics } from "./CharacterPhysics";
+import { CharacterHealth } from "./CharacterHealth";
 
 class Player {
     scene: BABYLON.Scene;
     canvas: HTMLCanvasElement;
     world: GameWorld;
     debug_mode: boolean;
+
     distanceToCharacter: number;
     camera: BABYLON.ArcRotateCamera;
     
     mCharacter: CharacterVisualization;
     mPhysics: CharacterPhysics;
+    mHealth: CharacterHealth;
 
-    rotation: BABYLON.Vector3;
-    private position: BABYLON.Vector3; 
-
-    charNormal: BABYLON.LinesMesh;
-    checkCollisions: boolean;
-    ellipsoid: BABYLON.Vector3;
-    contactRay: BABYLON.Ray;
-
-    inputDirection: BABYLON.Vector3 = BABYLON.Vector3.Zero();
+    inputDirectionBuffer: BABYLON.Vector3 = BABYLON.Vector3.Zero();
 
     normal: BABYLON.Vector3;
     slope: number;
@@ -54,25 +45,54 @@ class Player {
     inputRotateY: number;
     turningRate: any;
 
-
-    setPosition(rotation: BABYLON.Vector3) {
-        // TODO
+    getPosition() : BABYLON.Vector3 {
+        return this.mPhysics.getPosition();
     }
 
-    setRotation(rotation: BABYLON.Vector3) {
-        // TODO
+    getOrientation(): number {
+        return this.mPhysics.getOrientation();
+    }
+
+    setPosition(position: BABYLON.Vector3) {
+        if(this.mCharacter.finishedLoading()) {
+            this.mCharacter.setPosition(position);
+        }
+    }
+    
+    setOrientation(anzimuth: number) {
+        this.mPhysics.setOrientation(anzimuth);
+        this.mCharacter.setOrientation(anzimuth);
     }
 
     onGroundContact(speed: number) {
-        console.log(`Player has hit the ground at ${speed} m/s`);
+        if(this.mHealth) {
+            this.mHealth.dealFallDamage(speed);
+            console.log(`Player has hit the ground at ${speed} m/s`);
+        }
     }
 
-    constructor(scene: BABYLON.Scene, canvas: HTMLCanvasElement, world: GameWorld, assetManager: BABYLON.AssetsManager ) {
+
+    onDie() {
+        console.log("died");
+    }
+
+    onHPchanged() {
+        console.log("hp lost");
+    }
+
+
+    constructor(
+        scene: BABYLON.Scene, 
+        world: GameWorld, 
+        assetManager: BABYLON.AssetsManager) {
         this.scene = scene;
-        this.canvas = canvas;
         this.world = world;
 
         this.debug_mode = false;
+
+        this.mHealth = new CharacterHealth(100, 
+            this.onHPchanged, 
+            this.onDie);
 
         this.mCharacter = new CharacterVisualization(
             player_model,
@@ -86,7 +106,7 @@ class Player {
             }
         ) 
 
-    
+
         // settings
         this.jumpSpeed = 7;
         this.moveSpeed = 6;
@@ -95,10 +115,9 @@ class Player {
         this.strafe = true; // always strafe
 
 
-        this.mPhysics = new CharacterPhysics(this.moveSpeed, this.sprintSpeed, this.jumpSpeed, this.onGroundContact, world, this.mCharacter);
+        this.mPhysics = new CharacterPhysics(this.moveSpeed, this.sprintSpeed, this.jumpSpeed, this, world, this.mCharacter);
 
 
-        
         // CAMERA ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         // 3rd person camera for player ---------------------------------------
@@ -169,52 +188,52 @@ class Player {
     handleInput(keyEvent: KeyboardEvent) {
         const keyPressed = keyEvent.type == "keydown";
 
-        if (keyEvent.keyCode == KEYCODE.LEFT || keyEvent.keyCode == KEYCODE.A) {
+        if (keyEvent.key == "ArrowLeft" || keyEvent.key == "a") {
             if (keyPressed) {
                 if (this.strafe) {
-                    this.inputDirection.x = -0.5;
+                    this.inputDirectionBuffer.x = -0.5;
                 } else {
                     this.inputRotateY = this.turningRate;
                 }
             } else {
                 this.inputRotateY = 0;
-                this.inputDirection.x = 0;
+                this.inputDirectionBuffer.x = 0;
             }
         }  
-        if (keyEvent.keyCode == KEYCODE.RIGHT || keyEvent.keyCode == KEYCODE.D) {
+        if (keyEvent.key == "ArrowRight" || keyEvent.key == "d") {
             if (keyPressed) {
                 if (this.strafe) {
-                    this.inputDirection.x = 0.5;
+                    this.inputDirectionBuffer.x = 0.5;
                 } else {
                     this.inputRotateY = -this.turningRate;
                 }
             } else {
                 this.inputRotateY = 0;
-                this.inputDirection.x = 0;
+                this.inputDirectionBuffer.x = 0;
             }
         }  
-        if (keyEvent.keyCode == KEYCODE.UP || keyEvent.keyCode == KEYCODE.W) {
-            this.inputDirection.z = keyPressed ? 1 : 0;
+        if (keyEvent.key == "ArrowUp" || keyEvent.key == "w") {
+            this.inputDirectionBuffer.z = keyPressed ? 1 : 0;
         }  
-        if (keyEvent.keyCode == KEYCODE.DOWN || keyEvent.keyCode == KEYCODE.S) {
-            this.inputDirection.z = keyPressed ? -1 : 0;
+        if (keyEvent.key == "ArrowDown" || keyEvent.key == "s") {
+            this.inputDirectionBuffer.z = keyPressed ? -1 : 0;
         }  
-        if (keyEvent.keyCode == KEYCODE.SPACEBAR && keyPressed){
+        if (keyEvent.key == " " && keyPressed){
             this.mPhysics.jump();
         }
 
-        // if (keyEvent.keyCode == KEYCODE.CTRL) {
+        // if (keyEvent.key == "CTRL") {
         //     this.strafe = keyPressed ? true : false;
         //     if (keyPressed) {
         //         // this.inputDirection.x = 0;
         //     }
         // }      
 
-        if (keyEvent.keyCode == KEYCODE.SHIFT) {
+        if (keyEvent.key == "Shift") {
             this.mPhysics.sprinting = keyPressed ? true : false;
         }
         
-        this.mPhysics.normalizedLocalDirection = this.inputDirection;
+        this.mPhysics.normalizedLocalDirection = this.inputDirectionBuffer;
     }
 
 

@@ -14,8 +14,12 @@ import box_model from  '../assets/models/box.gltf';
 import * as BABYLON from "@babylonjs/core";
 import "@babylonjs/loaders";
 
+interface Pausable {
+    pause(): void;
+    resume(): void;
+}
 
-export default class GameWorld {
+class GameWorld implements Pausable {
     
     shadowGenerator:  BABYLON.ShadowGenerator;
 
@@ -172,7 +176,21 @@ export default class GameWorld {
         this.music.setVolume(0.05);      
     }
 
+
+    pause(): void {
+        if(!this.music.isPlaying){
+            this.music.play();
+        }
+    }
+    resume(): void {
+        if(!this.music.isPlaying){
+            this.music.play();
+        }
+    }
+
     setDebug(debug: boolean) {
 
     }
 }
+
+export { GameWorld, Pausable };

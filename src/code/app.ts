@@ -48,8 +48,10 @@ class App {
     // register renderloop
     this.engine.runRenderLoop(() => { 
       this.stats.begin();
-      this.game.mainloop(this.engine.getDeltaTime());
-      this.game.scene.render();
+      if (!this.game.paused) {
+        this.game.mainloop(this.engine.getDeltaTime());
+        this.game.scene.render();
+      }
       this.stats.end();
     });
 
@@ -61,6 +63,10 @@ class App {
     document.body.addEventListener("keyup", (event) => {
       this.game.handleInput(event);
     });
+
+    
+    // mouse? if we implement an own camera handler
+
 
     // catch the cursor to control the camera
     if (!this.env.isMobile) {

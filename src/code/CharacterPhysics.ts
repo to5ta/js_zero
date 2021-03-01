@@ -1,19 +1,20 @@
 
 import * as BABYLON from "@babylonjs/core";
 import { CharacterVisualization } from "./CharacterVisualization";
-import GameWorld from "./world";
+import { GameWorld } from "./world";
+import { Player } from "./Player";
 
 export class CharacterPhysics {
 
     world: GameWorld;
     imposter: BABYLON.Mesh;
 
+    parent: Player;
     
     walkSpeed: number;
     sprintSpeed: number;
     jumpSpeed: number;
-    
-    onGroundContact: (speed: number) => void;
+   
 
     falling: boolean;
     jumping: boolean;
@@ -22,8 +23,7 @@ export class CharacterPhysics {
     normalizedLocalDirection: BABYLON.Vector3;
     velocity: BABYLON.Vector3;
 
-    anzimuth: number;
-
+    private anzimuth: number;
 
     animatedModel: CharacterVisualization;
 
@@ -37,17 +37,17 @@ export class CharacterPhysics {
     constructor(
         walkSpeed: number,
         sprintSpeed: number,
-        jumpSpeed: number,        
-        onGroundContact: (speed: number) => void,
+        jumpSpeed: number,     
+        parent: Player,   
         world: GameWorld,
         animatedModel: CharacterVisualization
     ) {
         this.walkSpeed = walkSpeed;
         this.sprintSpeed = sprintSpeed;
         this.jumpSpeed = jumpSpeed;
-        this.onGroundContact = onGroundContact;
         this.world = world;
         this.animatedModel = animatedModel;
+        this.parent = parent;
 
 
         this.normalizedLocalDirection = BABYLON.Vector3.Zero();
@@ -104,9 +104,21 @@ export class CharacterPhysics {
         this.normalizedLocalDirection = normalizedLocalDirection;
     }
 
-    
+
+    setPosition(position: BABYLON.Vector3) {
+        this.imposter.position = position.add(BABYLON.Vector3.Up().scale(this.imposter.scaling.y));
+    }
+
+    getPosition() : BABYLON.Vector3 {
+        return this.imposter.position.subtract(BABYLON.Vector3.Up().scale(this.imposter.scaling.y));
+    }
+
     setOrientation(anzimuth: number) {
         this.anzimuth = anzimuth;
+    }
+
+    getOrientation(): number {
+        return this.anzimuth;
     }
 
 
@@ -136,7 +148,7 @@ export class CharacterPhysics {
             let dist = rayCastResults[0].distance;
 
             if(this.falling) {
-                this.onGroundContact(this.velocity.y);
+                this.parent.onGroundContact(this.velocity.y);
             }
 
             // we could also use slope here or other surface attributes such as "marked-as-sticky"

@@ -2,13 +2,13 @@ import * as BABYLON from "@babylonjs/core";
 import "@babylonjs/loaders";
 
 import { Player } from './Player';
-import GameWorld from './world';
+import { GameWorld, Pausable } from './world';
 import { DebugView } from "./debug_view";
+import GameUI from "./GameUI";
 
 // import 'babylonjs-loaders';
-import { KEYCODE } from './key_codes';
 
-class Game {
+class Game implements Pausable {
     engine: BABYLON.Engine;
     canvas: HTMLCanvasElement;
     debug_fly_mode: boolean;
@@ -19,6 +19,8 @@ class Game {
     world: GameWorld;
     player: Player;
     debug_view: DebugView;
+
+    ui: GameUI;
 
     constructor(engine: BABYLON.Engine, canvas: HTMLCanvasElement) { 
         this.engine = engine;
@@ -54,10 +56,13 @@ class Game {
 
         this.player = new Player(
             this.scene, 
-            this.canvas, 
             this.world, 
             this.assetManager);
+        
+
+        this.player.setPosition(this.world.player_start_position);
           
+
         // put debug functionality here 
         this.debug_view = new DebugView(
             this.scene, 
@@ -77,14 +82,14 @@ class Game {
     // TODO: if game is not paused....
     handleInput(keyEvent: KeyboardEvent) {
 
-        if(keyEvent.keyCode == KEYCODE.F1 && keyEvent.type == "keydown") {
+        if(keyEvent.key == "F1" && keyEvent.type == "keydown") {
             this.showDebugInfo= !this.showDebugInfo;
             this.player.setDebug(this.showDebugInfo);
             this.world.setDebug(this.showDebugInfo);
         }
 
 
-        if(keyEvent.keyCode == KEYCODE.C && keyEvent.type == "keydown") { 
+        if(keyEvent.key == "c" && keyEvent.type == "keydown") { 
             // console.log("Event", keyEvent);
             this.debug_fly_mode = !this.debug_fly_mode;
             if (!this.debug_fly_mode) {
@@ -107,16 +112,15 @@ class Game {
 
     pause() {
         this.paused = true;
-        this.world.music.pause();
+        this.world.pause();
         console.log("Game paused!")
     }
 
     resume() {
         this.paused = false;
-        if(!this.world.music.isPlaying){
-            this.world.music.play();
-        }
+        this.world.resume();
     }
+
 
     mainloop(dTimeMs : number){
         if(this.player && !this.paused){
