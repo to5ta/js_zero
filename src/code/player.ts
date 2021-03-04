@@ -18,7 +18,11 @@ import { CharacterVisualization } from "./CharacterVisualization";
 import { CharacterPhysics } from "./CharacterPhysics";
 import { CharacterHealth } from "./CharacterHealth";
 
-class Player {
+import { GameEvent, GameEventEmitter, GameEventListener } from "./GameEvent";
+
+
+class Player extends GameEventEmitter implements GameEventListener {
+
     scene: BABYLON.Scene;
     canvas: HTMLCanvasElement;
     world: GameWorld;
@@ -44,6 +48,17 @@ class Player {
     
     inputRotateY: number;
     turningRate: any;
+
+    setHealth(hp: number) {
+        this.mHealth.setHealthPoints(hp);
+    }
+
+    onEvent(event: GameEvent) {
+        console.log(`Player received event of type: ${event.type}`);
+        console.log(`Event has data: ${event.data!=null}`);
+        if (event.data) console.log("data: ", event.data);
+        this.emitEvent(event);
+    }
 
     getPosition() : BABYLON.Vector3 {
         return this.mPhysics.getPosition();
@@ -72,27 +87,20 @@ class Player {
     }
 
 
-    onDie() {
-        console.log("died");
-    }
-
-    onHPchanged() {
-        console.log("hp lost");
-    }
-
-
     constructor(
         scene: BABYLON.Scene, 
         world: GameWorld, 
         assetManager: BABYLON.AssetsManager) {
+        super();
         this.scene = scene;
         this.world = world;
 
         this.debug_mode = false;
 
-        this.mHealth = new CharacterHealth(100, 
-            this.onHPchanged, 
-            this.onDie);
+        this.mHealth = new CharacterHealth(100);
+
+        this.mHealth.addGameEventListener(this, "hp_changed");
+        this.mHealth.addGameEventListener(this, "died");
 
         this.mCharacter = new CharacterVisualization(
             player_model,

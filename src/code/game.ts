@@ -5,10 +5,11 @@ import { Player } from './Player';
 import { GameWorld, Pausable } from './world';
 import { DebugView } from "./debug_view";
 import GameUI from "./GameUI";
+import { GameEvent, GameEventListener } from "./GameEvent";
 
 // import 'babylonjs-loaders';
 
-class Game implements Pausable {
+class Game implements Pausable, GameEventListener  {
     engine: BABYLON.Engine;
     canvas: HTMLCanvasElement;
     debug_fly_mode: boolean;
@@ -21,6 +22,14 @@ class Game implements Pausable {
     debug_view: DebugView;
 
     ui: GameUI;
+
+
+    onEvent(event: GameEvent) {
+        if(event.data && event.data.hasOwnProperty("health")){
+            var data = event.data as {health: string};
+            this.ui.playerHealth.text = "\u2764 " + data.health;
+        }
+    }
 
     constructor(engine: BABYLON.Engine, canvas: HTMLCanvasElement) { 
         this.engine = engine;
@@ -58,9 +67,15 @@ class Game implements Pausable {
             this.scene, 
             this.world, 
             this.assetManager);
+
+        this.player.addGameEventListener(this, "hp_changed");
+        this.player.addGameEventListener(this, "died");
+        this.ui = new GameUI();
+
         
 
         this.player.setPosition(this.world.player_start_position);
+        this.player.setHealth(100);
           
 
         // put debug functionality here 
@@ -123,7 +138,7 @@ class Game implements Pausable {
 
 
     mainloop(dTimeMs : number){
-        if(this.player && !this.paused){
+        if(this.player && !this.paused && dTimeMs < 100){
             this.player.update(dTimeMs);
         }
     }

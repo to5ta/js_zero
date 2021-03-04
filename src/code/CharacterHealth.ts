@@ -1,31 +1,29 @@
 import * as BABYLON from "@babylonjs/core";
+import { GameEvent, GameEventEmitter, GameEventListener } from "./GameEvent";
 
-export class CharacterHealth {
+export class CharacterHealth extends GameEventEmitter  {
+    setHealthPoints(hp: number) {
+        this.healthPoints = hp;
+        this.emitEvent({type: "hp_changed", data: {health: this.healthPoints.toFixed(0).toString()}});
+    }
 
     private maxSpeedNoHurt = 10;
     private healthPoints: number;
     totalHealhPoints: number;
-
-    onChange: () => void;
-    onDying: () => void;
-    
+   
     constructor(
-        totalHealthpoints: number,
-        onchange: ()=> void,
-        onDying: () => void){
+        totalHealthpoints: number){
+        super();
         this.totalHealhPoints = totalHealthpoints;
         this.healthPoints = totalHealthpoints;
-        this.onChange = onchange;
-        this.onDying = onDying;
-
     }
 
     private dealDamage(damage: number) {
         this.healthPoints -= damage;
         if(this.healthPoints>0) {
-            this.onChange();
+            this.emitEvent({type: "hp_changed", data: {health: this.healthPoints.toFixed(0).toString()}});
         } else {
-            this.onDying();
+            this.emitEvent({type: "died", data: {health: "DEAD"}});
         }
     }
 
