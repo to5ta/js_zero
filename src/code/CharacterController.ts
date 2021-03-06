@@ -4,50 +4,50 @@ import { CharacterVisualization } from "./CharacterVisualization";
 import { GameWorld } from "./world";
 import { Player } from "./Player";
 
-export class CharacterPhysics {
-
-    world: GameWorld;
-    imposter: BABYLON.Mesh;
-
-    parent: Player;
-    
-    walkSpeed: number;
-    sprintSpeed: number;
+class ControllerConfig {
     jumpSpeed: number;
-   
+    moveSpeed: number;
+    sprintSpeed: number;
+}
 
-    falling: boolean;
-    jumping: boolean;
-    sprinting: boolean;
 
-    normalizedLocalDirection: BABYLON.Vector3;
-    velocity: BABYLON.Vector3;
+class CharacterController {
 
-    private anzimuth: number;
-
+    private world: GameWorld;
+    imposter: BABYLON.Mesh;
+    private parent: Player;
     animatedModel: CharacterVisualization;
+    
+    private config: ControllerConfig;
+   
+    falling: boolean;
+    private jumping: boolean;
+    private sprinting: boolean;
+
+    private normalizedLocalDirection: BABYLON.Vector3;
+    private velocity: BABYLON.Vector3;
+    private anzimuth: number;
 
     width: number;
     depth: number;
     height: number;
 
-    weight: number;
     contactRay: BABYLON.Ray;
+    
+    weight: number;
 
     constructor(
-        walkSpeed: number,
-        sprintSpeed: number,
-        jumpSpeed: number,     
+        config: ControllerConfig,  
         parent: Player,   
         world: GameWorld,
         animatedModel: CharacterVisualization
     ) {
-        this.walkSpeed = walkSpeed;
-        this.sprintSpeed = sprintSpeed;
-        this.jumpSpeed = jumpSpeed;
+        this.config = config;
+
         this.world = world;
         this.animatedModel = animatedModel;
         this.parent = parent;
+
 
 
         this.normalizedLocalDirection = BABYLON.Vector3.Zero();
@@ -95,11 +95,10 @@ export class CharacterPhysics {
     jump() {
         if (!this.falling) {
             this.jumping = true;
-            this.velocity.add(new BABYLON.Vector3(0, this.jumpSpeed, 0));
+            this.velocity.add(new BABYLON.Vector3(0, this.config.jumpSpeed, 0));
         }
     }
    
-
     move(normalizedLocalDirection: BABYLON.Vector3) {
         this.normalizedLocalDirection = normalizedLocalDirection;
     }
@@ -119,6 +118,48 @@ export class CharacterPhysics {
 
     getOrientation(): number {
         return this.anzimuth;
+    }
+
+
+    handleInput(keyEvent: KeyboardEvent) {
+        
+        const keyPressed = keyEvent.type == "keydown";
+
+        if (keyEvent.key == "ArrowLeft" || keyEvent.key == "a") {
+            if (keyPressed) {
+                this.normalizedLocalDirection.x = -0.5;
+            } else {
+                this.normalizedLocalDirection.x = 0;
+            }
+        }  
+        if (keyEvent.key == "ArrowRight" || keyEvent.key == "d") {
+            if (keyPressed) {
+                this.normalizedLocalDirection.x = 0.5;
+            } else {
+                this.normalizedLocalDirection.x = 0;
+            }
+        }  
+        if (keyEvent.key == "ArrowUp" || keyEvent.key == "w") {
+            this.normalizedLocalDirection.z = keyPressed ? 1 : 0;
+        }  
+        if (keyEvent.key == "ArrowDown" || keyEvent.key == "s") {
+            this.normalizedLocalDirection.z = keyPressed ? -1 : 0;
+        }  
+        if (keyEvent.key == " " && keyPressed){
+            this.jump();
+        }
+
+        // if (keyEvent.key == "CTRL") {
+        //     this.strafe = keyPressed ? true : false;
+        //     if (keyPressed) {
+        //         // this.inputDirection.x = 0;
+        //     }
+        // }      
+
+        if (keyEvent.key == "Shift") {
+            this.sprinting = keyPressed ? true : false;
+        }
+        
     }
 
 
@@ -166,14 +207,14 @@ export class CharacterPhysics {
         if (this.jumping) {
             this.jumping = false;
             this.falling = true;
-            this.velocity.y = this.jumpSpeed;
+            this.velocity.y = this.config.jumpSpeed;
         }
 
         // input form player + pyhsical interaction -----------------------------------------------------------------
         const velocityIntended = this.normalizedLocalDirection
             .normalize()
             .scale(
-                this.sprinting ? this.sprintSpeed : this.walkSpeed);
+                this.sprinting ? this.config.sprintSpeed : this.config.moveSpeed);
 
         // combine kinematic impacts such as gravity ----------------------------------------------------------------
         if (this.falling || externalPhysicalImpact) {
@@ -224,3 +265,5 @@ export class CharacterPhysics {
         }
     }
 }
+
+export { CharacterController, ControllerConfig };

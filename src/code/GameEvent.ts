@@ -1,12 +1,14 @@
 
 interface GameEvent {
     type: string;
+    // author: Object;
     data?: Object;
 }
 
 class GameEventEmitter {
     private typeToListeners = new Map<string, Array<GameEventListener>>(); 
 
+    private name: string;
 
     public addGameEventListener(listener: GameEventListener, type: string) {
         if (this.typeToListeners.has(type)) {
@@ -27,6 +29,7 @@ class GameEventEmitter {
     }
 
     public emitEvent(event: GameEvent){
+        console.log("Emitting event: ", event);
         const listeners = this.typeToListeners.get(event.type);
         listeners?.forEach(listener => {
             listener.onEvent(event);

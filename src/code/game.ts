@@ -6,6 +6,8 @@ import { GameWorld, Pausable } from './world';
 import { DebugView } from "./debug_view";
 import GameUI from "./GameUI";
 import { GameEvent, GameEventListener } from "./GameEvent";
+import { App } from "./app";
+
 
 // import 'babylonjs-loaders';
 
@@ -20,25 +22,53 @@ class Game implements Pausable, GameEventListener  {
     world: GameWorld;
     player: Player;
     debug_view: DebugView;
+    onReady: () => void;
+    app: App;
 
     ui: GameUI;
 
 
     onEvent(event: GameEvent) {
-        if(event.data && event.data.hasOwnProperty("health")){
-            var data = event.data as {health: string};
+        if (event.type == "ready" && event.data && event.data.hasOwnProperty("author")) {
+            let data = event.data as {author: string};
+            if (data.author == Player.name) {
+                console.log("This.player is ready!");
+                this.app.onReady();
+            }
+        }
+
+        if (event.data && event.data.hasOwnProperty("health")){
+            let data = event.data as {health: string};
             this.ui.playerHealth.text = "\u2764 " + data.health;
         }
+
+        if (event.type == "died") {
+            if (!this.player.died) {
+                setTimeout(()=> {
+                    this.player.died = false;
+                    this.player.setHealth(100);
+                    this.player.setPosition(this.world.player_start_position);
+                }, 3000);
+                this.player.died = true;
+            }
+        }
+
     }
 
-    constructor(engine: BABYLON.Engine, canvas: HTMLCanvasElement) { 
+    constructor(
+        engine: BABYLON.Engine, 
+        canvas: HTMLCanvasElement,
+        onReady: () => void, 
+        app: App) { 
         this.engine = engine;
         this.canvas = canvas;
+        this.app = app;
+
+        this.onReady = onReady;
  
         // game state ---------------------------------------------------------
         this.debug_fly_mode = false;
         this.showDebugInfo = false;
-        this.paused = true;
         
         // Create the scene ---------------------------------------------------
         this.scene = new BABYLON.Scene(this.engine);
@@ -67,16 +97,14 @@ class Game implements Pausable, GameEventListener  {
             this.scene, 
             this.world, 
             this.assetManager);
+        
+        this.player.setPosition(this.world.player_start_position);
 
         this.player.addGameEventListener(this, "hp_changed");
         this.player.addGameEventListener(this, "died");
-        this.ui = new GameUI();
-
+        this.player.addGameEventListener(this, "ready");
         
-
-        this.player.setPosition(this.world.player_start_position);
-        this.player.setHealth(100);
-          
+        this.ui = new GameUI();
 
         // put debug functionality here 
         this.debug_view = new DebugView(
@@ -121,6 +149,7 @@ class Game implements Pausable, GameEventListener  {
     }
 
     onFinishedLoading() {
+        this.player.setHealth(100);
         console.log("Finished loading resources! Starting game...");
         this.resume();
     }
@@ -138,7 +167,7 @@ class Game implements Pausable, GameEventListener  {
 
 
     mainloop(dTimeMs : number){
-        if(this.player && !this.paused && dTimeMs < 100){
+        if(this.player && !this.paused){
             this.player.update(dTimeMs);
         }
     }

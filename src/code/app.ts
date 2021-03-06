@@ -20,7 +20,7 @@ class App {
     this.env = new Environment();
 
     this.engine = new BABYLON.Engine(this.env.canvas, true);
-    this.game = new Game(this.engine, this.env.canvas);  
+    this.game = new Game(this.engine, this.env.canvas, this.onReady, this);
 
     this.stats = new Stats();
     this.stats.showPanel( 0 );
@@ -45,16 +45,6 @@ class App {
     });
 
 
-    // register renderloop
-    this.engine.runRenderLoop(() => { 
-      this.stats.begin();
-      if (!this.game.paused) {
-        this.game.mainloop(this.engine.getDeltaTime());
-        this.game.scene.render();
-      }
-      this.stats.end();
-    });
-
     // register input handle
     document.body.addEventListener("keydown", (event) => {
       this.game.handleInput(event);
@@ -74,6 +64,20 @@ class App {
         this.env.canvas.requestPointerLock();
       });
     }
+  }
+
+
+  onReady() {
+    console.log("register render loop function");
+    // register renderloop
+    this.engine.runRenderLoop(() => { 
+      this.stats.begin();
+      if (!this.game.paused) {
+        this.game.mainloop(this.engine.getDeltaTime());
+        this.game.scene.render();
+      }
+      this.stats.end();
+    });
   }
 }
 

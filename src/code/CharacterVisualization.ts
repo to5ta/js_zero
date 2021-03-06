@@ -9,31 +9,32 @@ interface animationProperties {
     soundfile?: string;
 }
 
-export class CharacterVisualization {
+import { GameEventEmitter } from "./GameEvent";
+export class CharacterVisualization extends GameEventEmitter {
     
     constructor(
         modelfile: string,
         assetManager: BABYLON.AssetsManager,
         scene: BABYLON.Scene,
         namedAnimationProperties: {[key: string]: animationProperties}) {
+        super();
         this.mNamedAnimationProperties = namedAnimationProperties;
         
         let soundsCount = 0;
-        if (soundsCount==0) {
-            this.soundsLoaded = true;
-        }
+
         let soundsLoaded = 0;
         let onSoundLoaded = () => {
             soundsLoaded++;
             if(soundsLoaded == soundsCount){
-                this.soundsLoaded = true;
+                this.onPartLoaded("sound");
             }
         }
         
         Object.keys(namedAnimationProperties).forEach(aniName => {
             if (namedAnimationProperties[aniName].soundfile) {
-                let task = assetManager.addBinaryFileTask(`${aniName}_sound_task`, 
-                namedAnimationProperties[aniName].soundfile as string);
+                let task = assetManager.addBinaryFileTask(
+                    `${aniName}_sound_task`, 
+                    namedAnimationProperties[aniName].soundfile as string);
                 soundsCount++;
                 task.onSuccess = (task: BABYLON.BinaryFileAssetTask) => {
                     let soundName = `${aniName}_sound`;
@@ -41,6 +42,9 @@ export class CharacterVisualization {
                 }
             }
         }); 
+        if (soundsCount==0) {
+            this.soundsLoaded = true;
+        }
         
         var assetTask = assetManager.addMeshTask(
             "PlayerModel", 
@@ -57,8 +61,7 @@ export class CharacterVisualization {
             Object.keys(namedAnimationProperties).forEach(animationName => {
                 this.mNamedAnimations[animationName] = animation.clone(animationName);
             });
-            
-            this.meshLoaded = true;
+            this.onPartLoaded("mesh");
         }
     }
 
@@ -118,6 +121,18 @@ export class CharacterVisualization {
     private meshLoaded = false;
     private soundsLoaded = false;
     private mMesh: BABYLON.Mesh;
+
+    onPartLoaded(part: string){
+        if (part === "mesh"){
+            this.meshLoaded = true;
+        } else if (part === "sound") {
+            this.soundsLoaded = true;
+        }
+        
+        if (this.meshLoaded==true && this.soundsLoaded==true) {
+            this.emitEvent({type: "ready", data: {author: CharacterVisualization.name}});
+        }
+    }
 
     finishedLoading(): boolean {return this.meshLoaded && this.soundsLoaded};
 } 
