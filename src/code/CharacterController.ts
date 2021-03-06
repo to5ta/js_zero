@@ -3,7 +3,7 @@ import * as BABYLON from "@babylonjs/core";
 import { CharacterVisualization } from "./CharacterVisualization";
 import { GameWorld } from "./world";
 import { Player } from "./Player";
-import { GameEventEmitter } from "./GameEvent";
+import { GameEventDispatcher } from "./GameEvent";
 
 class ControllerConfig {
     jumpSpeed: number;
@@ -12,7 +12,7 @@ class ControllerConfig {
 }
 
 
-class CharacterController extends GameEventEmitter {
+class CharacterController extends GameEventDispatcher {
 
     private world: GameWorld;
     imposter: BABYLON.Mesh;
@@ -43,7 +43,7 @@ class CharacterController extends GameEventEmitter {
         world: GameWorld,
         animatedModel: CharacterVisualization
     ) {
-        super();
+        super(CharacterController.name);
         this.config = config;
 
         this.world = world;
@@ -264,7 +264,7 @@ class CharacterController extends GameEventEmitter {
         }
 
         if (!this.parent.died && this.imposter.position.y < -50) {
-            this.emitEvent({type: "died", data: {reason: "abyss"}});
+            this.dispatchEvent({type: "died", data: {reason: "abyss"}});
         }
     }
 }

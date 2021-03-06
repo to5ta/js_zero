@@ -9,15 +9,15 @@ interface animationProperties {
     soundfile?: string;
 }
 
-import { GameEventEmitter } from "./GameEvent";
-export class CharacterVisualization extends GameEventEmitter {
+import { GameEventDispatcher } from "./GameEvent";
+export class CharacterVisualization extends GameEventDispatcher {
     
     constructor(
         modelfile: string,
         assetManager: BABYLON.AssetsManager,
         scene: BABYLON.Scene,
         namedAnimationProperties: {[key: string]: animationProperties}) {
-        super();
+        super(CharacterVisualization.name);
         this.mNamedAnimationProperties = namedAnimationProperties;
         
         let soundsCount = 0;
@@ -129,7 +129,7 @@ export class CharacterVisualization extends GameEventEmitter {
         }
         
         if (this.meshLoaded==true && this.soundsLoaded==true) {
-            this.emitEvent({type: "ready", data: {author: CharacterVisualization.name}});
+            this.dispatchEvent({type: "ready", data: {author: CharacterVisualization.name}});
         }
     }
 
