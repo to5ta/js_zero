@@ -113,7 +113,6 @@ export class CharacterVisualization extends GameEventEmitter {
         this.mMesh.rotation.y = anzimuth;
     }
             
-
     sounds: {[key: string]: BABYLON.Sound} = {};
     mNamedAnimations: {[key: string]: BABYLON.AnimationGroup} = {};
     mNamedAnimationProperties: {[key: string]: animationProperties};

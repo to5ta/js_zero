@@ -97,7 +97,7 @@ class Player extends GameEventEmitter implements GameEventListener {
         this.world = world;
 
         this.debug_mode = false;
-
+        
         this.mHealth = new CharacterHealth(100);
         this.mHealth.addGameEventListener(this, "hp_changed");
         this.mHealth.addGameEventListener(this, "died");
@@ -113,72 +113,73 @@ class Player extends GameEventEmitter implements GameEventListener {
                 "idle": {loop: true, speed: 1.0, from: 100/60, to: 160/60},
                 "sprint": {loop: true, speed: 3.0, from: 190/60, to: 289/60, soundfile: sprint_sound}
             }); 
-        this.mCharacter.addGameEventListener(this, "ready");
-
-
-        var ctrlConfig: ControllerConfig = {
-            jumpSpeed: 7,
-            moveSpeed: 6,
-            sprintSpeed: 10
-        };
-        this.mPhysics = new CharacterController(ctrlConfig, this, world, this.mCharacter);
-
-
-        // CAMERA ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-        // 3rd person camera for player ---------------------------------------
-        // this.camera = new BABYLON.FollowCamera(
-        //     "FollowCamera", 
-        //     new BABYLON.Vector3(0,0,0), 
-        //     this.scene);
-        // this.camera.radius = 5;
-        // this.camera.heightOffset = 1.7;
-        // this.camera.rotationOffset = 0;
-        // this.camera.maxCameraSpeed = 1;
-        // // this.camera.lowerHeightOffsetLimit = -0.5;
-        // // this.camera.upperHeightOffsetLimit = 10;
-        // // this.camera.lowerRotationOffsetLimit = -180;
-        // // this.camera.upperRotationOffsetLimit = 180;
-        // this.camera.rotation = new BABYLON.Vector3(0, 20, 0);
-        // this.camera.position = this.world.camera_start_position;
-        // // this.camera.attachControl(this.canvas, true);
-
-        // we can tweak that value later for narrow parts of the map / indoor scenes
-        this.distanceToCharacter = 4.5;
-        
-
-        this.camera = new BABYLON.ArcRotateCamera(
-            "PlayerCamera",
-            -Math.PI/2,
-            Math.PI/2,
-            this.distanceToCharacter,
-            BABYLON.Vector3.Zero(),
-            this.scene,
-            true);
-
-        this.camera.attachControl(this.canvas, true);
-        this.camera.inputs.remove(this.camera.inputs.attached.keyboard);
-        this.camera.inputs.remove(this.camera.inputs.attached.mousewheel);
-
-        this.camera.angularSensibilityX = 1500;
-        this.camera.angularSensibilityY = 1500;
-
-        this.camera.upperBetaLimit = 1.7;       // ca. horizont
-        this.camera.lowerBetaLimit = 0;         // zenit
-
-        // works but not completely satisfying 
+            this.mCharacter.addGameEventListener(this, "ready");
+            
+            
+            var ctrlConfig: ControllerConfig = {
+                jumpSpeed: 7,
+                moveSpeed: 6,
+                sprintSpeed: 10
+            };
+            this.mPhysics = new CharacterController(ctrlConfig, this, world, this.mCharacter);
+            this.mPhysics.addGameEventListener(this, "died");
+            
+            
+            // CAMERA ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            
+            // 3rd person camera for player ---------------------------------------
+            // this.camera = new BABYLON.FollowCamera(
+                //     "FollowCamera", 
+                //     new BABYLON.Vector3(0,0,0), 
+                //     this.scene);
+                // this.camera.radius = 5;
+                // this.camera.heightOffset = 1.7;
+                // this.camera.rotationOffset = 0;
+                // this.camera.maxCameraSpeed = 1;
+                // // this.camera.lowerHeightOffsetLimit = -0.5;
+                // // this.camera.upperHeightOffsetLimit = 10;
+                // // this.camera.lowerRotationOffsetLimit = -180;
+                // // this.camera.upperRotationOffsetLimit = 180;
+                // this.camera.rotation = new BABYLON.Vector3(0, 20, 0);
+                // this.camera.position = this.world.camera_start_position;
+                // // this.camera.attachControl(this.canvas, true);
+                
+                // we can tweak that value later for narrow parts of the map / indoor scenes
+                this.distanceToCharacter = 4.5;
+                
+                
+                this.camera = new BABYLON.ArcRotateCamera(
+                    "PlayerCamera",
+                    -Math.PI/2,
+                    Math.PI/2,
+                    this.distanceToCharacter,
+                    BABYLON.Vector3.Zero(),
+                    this.scene,
+                    true);
+                    
+                    this.camera.attachControl(this.canvas, true);
+                    this.camera.inputs.remove(this.camera.inputs.attached.keyboard);
+                    this.camera.inputs.remove(this.camera.inputs.attached.mousewheel);
+                    
+                    this.camera.angularSensibilityX = 1500;
+                    this.camera.angularSensibilityY = 1500;
+                    
+                    this.camera.upperBetaLimit = 1.7;       // ca. horizont
+                    this.camera.lowerBetaLimit = 0;         // zenit
+                    
+                    // works but not completely satisfying 
         // this.camera.checkCollisions = true;
         // this.camera.collisionRadius = new BABYLON.Vector3(0.2, 0.2, 0.2);
-
+        
         this.scene.activeCamera = this.camera;
         
         this.camera.lockedTarget = this.mPhysics.imposter;        
     }
-
-
+    
+    
     setDebug(debug : boolean) {
         this.debug_mode = debug;
-
+        
         if (debug) {
         } else {
         }

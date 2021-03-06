@@ -8,9 +8,6 @@ import GameUI from "./GameUI";
 import { GameEvent, GameEventListener } from "./GameEvent";
 import { App } from "./app";
 
-
-// import 'babylonjs-loaders';
-
 class Game implements Pausable, GameEventListener  {
     engine: BABYLON.Engine;
     canvas: HTMLCanvasElement;
@@ -49,12 +46,13 @@ class Game implements Pausable, GameEventListener  {
                     this.player.camera.alpha = -Math.PI/2;
                     this.player.setOrientation(-Math.PI);
                     this.player.setHealth(100);
+                    this.player.mPhysics.velocity = BABYLON.Vector3.Zero(); 
                     this.player.setPosition(this.world.player_start_position.clone());
                 }, 3000);
                 this.player.died = true;
+                console.log("Player died")
             }
         }
-
     }
 
     constructor(
@@ -132,7 +130,6 @@ class Game implements Pausable, GameEventListener  {
             this.player.setDebug(this.showDebugInfo);
             this.world.setDebug(this.showDebugInfo);
         }
-
 
         if(keyEvent.key == "c" && keyEvent.type == "keydown") { 
             // console.log("Event", keyEvent);

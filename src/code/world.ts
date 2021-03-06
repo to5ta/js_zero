@@ -178,8 +178,8 @@ class GameWorld implements Pausable {
 
 
     pause(): void {
-        if(!this.music.isPlaying){
-            this.music.play();
+        if(this.music.isPlaying){
+            this.music.pause();
         }
     }
     resume(): void {
