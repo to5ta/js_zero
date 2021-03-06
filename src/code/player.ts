@@ -18,13 +18,13 @@ import { CharacterVisualization } from "./CharacterVisualization";
 import { CharacterController, ControllerConfig } from "./CharacterController";
 import { CharacterHealth } from "./CharacterHealth";
 
-import { GameEvent, GameEventDispatcherher, GameEventListener } from "./GameEvent";
+import { GameEvent, GameEventDispatcher, GameEventListener } from "./GameEvent";
 
 
 
 
 
-class Player extends GameEventDispatcherher implements GameEventListener {
+class Player extends GameEventDispatcher implements GameEventListener {
 
     scene: BABYLON.Scene;
     canvas: HTMLCanvasElement;
@@ -51,9 +51,9 @@ class Player extends GameEventDispatcherher implements GameEventListener {
 
     onEvent(event: GameEvent) {
         if (event.type == "ready") {
-            this.dispatchEventvent({type: "ready", data: {author: Player.name}});
+            this.dispatchEvent({type: "ready", data: {author: Player.name}});
         } else {
-            this.dispatchEventvent(event);
+            this.dispatchEvent(event);
             // console.log(`Player received event of type: ${event.type}`);
             // console.log(`Event has data: ${event.data!=null}`);
             // if (event.data) console.log("data: ", event.data);
