@@ -70,8 +70,8 @@ class Player extends GameEventEmitter implements GameEventListener {
 
     setPosition(position: BABYLON.Vector3) {
         if(this.mCharacter.finishedLoading()) {
-            this.mPhysics.setPosition(position);
-            this.mCharacter.setPosition(position);
+            this.mPhysics.setPosition(position.clone());
+            this.mCharacter.setPosition(position.clone());
             this.mPhysics.falling = true;
         }
     }

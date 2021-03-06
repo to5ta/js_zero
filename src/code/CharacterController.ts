@@ -69,7 +69,7 @@ class CharacterController {
             }, 
             world.scene);
             
-        this.imposter.position = this.world.player_start_position;
+        this.imposter.position = this.world.player_start_position.clone();
         
         this.imposter.checkCollisions = true;
         this.imposter.ellipsoid = new BABYLON.Vector3(
@@ -87,8 +87,7 @@ class CharacterController {
         this.contactRay = new BABYLON.Ray(
             this.imposter.position,
             new BABYLON.Vector3(0, -1.1, 0));
-        this.contactRay.length = this.height/2 + 0.01;
-    
+        this.contactRay.length = this.height/2 + 0.01;   
     }
 
  
@@ -105,7 +104,7 @@ class CharacterController {
 
 
     setPosition(position: BABYLON.Vector3) {
-        this.imposter.position = position.add(BABYLON.Vector3.Up().scale(this.imposter.scaling.y));
+        this.imposter.position.copyFrom(position.clone()); // .add(BABYLON.Vector3.Up().scale(this.imposter.scaling.y)));
     }
 
     getPosition() : BABYLON.Vector3 {

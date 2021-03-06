@@ -46,8 +46,10 @@ class Game implements Pausable, GameEventListener  {
             if (!this.player.died) {
                 setTimeout(()=> {
                     this.player.died = false;
+                    this.player.camera.alpha = -Math.PI/2;
+                    this.player.setOrientation(-Math.PI);
                     this.player.setHealth(100);
-                    this.player.setPosition(this.world.player_start_position);
+                    this.player.setPosition(this.world.player_start_position.clone());
                 }, 3000);
                 this.player.died = true;
             }
@@ -98,7 +100,7 @@ class Game implements Pausable, GameEventListener  {
             this.world, 
             this.assetManager);
         
-        this.player.setPosition(this.world.player_start_position);
+        this.player.setPosition(this.world.player_start_position.clone());
 
         this.player.addGameEventListener(this, "hp_changed");
         this.player.addGameEventListener(this, "died");

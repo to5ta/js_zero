@@ -30,7 +30,7 @@ export class CharacterHealth extends GameEventEmitter  {
     dealFallDamage(speed: number) {
         var absSpeed = Math.abs(speed);
         if(absSpeed>this.maxSpeedNoHurt) {
-            this.dealDamage(absSpeed*2);   
+            this.dealDamage(absSpeed*5);   
         }
     }
 
