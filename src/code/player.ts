@@ -20,10 +20,6 @@ import { CharacterHealth } from "./CharacterHealth";
 
 import { GameEvent, GameEventDispatcher, GameEventListener } from "./GameEvent";
 
-
-
-
-
 class Player extends GameEventDispatcher implements GameEventListener {
 
     scene: BABYLON.Scene;
@@ -45,9 +41,6 @@ class Player extends GameEventDispatcher implements GameEventListener {
    
     died = false;
 
-    setHealth(hp: number) {
-        this.mHealth.setHealthPoints(hp);
-    }
 
     onEvent(event: GameEvent) {
         if (event.type == "ready") {
@@ -59,6 +52,15 @@ class Player extends GameEventDispatcher implements GameEventListener {
             // if (event.data) console.log("data: ", event.data);
         }
     }
+
+    dispatchHealthEvent() {
+    
+    }
+
+    dispatchVisualizationEvent() {
+
+    }
+
 
     getPosition() : BABYLON.Vector3 {
         return this.mPhysics.getPosition();
@@ -99,8 +101,8 @@ class Player extends GameEventDispatcher implements GameEventListener {
         this.debug_mode = false;
         
         this.mHealth = new CharacterHealth(100);
-        this.mHealth.addGameEventListener(this, "hp_changed");
-        this.mHealth.addGameEventListener(this, "died");
+        this.mHealth.addGameEventListener(this);
+        this.mHealth.addGameEventListener(this);
         
         
         this.mCharacter = new CharacterVisualization(
@@ -113,7 +115,7 @@ class Player extends GameEventDispatcher implements GameEventListener {
                 "idle": {loop: true, speed: 1.0, from: 100/60, to: 160/60},
                 "sprint": {loop: true, speed: 3.0, from: 190/60, to: 289/60, soundfile: sprint_sound}
             }); 
-            this.mCharacter.addGameEventListener(this, "ready");
+            this.mCharacter.addGameEventListener(this);
             
             
             var ctrlConfig: ControllerConfig = {
@@ -122,7 +124,7 @@ class Player extends GameEventDispatcher implements GameEventListener {
                 sprintSpeed: 10
             };
             this.mPhysics = new CharacterController(ctrlConfig, this, world, this.mCharacter);
-            this.mPhysics.addGameEventListener(this, "died");
+            this.mPhysics.addGameEventListener(this);
             
             
             // CAMERA ////////////////////////////////////////////////////////////////////////////////////////////////////////////////

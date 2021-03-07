@@ -5,38 +5,39 @@ interface GameEvent {
     data?: Object;
 }
 
-class GameEventDispatcher {
-    private typeToListeners = new Map<string, Array<GameEventListener>>(); 
+abstract class GameEventDispatcher {
+    private listeners = new Array<GameEventListener>(); 
 
-    private name: string;
+    private static takenNames = new Array<string>(); 
+    readonly name: string;
 
+    // derived classes should call this with a proper, unique name 
     constructor(name: string) {
-        this.name = name;
+        if (GameEventDispatcher.takenNames.indexOf(name) > -1) {
+            this.name = name.concat("_", Math.random().toString(36).substring(7));
+            throw new Error(`Name "${name}" is already used, using ${this.name} instead!`);
+        } else {
+            this.name = name;
+        }
+        GameEventDispatcher.takenNames.push(this.name);
     }
 
-    public addGameEventListener(listener: GameEventListener, type: string) {
-        if (this.typeToListeners.has(type)) {
-            this.typeToListeners.get(type)?.push(listener);
-        } else {
-            this.typeToListeners.set(type, new Array<GameEventListener>(listener));
+    public addGameEventListener(listener: GameEventListener) {
+        if (this.listeners.indexOf(listener) == -1) {
+            this.listeners.push(listener);
         }
     }
 
-    public removeGameEventListener(listener: GameEventListener, type: string) {
-        if(this.typeToListeners.has(type)) {
-            const listeners = this.typeToListeners.get(type) as  Array<GameEventListener>;
-
-            while (listeners.indexOf(listener, 0) > -1) {
-                listeners.splice(listeners.indexOf(listener, 0), 1);
-            }
+    public removeGameEventListener(listener: GameEventListener) {
+        while (this.listeners.indexOf(listener) > -1) {
+            this.listeners.splice(this.listeners.indexOf(listener, 0), 1);
         }
     }
 
     public dispatchEvent(event: GameEvent){
         event.dispatcher = this.name;
-        const listeners = this.typeToListeners.get(event.type);
-        listeners?.forEach(listener => {
-            // console.log("\nDispatcher: ",event.dispatcher,", Type: ",event.type);
+        this.listeners.forEach(listener => {
+            console.log("\nDispatcher: ",event.dispatcher,", Type: ",event.type);
             listener.onEvent(event);
         });
     }

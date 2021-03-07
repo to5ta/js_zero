@@ -45,7 +45,7 @@ class Game implements Pausable, GameEventListener  {
                     this.player.died = false;
                     this.player.camera.alpha = -Math.PI/2;
                     this.player.setOrientation(-Math.PI);
-                    this.player.setHealth(100);
+                    this.player.mHealth.setHealthPoints(100);
                     this.player.mPhysics.velocity = BABYLON.Vector3.Zero(); 
                     this.player.setPosition(this.world.player_start_position.clone());
                 }, 3000);
@@ -100,9 +100,9 @@ class Game implements Pausable, GameEventListener  {
         
         this.player.setPosition(this.world.player_start_position.clone());
 
-        this.player.addGameEventListener(this, "hp_changed");
-        this.player.addGameEventListener(this, "died");
-        this.player.addGameEventListener(this, "ready");
+        this.player.addGameEventListener(this);
+        this.player.addGameEventListener(this);
+        this.player.addGameEventListener(this);
         
         this.ui = new GameUI();
 
@@ -148,7 +148,7 @@ class Game implements Pausable, GameEventListener  {
     }
 
     onFinishedLoading() {
-        this.player.setHealth(100);
+        this.player.mHealth.setHealthPoints(100);
         console.log("Finished loading resources! Starting game...");
         this.resume();
     }
