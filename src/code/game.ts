@@ -7,6 +7,7 @@ import { DebugView } from "./debug_view";
 import GameUI from "./GameUI";
 import { GameEvent, GameEventListener } from "./GameEvent";
 import { App } from "./app";
+import { CustomLoadingScreen } from "./LoadingScreen";
 
 class Game implements Pausable, GameEventListener  {
     engine: BABYLON.Engine;
@@ -23,6 +24,8 @@ class Game implements Pausable, GameEventListener  {
     app: App;
 
     ui: GameUI;
+
+    loadingScreen: CustomLoadingScreen;
 
 
     onEvent(event: GameEvent) {
@@ -65,7 +68,10 @@ class Game implements Pausable, GameEventListener  {
         this.app = app;
 
         this.onReady = onReady;
- 
+
+        this.loadingScreen = new CustomLoadingScreen();
+        this.engine.loadingScreen = this.loadingScreen;
+
         // game state ---------------------------------------------------------
         this.debug_fly_mode = false;
         this.showDebugInfo = false;
@@ -171,6 +177,6 @@ class Game implements Pausable, GameEventListener  {
         }
     }
 }
-  
+
 export { Game };
   

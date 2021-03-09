@@ -53,15 +53,6 @@ class Player extends GameEventDispatcher implements GameEventListener {
         }
     }
 
-    dispatchHealthEvent() {
-    
-    }
-
-    dispatchVisualizationEvent() {
-
-    }
-
-
     getPosition() : BABYLON.Vector3 {
         return this.mPhysics.getPosition();
     }
