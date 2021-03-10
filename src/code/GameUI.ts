@@ -11,7 +11,7 @@ export default class GameUI {
     this.playerHealth = new BABYLONGUI.TextBlock();
     this.playerHealth.text = "Hello world";
     this.playerHealth.color = "white";
-    this.playerHealth.fontSize = 35;
+    this.playerHealth.fontSize = 45;
     this.playerHealth.textHorizontalAlignment = BABYLONGUI.TextBlock.HORIZONTAL_ALIGNMENT_LEFT;
     this.playerHealth.textVerticalAlignment = BABYLONGUI.TextBlock.VERTICAL_ALIGNMENT_TOP;
     this.playerHealth.horizontalAlignment = BABYLONGUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;

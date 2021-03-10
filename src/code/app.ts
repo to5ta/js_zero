@@ -45,6 +45,16 @@ class App {
     });
 
 
+    window.addEventListener('focus', () => {
+      console.log('App gets focus again...');
+      this.game.resume();
+    });
+
+    window.addEventListener('blur', () => {
+      console.log('App lost focus...');
+      this.game.pause();
+    });
+
     // register input handle
     document.body.addEventListener("keydown", (event) => {
       this.game.handleInput(event);
@@ -55,7 +65,7 @@ class App {
     });
 
     
-    // mouse? if we implement an own camera handler
+    // mouse? if we'd implement an own camera handler
 
 
     // catch the cursor to control the camera

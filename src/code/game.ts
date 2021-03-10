@@ -156,6 +156,9 @@ class Game implements Pausable, GameEventListener  {
     onFinishedLoading() {
         this.player.mHealth.setHealthPoints(100);
         console.log("Finished loading resources! Starting game...");
+        if(this.world.music && !this.world.music.isPlaying){
+            this.world.music.play();
+        }
         this.resume();
     }
 

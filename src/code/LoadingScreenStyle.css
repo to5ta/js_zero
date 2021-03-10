@@ -1,3 +1,9 @@
+@keyframes fadeOutBackground {
+    from { background-color: black;}
+    to {background-color: transparent;}
+  }
+
+
 p {
     top: 40px;
     position: absolute;
@@ -8,9 +14,8 @@ p {
 
 #loadingtitle {
     font-family: Georgia, 'Times New Roman', Times, serif;
-    font-size:  100%;
+    font-size:  300%;
     color: whitesmoke;
-
     position: absolute;
     top: 50%;
     left: 50%;
@@ -25,10 +30,14 @@ body {
 }
 
 canvas {
+    width: 100%;
+    height: 100%;
     z-index: 0;
     position: fixed;
     display: block; /* fix necessary to remove space at bottom of canvas */
 }
+
+
 
 #loading_screen_background {
     left: 0%;
@@ -36,8 +45,11 @@ canvas {
     width: 100%;
     height: 100%;
     position: absolute;
-    background-color: #313C74;
+    background-color: black;
     z-index: 100;
     text-align: center;
-    
+    animation-name: fadeOutBackground;
+    animation-play-state: paused;
+    animation-duration: 3000ms;
+    animation-fill-mode: both;
 }

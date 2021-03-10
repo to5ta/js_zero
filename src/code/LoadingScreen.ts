@@ -34,9 +34,14 @@ class CustomLoadingScreen implements ILoadingScreen {
         document.body.appendChild(this.background);
     }
 
-
     hideLoadingUI() {
-        document.body.removeChild(this.background);
+        setTimeout(()=>{
+            this.background.style.animationPlayState = "running";
+            this.title.textContent ="";
+        }, 1500);
+        setTimeout(()=> {
+            document.body.removeChild(this.background);
+        }, 4500);
     }
 }
 
