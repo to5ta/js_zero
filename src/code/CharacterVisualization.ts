@@ -1,23 +1,50 @@
 import * as BABYLON from "@babylonjs/core";
 import "@babylonjs/loaders";
 
-
 interface animationProperties {
     loop: boolean;
     speed: number;
     from: number;
     to: number;
-    soundfile?: string;  // TODO
+    soundfile?: string;
 }
 
-export class CharacterVisualization {
+import { GameEventDispatcher } from "./GameEvent";
+export class CharacterVisualization extends GameEventDispatcher {
     
     constructor(
         modelfile: string,
         assetManager: BABYLON.AssetsManager,
         scene: BABYLON.Scene,
         namedAnimationProperties: {[key: string]: animationProperties}) {
+        super(CharacterVisualization.name);
         this.mNamedAnimationProperties = namedAnimationProperties;
+        
+        let soundsCount = 0;
+
+        let soundsLoaded = 0;
+        let onSoundLoaded = () => {
+            soundsLoaded++;
+            if(soundsLoaded == soundsCount){
+                this.onPartLoaded("sound");
+            }
+        }
+        
+        Object.keys(namedAnimationProperties).forEach(aniName => {
+            if (namedAnimationProperties[aniName].soundfile) {
+                let task = assetManager.addBinaryFileTask(
+                    `${aniName}_sound_task`, 
+                    namedAnimationProperties[aniName].soundfile as string);
+                soundsCount++;
+                task.onSuccess = (task: BABYLON.BinaryFileAssetTask) => {
+                    let soundName = `${aniName}_sound`;
+                    this.sounds[soundName] = new BABYLON.Sound(soundName, task.data, scene, onSoundLoaded, {});
+                }
+            }
+        }); 
+        if (soundsCount==0) {
+            this.soundsLoaded = true;
+        }
         
         var assetTask = assetManager.addMeshTask(
             "PlayerModel", 
@@ -31,19 +58,19 @@ export class CharacterVisualization {
             let animation = assetTask.loadedAnimationGroups[0];      
             animation.start();
             animation.stop();        
-            console.log(Object.keys(namedAnimationProperties));    
             Object.keys(namedAnimationProperties).forEach(animationName => {
                 this.mNamedAnimations[animationName] = animation.clone(animationName);
             });
-            
-            this.meshLoaded = true;
+            this.onPartLoaded("mesh");
         }
     }
+
 
     isPlaying(animationName: string) : boolean {
         return this.mNamedAnimations[animationName]?.isPlaying ?? false;
     }
-            
+         
+    
     play(animationName: string): void 
     {
         if (!this.meshLoaded || 
@@ -57,8 +84,21 @@ export class CharacterVisualization {
                 this.mNamedAnimationProperties[animationName].speed,
                 this.mNamedAnimationProperties[animationName].from,
                 this.mNamedAnimationProperties[animationName].to,
-                false);                
+                false);         
         }
+
+        let soundName = `${animationName}_sound`; 
+        Object.keys(this.sounds).forEach(otherSoundName => {this.sounds[otherSoundName].stop()});
+        if (Object.keys(this.sounds).includes(soundName)) {
+            this.playSound(soundName);
+        }
+    }
+
+    playSound(soundName: string){
+        Object.keys(this.sounds).forEach(otherSoundName => {this.sounds[otherSoundName].stop()});
+        if (Object.keys(this.sounds).includes(soundName)) {
+            this.sounds[soundName].play();
+        } 
     }
 
     setPosition(position: BABYLON.Vector3) {
@@ -73,13 +113,25 @@ export class CharacterVisualization {
         this.mMesh.rotation.y = anzimuth;
     }
             
-
+    sounds: {[key: string]: BABYLON.Sound} = {};
     mNamedAnimations: {[key: string]: BABYLON.AnimationGroup} = {};
     mNamedAnimationProperties: {[key: string]: animationProperties};
     
     private meshLoaded = false;
-    private scene: BABYLON.Scene;
+    private soundsLoaded = false;
     private mMesh: BABYLON.Mesh;
 
-    finishedLoading(): boolean {return this.meshLoaded};
+    onPartLoaded(part: string){
+        if (part === "mesh"){
+            this.meshLoaded = true;
+        } else if (part === "sound") {
+            this.soundsLoaded = true;
+        }
+        
+        if (this.meshLoaded==true && this.soundsLoaded==true) {
+            this.dispatchEvent({type: "ready", data: {author: CharacterVisualization.name}});
+        }
+    }
+
+    finishedLoading(): boolean {return this.meshLoaded && this.soundsLoaded};
 } 

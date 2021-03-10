@@ -74,6 +74,9 @@ Show some interesting game mechanics and capabilities:
     * Player
     * AI / NPC
 
+<<<<<<< HEAD
+# 
+=======
 
 
 
@@ -113,3 +116,4 @@ Show some interesting game mechanics and capabilities:
 - [ ] Minimum mobile controls concept
 - [ ] Player Actions like fighting, interacting...
 
+>>>>>>> master

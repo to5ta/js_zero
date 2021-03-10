@@ -14,8 +14,12 @@ import box_model from  '../assets/models/box.gltf';
 import * as BABYLON from "@babylonjs/core";
 import "@babylonjs/loaders";
 
+interface Pausable {
+    pause(): void;
+    resume(): void;
+}
 
-export default class GameWorld {
+class GameWorld implements Pausable {
     
     shadowGenerator:  BABYLON.ShadowGenerator;
 
@@ -27,6 +31,7 @@ export default class GameWorld {
     box: BABYLON.Mesh;
     music2: BABYLON.Sound;
     music: BABYLON.Sound;
+    photoDome: BABYLON.PhotoDome;
     
 
     constructor(scene: BABYLON.Scene, assetManager: BABYLON.AssetsManager) {
@@ -36,7 +41,7 @@ export default class GameWorld {
 
         this.gravity = -9.81;
 
-        this.player_start_position = new BABYLON.Vector3(0,15,0);
+        this.player_start_position = new BABYLON.Vector3(0,1.2,0);
         this.camera_start_position = new BABYLON.Vector3(30,30,30);
 
         // Add a camera to the scene and attach it to the canvas
@@ -86,16 +91,14 @@ export default class GameWorld {
             test_level_model);   
 
         levelLoadTask.onSuccess = () => {
-            console.log(levelLoadTask);
+            // console.log(levelLoadTask);
 
             // start ambient animations
             levelLoadTask.loadedAnimationGroups.forEach(animation => {
                 animation.start(true);
             });
-            // console.log("levelTask: ", levelLoadTask);
             levelLoadTask.loadedMeshes.forEach((mesh) => {
                 this.collision_meshes.push(mesh as BABYLON.Mesh);
-                // console.log("Add Mesh to Collision: ", mesh);
                 mesh.checkCollisions = true;
                 // mesh.material.wireframe = true;
             });
@@ -153,7 +156,11 @@ export default class GameWorld {
         //     false);    
         // this.scene.createDefaultSkybox(envTexture, false, 1000, 0, false);
 
-        var photoDome = new BABYLON.PhotoDome("envMapDome", envMap, {}, scene);
+        this.photoDome = new BABYLON.PhotoDome("envMapDome", envMap, {}, scene);
+
+        setInterval(()=>{
+            this.photoDome.rotate(BABYLON.Vector3.Up(), 0.0006);
+        }, 50);
 
         this.music2 = new BABYLON.Sound("Music1", medieval_theme_01, scene, null, {
             loop: true,
@@ -169,7 +176,21 @@ export default class GameWorld {
         this.music.setVolume(0.05);      
     }
 
+
+    pause(): void {
+        if(this.music.isPlaying){
+            this.music.pause();
+        }
+    }
+    resume(): void {
+        if(!this.music.isPlaying){
+            this.music.play();
+        }
+    }
+
     setDebug(debug: boolean) {
 
     }
 }
+
+export { GameWorld, Pausable };

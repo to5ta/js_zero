@@ -11,9 +11,11 @@ class Environment {
             navigator.userAgent);
 
         this.canvas = document.createElement("canvas");
-        document.body.appendChild(this.canvas);
         this.canvas.height = window.innerHeight;
         this.canvas.width = window.innerWidth;
+        console.log(this.canvas);
+        console.log(window);
+        document.body.appendChild(this.canvas);
     }
 }
 

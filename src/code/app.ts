@@ -20,7 +20,7 @@ class App {
     this.env = new Environment();
 
     this.engine = new BABYLON.Engine(this.env.canvas, true);
-    this.game = new Game(this.engine, this.env.canvas);  
+    this.game = new Game(this.engine, this.env.canvas, this.onReady, this);
 
     this.stats = new Stats();
     this.stats.showPanel( 0 );
@@ -35,22 +35,24 @@ class App {
     });
 
     window.addEventListener('focusin', () => {
-      console.log('get focus again');
+      console.log('App gets focus again...');
       this.game.resume();
     });
 
     window.addEventListener('focusout', () => {
-      console.log('lost focus');
+      console.log('App lost focus...');
       this.game.pause();
     });
 
 
-    // register renderloop
-    this.engine.runRenderLoop(() => { 
-      this.stats.begin();
-      this.game.mainloop(this.engine.getDeltaTime());
-      this.game.scene.render();
-      this.stats.end();
+    window.addEventListener('focus', () => {
+      console.log('App gets focus again...');
+      this.game.resume();
+    });
+
+    window.addEventListener('blur', () => {
+      console.log('App lost focus...');
+      this.game.pause();
     });
 
     // register input handle
@@ -62,12 +64,30 @@ class App {
       this.game.handleInput(event);
     });
 
+    
+    // mouse? if we'd implement an own camera handler
+
+
     // catch the cursor to control the camera
     if (!this.env.isMobile) {
       document.body.addEventListener("click", (event) => {
         this.env.canvas.requestPointerLock();
       });
     }
+  }
+
+
+  onReady() {
+    console.log("register render loop function");
+    // register renderloop
+    this.engine.runRenderLoop(() => { 
+      this.stats.begin();
+      if (!this.game.paused) {
+        this.game.mainloop(this.engine.getDeltaTime());
+        this.game.scene.render();
+      }
+      this.stats.end();
+    });
   }
 }
 
