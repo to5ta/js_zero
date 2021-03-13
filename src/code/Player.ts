@@ -80,6 +80,24 @@ class Player extends GameEventDispatcher implements GameEventListener {
         }
     }
 
+    onDying(event: GameEvent) {
+        this.mCharacter.play("jump"); // "die" animation does not exist yet
+        console.log("start dying animation...");
+        this.inputDirectionBuffer = BABYLON.Vector3.Zero();
+        this.mPhysics.reset();
+        this.died = true;
+    }
+
+
+    reset() {
+        this.died = false;
+        this.camera.alpha = -Math.PI/2;
+        this.setOrientation(-Math.PI);
+        this.mHealth.setHealthPoints(100);
+        this.inputDirectionBuffer = BABYLON.Vector3.Zero();
+        this.setPosition(this.world.player_start_position.clone());
+    }
+
 
     constructor(
         scene: BABYLON.Scene, 
@@ -110,7 +128,7 @@ class Player extends GameEventDispatcher implements GameEventListener {
             
             
             var ctrlConfig: ControllerConfig = {
-                jumpSpeed: 7,
+                jumpSpeed: 10,
                 moveSpeed: 6,
                 sprintSpeed: 10
             };
@@ -197,8 +215,10 @@ class Player extends GameEventDispatcher implements GameEventListener {
         // preconditions
         const dTimeSec = dTimeMs / 1000;
 
-        this.mPhysics.setOrientation(Math.PI/2 - this.camera.alpha + Math.PI);
-        this.mPhysics.update(dTimeMs);
+        if(!this.died) {
+            this.mPhysics.setOrientation(Math.PI/2 - this.camera.alpha + Math.PI);
+            this.mPhysics.update(dTimeMs);
+        }
     }
 
 

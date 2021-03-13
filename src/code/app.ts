@@ -19,14 +19,19 @@ class App {
   constructor() { 
     this.env = new Environment();
 
-    this.engine = new BABYLON.Engine(this.env.canvas, true);
-    this.game = new Game(this.engine, this.env.canvas, this.onReady, this);
+    this.engine = new BABYLON.Engine(
+      this.env.canvas, 
+      true);
+    
+    this.game = new Game(
+      this.engine, 
+      this.env.canvas, 
+      this);
 
     this.stats = new Stats();
     this.stats.showPanel( 0 );
     document.body.appendChild( this.stats.dom );
-    
-
+   
     // Watch for browser/canvas resize events
     window.addEventListener("resize",  () => { 
       if(this.engine) {
@@ -78,13 +83,15 @@ class App {
 
 
   onReady() {
-    console.log("register render loop function");
+    console.log(Date.now(), "Resources loaded, register render loop function...");
     // register renderloop
+
     this.engine.runRenderLoop(() => { 
       this.stats.begin();
       if (!this.game.paused) {
-        this.game.mainloop(this.engine.getDeltaTime());
         this.game.scene.render();
+        
+        this.game.mainloop(this.engine.getDeltaTime());
       }
       this.stats.end();
     });

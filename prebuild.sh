@@ -1,0 +1,1 @@
+echo "Execution of prebuild steps from custom bash script..." #replace debug-tagged lines as theres no preprocessor macros in ts

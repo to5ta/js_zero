@@ -4,6 +4,11 @@
 
 Powered by blender, babylon.js, typescript, npm and github.
 
+## Online-Demo
+
+Go ahead an try it directly: https://to5ta.github.io/js_zero/
+
+
 
 ![Promo](promo2.PNG)
 
@@ -13,10 +18,6 @@ Powered by blender, babylon.js, typescript, npm and github.
 2. `npm install` to install all dependencies
 3. `npm run dev` to host the app locally
 4. open `localhost:8080` in your Browser
-
-## Online-Demo
-
-https://to5ta.github.io/js_zero/
 
 ## Credits
 

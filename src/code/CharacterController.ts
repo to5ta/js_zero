@@ -21,9 +21,9 @@ class CharacterController extends GameEventDispatcher {
     
     private config: ControllerConfig;
    
-    falling: boolean;
-    private jumping: boolean;
-    private sprinting: boolean;
+    falling = true;
+    private jumping = false;
+    private sprinting = false;
 
     private normalizedLocalDirection: BABYLON.Vector3;
     velocity: BABYLON.Vector3;
@@ -90,6 +90,11 @@ class CharacterController extends GameEventDispatcher {
         this.contactRay.length = this.height/2 + 0.01;   
     }
 
+    reset() {
+        this.normalizedLocalDirection = BABYLON.Vector3.Zero();
+        this.velocity = BABYLON.Vector3.Zero(); 
+    }
+
  
     jump() {
         if (!this.falling) {
@@ -101,7 +106,6 @@ class CharacterController extends GameEventDispatcher {
     move(normalizedLocalDirection: BABYLON.Vector3) {
         this.normalizedLocalDirection = normalizedLocalDirection;
     }
-
 
     setPosition(position: BABYLON.Vector3) {
         this.imposter.position.copyFrom(position.clone()); // .add(BABYLON.Vector3.Up().scale(this.imposter.scaling.y)));
@@ -144,7 +148,7 @@ class CharacterController extends GameEventDispatcher {
         if (keyEvent.key == "ArrowDown" || keyEvent.key == "s") {
             this.normalizedLocalDirection.z = keyPressed ? -1 : 0;
         }  
-        if (keyEvent.key == " " && keyPressed){
+        if ((keyEvent.key == " " || keyEvent.key == "Control") && keyPressed){
             this.jump();
         }
 
@@ -217,7 +221,7 @@ class CharacterController extends GameEventDispatcher {
 
         // combine kinematic impacts such as gravity ----------------------------------------------------------------
         if (this.falling || externalPhysicalImpact) {
-            velocityPhysics.y = this.velocity.y - 9.81 * dTimeSec;
+            velocityPhysics.y = this.velocity.y - dTimeSec * 20; // should be 9.81 but looks bad
             this.velocity.y = velocityPhysics.y;
         } else {
             this.velocity.y = 0.01;
