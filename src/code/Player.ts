@@ -81,7 +81,7 @@ class Player extends GameEventDispatcher implements GameEventListener {
     }
 
     onDying(event: GameEvent) {
-        this.mCharacter.play("jump"); // "die" animation does not exist yet
+        this.mCharacter.play("dieOnFall");
         console.log("start dying animation...");
         this.inputDirectionBuffer = BABYLON.Vector3.Zero();
         this.mPhysics.reset();
@@ -119,10 +119,12 @@ class Player extends GameEventDispatcher implements GameEventListener {
             assetManager,
             scene,
             {
-                "walk": {loop: true, speed: 1.3, from: 0.0, to: 1.0, soundfile: steps_sound},
-                "jump": {loop: false, speed: 1.0, from: 70/60, to: 90/60},
-                "idle": {loop: true, speed: 1.0, from: 100/60, to: 160/60},
-                "sprint": {loop: true, speed: 3.0, from: 190/60, to: 289/60, soundfile: sprint_sound}
+                "walk": {loop: true, speed: 1.3, from: 0, to: 1, soundfile: steps_sound},
+                "jump": {loop: false, speed: 1.0, from: 0, to: 1},
+                "idle": {loop: true, speed: 0.5, from: 0, to: 1},
+                "fall": {loop: true, speed: 1.5, from: 0, to: 1},
+                "sprint": {loop: true, speed: 1.5, from: 0, to: 1, soundfile: sprint_sound},
+                "dieOnFall": {loop: false, speed: 1.0, from: 0, to: 1}
             }); 
             this.mCharacter.addGameEventListener(this);
             

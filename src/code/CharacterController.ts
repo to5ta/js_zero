@@ -249,10 +249,12 @@ class CharacterController extends GameEventDispatcher {
                 }
             }
             else {
-                this.animatedModel.play("idle");
+                if (!this.parent.died) {
+                    this.animatedModel.play("idle");
+                }
             }
         } else {
-            this.animatedModel.play("jump");
+            this.animatedModel.play("fall");
         }
 
         // update the character mesh

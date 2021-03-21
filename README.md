@@ -6,11 +6,9 @@ Powered by blender, babylon.js, typescript, npm and github.
 
 ## Online-Demo
 
-Go ahead an try it directly: https://to5ta.github.io/js_zero/
+Go ahead an try it online directly: https://to5ta.github.io/js_zero/
 
-
-
-![Promo](promo2.PNG)
+![Promo](promotion/promo6.PNG)
 
 ## Installation
 
