@@ -20,6 +20,7 @@ function NormaltoSlopeXZ(vec3: BABYLON.Vector3) : [number, number] {
     ];
 }
 
+
 function toDeg(rad: number) : number {
     return rad / Math.PI * 180;
 }

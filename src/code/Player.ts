@@ -40,6 +40,7 @@ class Player extends GameEventDispatcher implements GameEventListener {
     slope: number;
    
     died = false;
+    weight: any;
 
 
     onEvent(event: GameEvent) {
@@ -65,7 +66,6 @@ class Player extends GameEventDispatcher implements GameEventListener {
         if(this.mCharacter.finishedLoading()) {
             this.mPhysics.setPosition(position.clone());
             this.mCharacter.setPosition(position.clone());
-            this.mPhysics.falling = true;
         }
     }
     
@@ -132,7 +132,11 @@ class Player extends GameEventDispatcher implements GameEventListener {
             var ctrlConfig: ControllerConfig = {
                 jumpSpeed: 10,
                 moveSpeed: 6,
-                sprintSpeed: 10
+                sprintSpeed: 10,
+                width: 0.7,
+                depth: 0.3,
+                height: 1.9,
+                weight: 75.0 //kg
             };
             this.mPhysics = new CharacterController(ctrlConfig, this, world, this.mCharacter);
             this.mPhysics.addGameEventListener(this);
@@ -200,7 +204,7 @@ class Player extends GameEventDispatcher implements GameEventListener {
 
 
     getTotalWeight() {
-        return this.mPhysics.weight; // + items later
+        return this.weight; // + items later
     }
 
 

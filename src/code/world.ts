@@ -162,18 +162,12 @@ class GameWorld implements Pausable {
             this.photoDome.rotate(BABYLON.Vector3.Up(), 0.0006);
         }, 50);
 
-        this.music2 = new BABYLON.Sound("Music1", medieval_theme_01, scene, null, {
-            loop: true,
-            autoplay: false
-        });
-          
-        this.music = new BABYLON.Sound("Music2", medieval_theme_02, scene, null, {
+        this.music = new BABYLON.Sound("Music", Math.random() < 0.5 ? medieval_theme_02 : medieval_theme_01, scene, null, {
             loop: true,
             autoplay: false
         });
     
-        this.music2.setVolume(0.05);      
-        this.music.setVolume(0.05);      
+        this.music.setVolume(0.07);      
     }
 
 
