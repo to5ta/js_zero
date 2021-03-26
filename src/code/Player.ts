@@ -40,6 +40,7 @@ class Player extends GameEventDispatcher implements GameEventListener {
     slope: number;
    
     died = false;
+    weight: any;
 
 
     onEvent(event: GameEvent) {
@@ -65,7 +66,6 @@ class Player extends GameEventDispatcher implements GameEventListener {
         if(this.mCharacter.finishedLoading()) {
             this.mPhysics.setPosition(position.clone());
             this.mCharacter.setPosition(position.clone());
-            this.mPhysics.falling = true;
         }
     }
     
@@ -78,6 +78,24 @@ class Player extends GameEventDispatcher implements GameEventListener {
         if(this.mHealth) {
             this.mHealth.dealFallDamage(speed);
         }
+    }
+
+    onDying(event: GameEvent) {
+        this.mCharacter.play("dieOnFall");
+        console.log("start dying animation...");
+        this.inputDirectionBuffer = BABYLON.Vector3.Zero();
+        this.mPhysics.reset();
+        this.died = true;
+    }
+
+
+    reset() {
+        this.died = false;
+        this.camera.alpha = -Math.PI/2;
+        this.setOrientation(-Math.PI);
+        this.mHealth.setHealthPoints(100);
+        this.inputDirectionBuffer = BABYLON.Vector3.Zero();
+        this.setPosition(this.world.player_start_position.clone());
     }
 
 
@@ -101,18 +119,24 @@ class Player extends GameEventDispatcher implements GameEventListener {
             assetManager,
             scene,
             {
-                "walk": {loop: true, speed: 1.3, from: 0.0, to: 1.0, soundfile: steps_sound},
-                "jump": {loop: false, speed: 1.0, from: 70/60, to: 90/60},
-                "idle": {loop: true, speed: 1.0, from: 100/60, to: 160/60},
-                "sprint": {loop: true, speed: 3.0, from: 190/60, to: 289/60, soundfile: sprint_sound}
+                "walk": {loop: true, speed: 1.3, from: 0, to: 1, soundfile: steps_sound},
+                "jump": {loop: false, speed: 1.0, from: 0, to: 1},
+                "idle": {loop: true, speed: 0.5, from: 0, to: 1},
+                "fall": {loop: true, speed: 1.5, from: 0, to: 1},
+                "sprint": {loop: true, speed: 1.5, from: 0, to: 1, soundfile: sprint_sound},
+                "dieOnFall": {loop: false, speed: 1.0, from: 0, to: 1}
             }); 
             this.mCharacter.addGameEventListener(this);
             
             
             var ctrlConfig: ControllerConfig = {
-                jumpSpeed: 7,
+                jumpSpeed: 10,
                 moveSpeed: 6,
-                sprintSpeed: 10
+                sprintSpeed: 10,
+                width: 0.7,
+                depth: 0.3,
+                height: 1.9,
+                weight: 75.0 //kg
             };
             this.mPhysics = new CharacterController(ctrlConfig, this, world, this.mCharacter);
             this.mPhysics.addGameEventListener(this);
@@ -180,7 +204,7 @@ class Player extends GameEventDispatcher implements GameEventListener {
 
 
     getTotalWeight() {
-        return this.mPhysics.weight; // + items later
+        return this.weight; // + items later
     }
 
 
@@ -197,8 +221,10 @@ class Player extends GameEventDispatcher implements GameEventListener {
         // preconditions
         const dTimeSec = dTimeMs / 1000;
 
-        this.mPhysics.setOrientation(Math.PI/2 - this.camera.alpha + Math.PI);
-        this.mPhysics.update(dTimeMs);
+        if(!this.died) {
+            this.mPhysics.setOrientation(Math.PI/2 - this.camera.alpha + Math.PI);
+            this.mPhysics.update(dTimeMs);
+        }
     }
 
 

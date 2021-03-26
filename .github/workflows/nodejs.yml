@@ -20,6 +20,8 @@ jobs:
       run: |
         npm install
         npm run build
+        chmod +x ./prebuild.sh
+        ./prebuild.sh
       env:
         CI: true
 

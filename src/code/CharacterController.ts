@@ -1,41 +1,45 @@
-
 import * as BABYLON from "@babylonjs/core";
 import { CharacterVisualization } from "./CharacterVisualization";
 import { GameWorld } from "./world";
 import { Player } from "./Player";
 import { GameEventDispatcher } from "./GameEvent";
+import { NormaltoSlopeXZ } from "./utils";
 
 class ControllerConfig {
     jumpSpeed: number;
     moveSpeed: number;
     sprintSpeed: number;
+    width: number;
+    depth: number;
+    height: number;
+    weight: number;
 }
+
 
 
 class CharacterController extends GameEventDispatcher {
 
     private world: GameWorld;
-    imposter: BABYLON.Mesh;
+    readonly imposter: BABYLON.Mesh;
     private parent: Player;
-    animatedModel: CharacterVisualization;
+    readonly animatedModel: CharacterVisualization;
     
     private config: ControllerConfig;
    
-    falling: boolean;
-    private jumping: boolean;
-    private sprinting: boolean;
+    private falling = true;
+    private jumping = false;
+    private sprint = false;
 
-    private normalizedLocalDirection: BABYLON.Vector3;
-    velocity: BABYLON.Vector3;
+    private localInputDirection: BABYLON.Vector3;
     private anzimuth: number;
-
-    width: number;
-    depth: number;
-    height: number;
-
-    contactRay: BABYLON.Ray;
     
-    weight: number;
+    private velocity: BABYLON.Vector3;
+
+    private contactRay: BABYLON.Ray;
+
+    private standingNormal: BABYLON.Vector3 = BABYLON.Vector3.Up();
+    private positionLastFrame: BABYLON.Vector3;
+    private currentVelocity: BABYLON.Vector3;
 
     constructor(
         config: ControllerConfig,  
@@ -44,50 +48,50 @@ class CharacterController extends GameEventDispatcher {
         animatedModel: CharacterVisualization
     ) {
         super(CharacterController.name);
-        this.config = config;
+        this.config             = config;
+        this.world              = world;
+        this.animatedModel      = animatedModel;
+        this.parent             = parent;
 
-        this.world = world;
-        this.animatedModel = animatedModel;
-        this.parent = parent;
+        this.localInputDirection = BABYLON.Vector3.Zero();
 
-        this.normalizedLocalDirection = BABYLON.Vector3.Zero();
         this.velocity = BABYLON.Vector3.Zero();
 
         // physical representation --------------------------------------------
-
-        this.width = 0.7;
-        this.depth = 0.3;
-        this.height = 1.9;
-        this.weight = 75.0; //kg
-
         this.imposter = BABYLON.MeshBuilder.CreateSphere(
             "PlayerSphere", 
             {   
-                diameterX: this.width,
-                diameterY: this.height,
-                diameterZ: this.depth,
+                diameterX: this.config.width,
+                diameterY: this.config.height,
+                diameterZ: this.config.depth,
             }, 
             world.scene);
             
         this.imposter.position = this.world.player_start_position.clone();
+        this.currentVelocity = BABYLON.Vector3.Zero();
+        this.positionLastFrame = this.imposter.position;
+
         
         this.imposter.checkCollisions = true;
         this.imposter.ellipsoid = new BABYLON.Vector3(
-            this.width/2, 
-            this.height/2, 
-            this.depth/2);
+            this.config.width/2, 
+            this.config.height/2, 
+            this.config.depth/2);
             
         this.imposter.material = new BABYLON.StandardMaterial("player_box_material", world.scene);
         this.imposter.material.wireframe = true;            
         this.imposter.visibility = 0;
 
-        var floatingDistToGround = 0.05;
-
-
         this.contactRay = new BABYLON.Ray(
             this.imposter.position,
             new BABYLON.Vector3(0, -1.1, 0));
-        this.contactRay.length = this.height/2 + 0.01;   
+        this.contactRay.length = this.config.height/2 + 0.01;  
+
+    }
+
+    reset() {
+        this.localInputDirection = BABYLON.Vector3.Zero();
+        this.velocity = BABYLON.Vector3.Zero(); 
     }
 
  
@@ -99,9 +103,8 @@ class CharacterController extends GameEventDispatcher {
     }
    
     move(normalizedLocalDirection: BABYLON.Vector3) {
-        this.normalizedLocalDirection = normalizedLocalDirection;
+        this.localInputDirection = normalizedLocalDirection;
     }
-
 
     setPosition(position: BABYLON.Vector3) {
         this.imposter.position.copyFrom(position.clone()); // .add(BABYLON.Vector3.Up().scale(this.imposter.scaling.y)));
@@ -120,31 +123,36 @@ class CharacterController extends GameEventDispatcher {
     }
 
 
+    getCurrentVelocity(): BABYLON.Vector3 {
+        return this.currentVelocity;
+    }
+
+
     handleInput(keyEvent: KeyboardEvent) {
         
         const keyPressed = keyEvent.type == "keydown";
 
         if (keyEvent.key == "ArrowLeft" || keyEvent.key == "a") {
             if (keyPressed) {
-                this.normalizedLocalDirection.x = -0.5;
+                this.localInputDirection.x = -0.5;
             } else {
-                this.normalizedLocalDirection.x = 0;
+                this.localInputDirection.x = 0;
             }
         }  
         if (keyEvent.key == "ArrowRight" || keyEvent.key == "d") {
             if (keyPressed) {
-                this.normalizedLocalDirection.x = 0.5;
+                this.localInputDirection.x = 0.5;
             } else {
-                this.normalizedLocalDirection.x = 0;
+                this.localInputDirection.x = 0;
             }
         }  
         if (keyEvent.key == "ArrowUp" || keyEvent.key == "w") {
-            this.normalizedLocalDirection.z = keyPressed ? 1 : 0;
+            this.localInputDirection.z = keyPressed ? 1 : 0;
         }  
         if (keyEvent.key == "ArrowDown" || keyEvent.key == "s") {
-            this.normalizedLocalDirection.z = keyPressed ? -1 : 0;
+            this.localInputDirection.z = keyPressed ? -1 : 0;
         }  
-        if (keyEvent.key == " " && keyPressed){
+        if ((keyEvent.key == " " || keyEvent.key == "Control") && keyPressed){
             this.jump();
         }
 
@@ -156,7 +164,7 @@ class CharacterController extends GameEventDispatcher {
         // }      
 
         if (keyEvent.key == "Shift") {
-            this.sprinting = keyPressed ? true : false;
+            this.sprint = keyPressed ? true : false;
         }
         
     }
@@ -165,14 +173,16 @@ class CharacterController extends GameEventDispatcher {
     update(dTimeMs: number) {
         const dTimeSec = dTimeMs / 1000;
 
+        var isSprinting = this.sprint && this.localInputDirection.z == 1 && this.localInputDirection.x == 0;
+
+
+
         // collision detection for player ------------------------------------------------------------------------------------
         var externalPhysicalImpact = false;
-
 
         let meshes = this.world.collision_meshes;
         var rayCastResults : BABYLON.PickingInfo[] = Array();
         
-
         this.contactRay.intersectsMeshes(
             meshes as BABYLON.DeepImmutableObject<BABYLON.AbstractMesh>[], 
             false,
@@ -183,16 +193,22 @@ class CharacterController extends GameEventDispatcher {
 
         // "collision response" for player -----------------------------------------------------------------------------------
         const velocityPhysics =  new BABYLON.Vector3(0,0,0);
+        var pitch=0;
+        var roll=0;
 
         if (rayCastToGroundHit) {
             let dist = rayCastResults[0].distance;
+
+            this.standingNormal = rayCastResults[0].getNormal(true) ?? BABYLON.Vector3.Up();
+                 
+            [pitch, roll] = NormaltoSlopeXZ(this.standingNormal);
 
             if(this.falling) {
                 this.parent.onGroundContact(this.velocity.y);
             }
 
             // we could also use slope here or other surface attributes such as "marked-as-sticky"
-            if(dist - 0.05 <= this.height/2) {
+            if(dist - 0.05 <= this.config.height/2) {
                 this.falling = false;
                 let matref = this.imposter.material as BABYLON.StandardMaterial;  
                 matref.emissiveColor = new BABYLON.Color3(1, 0, 0);
@@ -209,59 +225,85 @@ class CharacterController extends GameEventDispatcher {
             this.velocity.y = this.config.jumpSpeed;
         }
 
-        // input form player + pyhsical interaction -----------------------------------------------------------------
-        const velocityIntended = this.normalizedLocalDirection
-            .normalize()
-            .scale(
-                this.sprinting ? this.config.sprintSpeed : this.config.moveSpeed);
 
-        // combine kinematic impacts such as gravity ----------------------------------------------------------------
-        if (this.falling || externalPhysicalImpact) {
-            velocityPhysics.y = this.velocity.y - 9.81 * dTimeSec;
-            this.velocity.y = velocityPhysics.y;
-        } else {
-            this.velocity.y = 0.01;
-        }
 
-        const toWorld = BABYLON.Matrix.RotationYawPitchRoll(
+        // intended velocity from player input -----------------------------------------------------------------
+
+        const toWorldOrientation = BABYLON.Matrix.RotationYawPitchRoll(
             this.anzimuth,
             0,
             0); 
         
-        const moveCombined = velocityPhysics.add(
-            BABYLON.Vector3.TransformCoordinates(velocityIntended, toWorld));
+        const toWorldSlope = BABYLON.Matrix.RotationYawPitchRoll(
+            0,
+            pitch,
+            -roll);
+
+        let inputVelocity = this.localInputDirection.normalizeToNew();
+
+        inputVelocity
+            .scaleInPlace(
+                (this.sprint && isSprinting) ? this.config.sprintSpeed : this.config.moveSpeed);
+
+        inputVelocity = BABYLON.Vector3.TransformCoordinates(inputVelocity, toWorldOrientation);
+        inputVelocity = BABYLON.Vector3.TransformCoordinates(inputVelocity, toWorldSlope);
+       
+
+
+
+        // combine kinematic impacts such as gravity ----------------------------------------------------------------
+        if (this.falling || externalPhysicalImpact) {
+            // calc falling
+            velocityPhysics.y = this.velocity.y - 20 * dTimeSec; // g = 9.81 looks shitty, use 20 instead
+            // mix in furhter externalPhysicalImpact if any.. (TODO)        
+            
+            // cache current falling
+            this.velocity.y = velocityPhysics.y;    
+        } else {
+            this.velocity.y = 0.01;
+        }
+        
+        const moveCombined = velocityPhysics.add( inputVelocity );
+
 
         // move the player based on input + physics
         this.imposter.moveWithCollisions(moveCombined.scale(dTimeSec));
+        
+        this.positionLastFrame = this.imposter.position;
+        this.currentVelocity = this.imposter.position.subtract(this.positionLastFrame).scale(1/(dTimeMs*1000)); 
 
-        var sprintValid = this.sprinting && this.normalizedLocalDirection.z == 1 && this.normalizedLocalDirection.x == 0;
 
-        if (!this.falling) {
-            if ( this.normalizedLocalDirection.length() > 0.1) {
-                if (sprintValid) {
-                    this.animatedModel.play("sprint");
-                } else {
-                    this.animatedModel.play("walk");
+
+        if (!this.parent.died) {
+            if (!this.falling) {
+                if (this.localInputDirection.length() > 0.1) {
+                    if (isSprinting) {
+                        this.animatedModel.play("sprint");
+                    } else {
+                        this.animatedModel.play("walk");
+                    }
                 }
+                else {
+                    this.animatedModel.play("idle");
+                }
+            } else {
+                this.animatedModel.play("fall");
             }
-            else {
-                this.animatedModel.play("idle");
-            }
-        } else {
-            this.animatedModel.play("jump");
         }
+
 
         // update the character mesh
         if(this.animatedModel.finishedLoading()) {
             this.animatedModel.setPosition(new BABYLON.Vector3(
                 this.imposter.position.x,
-                this.imposter.position.y - this.height/2,
+                this.imposter.position.y - this.config.height/2,
                 this.imposter.position.z));
         }
   
-        if(this.normalizedLocalDirection.length() > 0.1){
+        if(this.localInputDirection.length() > 0.1){
             this.animatedModel.setOrientation(this.anzimuth - Math.PI);
         }
+
 
         if (!this.parent.died && this.imposter.position.y < -50) {
             this.dispatchEvent({type: "died", data: {reason: "abyss"}});

@@ -20,21 +20,37 @@ class Game implements Pausable, GameEventListener  {
     world: GameWorld;
     player: Player;
     debug_view: DebugView;
-    onReady: () => void;
     app: App;
+
+    updateLoop: (dTimeMs: number) => {};
+
+    timeStampStart_ms: number;
 
     ui: GameUI;
 
     loadingScreen: CustomLoadingScreen;
 
 
+    onResourcesLoaded(event: GameEvent) {
+        let data = event.data as {author: string};
+        if (data.author == Player.name) {
+            this.app.onReady();
+        }
+    }
+
+    onPlayerDied(event: GameEvent) {
+        if (!this.player.died) {
+            setTimeout(()=> {
+                this.player.reset();
+            }, 3000);
+            this.player.onDying(event);
+            console.log("Player died", event);
+        }
+    }
+
     onEvent(event: GameEvent) {
         if (event.type == "ready" && event.data && event.data.hasOwnProperty("author")) {
-            let data = event.data as {author: string};
-            if (data.author == Player.name) {
-                console.log("This.player is ready!");
-                this.app.onReady();
-            }
+            this.onResourcesLoaded(event);
         }
 
         if (event.data && event.data.hasOwnProperty("health")){
@@ -43,31 +59,19 @@ class Game implements Pausable, GameEventListener  {
         }
 
         if (event.type == "died") {
-            if (!this.player.died) {
-                setTimeout(()=> {
-                    this.player.died = false;
-                    this.player.camera.alpha = -Math.PI/2;
-                    this.player.setOrientation(-Math.PI);
-                    this.player.mHealth.setHealthPoints(100);
-                    this.player.mPhysics.velocity = BABYLON.Vector3.Zero(); 
-                    this.player.setPosition(this.world.player_start_position.clone());
-                }, 3000);
-                this.player.died = true;
-                console.log("Player died")
-            }
+            this.onPlayerDied(event);
         }
     }
 
     constructor(
         engine: BABYLON.Engine, 
         canvas: HTMLCanvasElement,
-        onReady: () => void, 
         app: App) { 
         this.engine = engine;
         this.canvas = canvas;
         this.app = app;
 
-        this.onReady = onReady;
+        this.timeStampStart_ms = Date.now();
 
         this.loadingScreen = new CustomLoadingScreen();
         this.engine.loadingScreen = this.loadingScreen;
@@ -155,7 +159,7 @@ class Game implements Pausable, GameEventListener  {
 
     onFinishedLoading() {
         this.player.mHealth.setHealthPoints(100);
-        console.log("Finished loading resources! Starting game...");
+        console.log(Date.now(), "AssetManager finished loading resources! Resuming game...");
         if(this.world.music && !this.world.music.isPlaying){
             this.world.music.play();
         }
@@ -174,9 +178,15 @@ class Game implements Pausable, GameEventListener  {
     }
 
 
-    mainloop(dTimeMs : number){
-        if(this.player && !this.paused){
-            this.player.update(dTimeMs);
+    mainloop(deltaTimeMs: number){
+        var now_ms = Date.now(); 
+        var elapsedTime_ms = now_ms - this.timeStampStart_ms;
+
+        // fake physics screws up with large dt
+        if(deltaTimeMs < 100) { 
+            if(!this.paused){
+                this.player.update(deltaTimeMs);
+            }
         }
     }
 }

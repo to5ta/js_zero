@@ -4,8 +4,11 @@
 
 Powered by blender, babylon.js, typescript, npm and github.
 
+## Online-Demo
 
-![Promo](promo2.PNG)
+Go ahead an try it online directly: https://to5ta.github.io/js_zero/
+
+![Promo](promotion/promo6.jpg)
 
 ## Installation
 
@@ -14,10 +17,6 @@ Powered by blender, babylon.js, typescript, npm and github.
 3. `npm run dev` to host the app locally
 4. open `localhost:8080` in your Browser
 
-## Online-Demo
-
-https://to5ta.github.io/js_zero/
-
 ## Credits
 
-* Some Texture Sets used refer to the awesome work published on (https://texturehaven.com/textures/ and https://hdrihaven.com/)
+* Some of the Texture Sets being used refer to the awesome work published on (https://texturehaven.com/textures/ and https://hdrihaven.com/)

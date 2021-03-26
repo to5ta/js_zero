@@ -74,13 +74,15 @@ Show some interesting game mechanics and capabilities:
     * Player
     * AI / NPC
 
-<<<<<<< HEAD
-# 
-=======
 
 
 
-# TODO
+## Urgent 
+[ ] animation on falling
+[ ] treppensteigen: smooth movement of character
+[X] moon physics
+[ ] death animation
+[ ] death screen + respawn time
 
 ## Infrastructure 
 - [X] Deploy online to Github Pages
@@ -116,4 +118,3 @@ Show some interesting game mechanics and capabilities:
 - [ ] Minimum mobile controls concept
 - [ ] Player Actions like fighting, interacting...
 
->>>>>>> master

@@ -55,12 +55,11 @@ export class CharacterVisualization extends GameEventDispatcher {
         assetTask.onSuccess = () => {
             this.mMesh = assetTask.loadedMeshes[0] as BABYLON.Mesh;
             this.mMesh.rotation = BABYLON.Vector3.Zero();
-            let animation = assetTask.loadedAnimationGroups[0];      
-            animation.start();
-            animation.stop();        
-            Object.keys(namedAnimationProperties).forEach(animationName => {
-                this.mNamedAnimations[animationName] = animation.clone(animationName);
-            });
+            
+            assetTask.loadedAnimationGroups.forEach((aniGroup) =>
+            {
+                this.mNamedAnimations[aniGroup.name] = aniGroup;
+            });     
             this.onPartLoaded("mesh");
         }
     }
