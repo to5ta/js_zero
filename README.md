@@ -8,7 +8,7 @@ Powered by blender, babylon.js, typescript, npm and github.
 
 Go ahead an try it online directly: https://to5ta.github.io/js_zero/
 
-![Promo](promotion/promo6.PNG)
+![Promo](promotion/promo6.jpg)
 
 ## Installation
 
@@ -19,4 +19,4 @@ Go ahead an try it online directly: https://to5ta.github.io/js_zero/
 
 ## Credits
 
-* Some Texture Sets used refer to the awesome work published on (https://texturehaven.com/textures/ and https://hdrihaven.com/)
+* Some of the Texture Sets being used refer to the awesome work published on (https://texturehaven.com/textures/ and https://hdrihaven.com/)

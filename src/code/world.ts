@@ -8,7 +8,8 @@ import sky_pz from  "../assets/textures/skybox/skybox0000_pz.png";
 import sky_nz from  "../assets/textures/skybox/skybox0000_nz.png";
 import medieval_theme_01 from  '../assets/music/medieval_theme_01.mp3';
 import medieval_theme_02 from  '../assets/music/medieval_theme_02.mp3';
-import test_level_model from  '../assets/models/test_level_2.gltf';
+import test_level_model from  '../assets/models/level0.gltf';
+import test_level_model_bin from  '../assets/models/level0.bin';
 import box_model from  '../assets/models/box.gltf';
 
 import * as BABYLON from "@babylonjs/core";
@@ -97,9 +98,16 @@ class GameWorld implements Pausable {
             levelLoadTask.loadedAnimationGroups.forEach(animation => {
                 animation.start(true);
             });
+
             levelLoadTask.loadedMeshes.forEach((mesh) => {
-                this.collision_meshes.push(mesh as BABYLON.Mesh);
-                mesh.checkCollisions = true;
+                if (!mesh.name.includes("_np_")) { // no physics
+                    this.collision_meshes.push(mesh as BABYLON.Mesh);
+                    mesh.checkCollisions = true;
+                } 
+                
+                if (mesh.name.includes("_ho_")) { // hidden obstacle
+                    mesh.visibility = 0;
+                }
                 // mesh.material.wireframe = true;
             });
         }
@@ -158,9 +166,6 @@ class GameWorld implements Pausable {
 
         this.photoDome = new BABYLON.PhotoDome("envMapDome", envMap, {}, scene);
 
-        setInterval(()=>{
-            this.photoDome.rotate(BABYLON.Vector3.Up(), 0.0006);
-        }, 50);
 
         this.music = new BABYLON.Sound("Music", Math.random() < 0.5 ? medieval_theme_02 : medieval_theme_01, scene, null, {
             loop: true,

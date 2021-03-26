@@ -48,4 +48,10 @@ declare module "*.css" {
     export default value;
 }
 
+declare module "*.bin" {
+    const value: string;
+    export default value;
+}
+
+
 declare module 'stats-js';
