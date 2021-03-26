@@ -57,32 +57,8 @@ class GameWorld implements Pausable {
         this.shadowGenerator = new BABYLON.ShadowGenerator(1024, light2);
         this.shadowGenerator.useExponentialShadowMap = true;
 
-        // console.log(light2)
-        // console.log(this.shadowGenerator)
-
         this.collision_meshes = [];
         var ground_material = new BABYLON.PBRMetallicRoughnessMaterial("ground_material", this.scene);
-        // ground_material.wireframe = true;
-
-        // ground_material.specularPower = 0;
-        // ground_material.emissiveColor = new BABYLON.Color3(1,1,1);
-        // ground_material.roughness = 0.1;
-
-        // Add and manipulate meshes in the scene
-        // this.plane = BABYLON.MeshBuilder.CreatePlane("Ground", {size: 30}, this.scene);
-        // this.plane.rotation.x = Math.PI / 2;
-        // this.plane.material = ground_material;
-        // this.plane.checkCollisions = true;
-        // this.collision_meshes.push(this.plane);
-        // this.plane.receiveShadows = true;
-
-        this.box = BABYLON.MeshBuilder.CreateBox("GroundBox", {size: 2}, this.scene);
-        this.box.position = new BABYLON.Vector3(0, 1, 5);
-        this.box.checkCollisions = true;
-        this.box.material = ground_material;
-        this.box.receiveShadows = true;
-        this.collision_meshes.push(this.box); 
-
 
 
         var levelLoadTask = assetManager.addMeshTask(
@@ -112,50 +88,6 @@ class GameWorld implements Pausable {
             });
         }
 
-        // var boxLoadTask = assetManager.addMeshTask(
-        //     "BoxModel", 
-        //     null, 
-        //     './', 
-        //     box_model);   
-
-        //     boxLoadTask.onSuccess = () => {
-        //     // console.log(boxLoadTask);
-        //     // console.log("boxTask: ", boxLoadTask);
-        //     boxLoadTask.loadedMeshes.forEach((mesh) => {
-        //         this.collision_meshes.push(mesh);
-        //         // console.log("Add Mesh to Collision: ", mesh);
-        //         mesh.checkCollisions = true;
-        //         // mesh.material.wireframe = true;
-        //     });
-        // }
-
-        //     levelLoadTask.loadedMeshes.forEach((mesh) => {
-
-        //         // this.collision_meshes.push(mesh);
-                
-        //         mesh.receiveShadows = true;
-        //         console.log("mesh", mesh.name)
-        //         this.collision_meshes.push(mesh);
-
-
-        //         mesh.isVisible = false;
-                   
-        //         var box = BABYLON.MeshBuilder.CreateBox("GroundBox", {size: 2}, this.scene);
-        //         box.position = new BABYLON.Vector3(5, 0.5, 5);
-        //         box.rotationQuaternion = mesh.rotationQuaternion;
-        //         box.scaling = mesh.scaling;
-        //         box.checkCollisions = true;
-        //         console.log(box.scaling)
-        //         console.log(box.position)
-        //         console.log(box.rotationQuaternion)
-        //         box.material = ground_material;
-        //         this.collision_meshes.push(box);
-
-        //         // if (mesh.name.includes('collision')) {
-
-        //         // }
-        //     });
-        // } 
 
         // self-made skybox, currently ugly
         // var envTexture = new BABYLON.CubeTexture.CreateFromImages(
@@ -166,21 +98,34 @@ class GameWorld implements Pausable {
 
         this.photoDome = new BABYLON.PhotoDome("envMapDome", envMap, {}, scene);
 
-
-        this.music = new BABYLON.Sound("Music", Math.random() < 0.5 ? medieval_theme_02 : medieval_theme_01, scene, null, {
-            loop: true,
+        this.music = new BABYLON.Sound("Music", medieval_theme_02, scene, null, {
+            loop: false,
             autoplay: false
         });
-    
-        this.music.setVolume(0.07);      
-    }
 
+        this.music2 = new BABYLON.Sound("Music2", medieval_theme_01, scene, null, {
+            loop: false,
+            autoplay: false
+        });
+
+        this.music.onEndedObservable.add(()=> {
+            this.music2.play();
+        });
+
+        this.music2.onEndedObservable.add(()=> {
+            this.music.play();
+        });
+        
+        this.music.setVolume(0.07);     
+        this.music2.setVolume(0.045); 
+    }
 
     pause(): void {
         if(this.music.isPlaying){
             this.music.pause();
         }
     }
+
     resume(): void {
         if(!this.music.isPlaying){
             this.music.play();
