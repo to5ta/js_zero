@@ -13,8 +13,9 @@ module.exports = {
   },
   devtool: 'source-map',
   devServer: {
-    contentBase: './dist',
-    open: true
+    static: {
+      directory: path.join(__dirname, 'dist')
+    }
   },
   module: {
     rules: [
