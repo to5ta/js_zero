@@ -14,9 +14,9 @@
   "devDependencies": {
     "@babel/core": "^7.7.5",
     "@babel/preset-env": "^7.7.6",
-    "@babylonjs/core": "^4.2.0",
-    "@babylonjs/gui": "^4.2.0",
-    "@babylonjs/loaders": "^4.2.0",
+    "@babylonjs/core": "^6.1.0",
+    "@babylonjs/gui": "^6.1.0",
+    "@babylonjs/loaders": "^6.1.0",
     "babel-loader": "^8.0.6",
     "css-loader": "^5.0.1",
     "file-loader": "^6.2.0",

@@ -8,9 +8,12 @@ import "@babylonjs/loaders";
 // import * as BABYLONLOADERS from "@babylonjs/loaders";
 
 
-import steps_sound from '../assets/sound/simple_steps.mp3';
-import sprint_sound from '../assets/sound/simple_sprint.mp3';
-import player_model from "../assets/models/wache02.gltf";
+// import steps_sound from '../assets/sound/simple_steps.mp3';
+const steps_sound = '../assets/sound/simple_steps.mp3';
+// import sprint_sound from '../assets/sound/simple_sprint.mp3';
+const sprint_sound = '../assets/sound/simple_sprint.mp3';
+// import player_model from '../assets/models/wache02.gltf';
+const player_model = '../assets/models/wache02.gltf';
 
 import { GameWorld } from './world';
 
