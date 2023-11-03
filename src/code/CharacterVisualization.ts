@@ -30,7 +30,7 @@ export class CharacterVisualization extends GameEventDispatcher {
             }
         }
         
-        Object.keys(namedAnimationProperties).forEach(aniName => {
+                Object.keys(namedAnimationProperties).forEach(aniName => {
             if (namedAnimationProperties[aniName].soundfile) {
                 let task = assetManager.addBinaryFileTask(
                     `${aniName}_sound_task`, 

@@ -6,7 +6,8 @@ module.exports = {
   entry: './src/code/index.ts',
   output: {
     filename: '[name].bundle.js',
-    path: path.resolve(__dirname, 'dist')
+    path: path.resolve(__dirname, 'dist'),
+    publicPath: ''
   },
   resolve: {
     extensions: ['.ts', '.tsx', '.js']
@@ -56,5 +57,5 @@ module.exports = {
     new HtmlWebpackPlugin({
       title: "Project JS_Zero",
     }),
-  ],
+      ],
 };
