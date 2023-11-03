@@ -122,7 +122,7 @@ class Game implements Pausable, GameEventListener  {
             canvas);
         
         this.assetManager.load();
-        this.assetManager.onProgress = (event) => {
+                this.assetManager.onProgress = (event) => {
             console.log(event)
         }
         this.assetManager.onFinish = () => {
