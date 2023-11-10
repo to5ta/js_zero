@@ -118,12 +118,12 @@ class Player extends GameEventDispatcher implements GameEventListener {
             assetManager,
             scene,
             {
-                "walk": {loop: true, speed: 1.3, from: 0, to: 1, soundfile: steps_sound},
-                "jump": {loop: false, speed: 1.0, from: 0, to: 1},
-                "idle": {loop: true, speed: 0.5, from: 0, to: 1},
-                "fall": {loop: true, speed: 1.5, from: 0, to: 1},
-                "sprint": {loop: true, speed: 1.5, from: 0, to: 1, soundfile: sprint_sound},
-                "dieOnFall": {loop: false, speed: 1.0, from: 0, to: 1}
+                "walk": {loop: true, speed: 1.3, from: 0, to: 100, soundfile: steps_sound},
+                "jump": {loop: false, speed: 1.0, from: 0, to: 100},
+                "idle": {loop: true, speed: 0.5, from: 0, to: 100},
+                "fall": {loop: true, speed: 1.5, from: 0, to: 100},
+                "sprint": {loop: true, speed: 1.5, from: 0, to: 100, soundfile: sprint_sound},
+                "dieOnFall": {loop: false, speed: 1.0, from: 0, to: 100}
             }); 
             this.mCharacter.addGameEventListener(this);
             
