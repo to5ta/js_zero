@@ -22,7 +22,7 @@ class App {
     this.engine = new BABYLON.Engine(
       this.env.canvas, 
       true);
-    
+        
     this.game = new Game(
       this.engine, 
       this.env.canvas, 

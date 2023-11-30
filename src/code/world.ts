@@ -30,8 +30,8 @@ class GameWorld implements Pausable {
     camera_start_position: BABYLON.Vector3;
     collision_meshes: BABYLON.Mesh[];
     box: BABYLON.Mesh;
-    music2: BABYLON.Sound;
     music: BABYLON.Sound;
+    music_tracks: { [key: string]: BABYLON.Sound } = {};
     photoDome: BABYLON.PhotoDome;
     
 
@@ -98,30 +98,44 @@ class GameWorld implements Pausable {
 
         this.photoDome = new BABYLON.PhotoDome("envMapDome", envMap, {}, scene);
 
-        this.music = new BABYLON.Sound("Music", medieval_theme_02, scene, null, {
-            loop: false,
-            autoplay: false
-        });
+        for (const music of [
+            {url: medieval_theme_01, name: "theme_01", volume: 0.07, default: true },
+            {url: medieval_theme_02, name: "theme_02", volume: 0.045 }]) {
+            let task = assetManager.addBinaryFileTask(
+                music.name, 
+                music.url);
+            task.onSuccess = (task: BABYLON.BinaryFileAssetTask) => {
+                this.music_tracks[music.name] = new BABYLON.Sound(
+                    music.name, 
+                    task.data, scene, 
+                    ()=>{}, 
+                    {
+                        loop: false,
+                        autoplay: false
+                    });
+                this.music_tracks[music.name].setVolume(music.volume);
 
-        this.music2 = new BABYLON.Sound("Music2", medieval_theme_01, scene, null, {
-            loop: false,
-            autoplay: false
-        });
+                console.log("loaded music track: ", music.name, " from ", music.url);
 
-        this.music.onEndedObservable.add(()=> {
-            this.music2.play();
-        });
+                if (music.default) {
+                    this.music = this.music_tracks[music.name];
+                    this.music.play();
+                    console.log("playing music track: ", this.music );
+                    console.log("available music tracks: ", Object.keys(this.music_tracks));
+                }
 
-        this.music2.onEndedObservable.add(()=> {
-            this.music.play();
-        });
-        
-        this.music.setVolume(0.07);     
-        this.music2.setVolume(0.045); 
+                // get keys from music_tracks, get next key, play it
+                this.music_tracks[music.name].onEndedObservable.add(() => {
+                    let keys = Object.keys(this.music_tracks);
+                    let next = keys[(keys.indexOf(music.name)+1) % keys.length];
+                    this.music_tracks[next].play();
+                });
+            }
+        }
     }
 
     pause(): void {
-        if(this.music.isPlaying){
+        if(this.music && this.music.isPlaying){
             this.music.pause();
         }
     }

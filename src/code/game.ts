@@ -97,7 +97,20 @@ class Game implements Pausable, GameEventListener  {
                 // loader.<option2> = <...>
             }
         });
-    
+
+
+        if (BABYLON.Engine.audioEngine) {
+            BABYLON.Engine.audioEngine.useCustomUnlockedButton = true;
+
+            // Unlock audio on first user interaction.
+            window.addEventListener('click', () => {
+                if (BABYLON.Engine.audioEngine && !BABYLON.Engine.audioEngine.unlocked) {
+                    BABYLON.Engine.audioEngine.unlock();
+                }
+            }, { once: true });
+        }
+
+
         this.assetManager = new BABYLON.AssetsManager(this.scene);
 
         // create the level to play in ----------------------------------------
@@ -111,8 +124,6 @@ class Game implements Pausable, GameEventListener  {
         this.player.setPosition(this.world.player_start_position.clone());
 
         this.player.addGameEventListener(this);
-        this.player.addGameEventListener(this);
-        this.player.addGameEventListener(this);
         
         this.ui = new GameUI();
 
@@ -122,8 +133,8 @@ class Game implements Pausable, GameEventListener  {
             canvas);
         
         this.assetManager.load();
-                this.assetManager.onProgress = (event) => {
-            console.log(event)
+                this.assetManager.onProgress = (remaing, total, task) => {
+            this.loadingScreen.updateProgress(remaing, total, task)
         }
         this.assetManager.onFinish = () => {
             this.onFinishedLoading();
@@ -131,6 +142,7 @@ class Game implements Pausable, GameEventListener  {
         this.pause();  
         
         this.engine.enterPointerlock();
+
 
     }
 
@@ -162,11 +174,12 @@ class Game implements Pausable, GameEventListener  {
 
     onFinishedLoading() {
         this.player.mHealth.setHealthPoints(100);
+        this.resume();    
         console.log(Date.now(), "AssetManager finished loading resources! Resuming game...");
-        if(this.world.music && !this.world.music.isPlaying){
-            this.world.music.play();
-        }
-        this.resume();
+        // setTimeout(() => {
+        //     console.log("Play music:" + this.world.music);
+        //     this.world.music.play();        
+        // }, 5000);
     }
 
     pause() {
