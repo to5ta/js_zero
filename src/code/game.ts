@@ -8,6 +8,7 @@ import GameUI from "./GameUI";
 import { GameEvent, GameEventListener } from "./GameEvent";
 import { App } from "./app";
 import { CustomLoadingScreen } from "./LoadingScreen";
+import { MenuScreen } from "./MenuScreen";
 
 class Game implements Pausable, GameEventListener  {
     engine: BABYLON.Engine;
@@ -29,15 +30,8 @@ class Game implements Pausable, GameEventListener  {
     ui: GameUI;
 
     loadingScreen: CustomLoadingScreen;
-
-
-    onResourcesLoaded(event: GameEvent) {
-        let data = event.data as {author: string};
-        if (data.author == Player.name) {
-            this.app.onReady();
-        }
-    }
-
+    menuScreen: MenuScreen;
+    
     onPlayerDied(event: GameEvent) {
         if (!this.player.died) {
             setTimeout(()=> {
@@ -49,10 +43,6 @@ class Game implements Pausable, GameEventListener  {
     }
 
     onEvent(event: GameEvent) {
-        if (event.type == "ready" && event.data && event.data.hasOwnProperty("author")) {
-            this.onResourcesLoaded(event);
-        }
-
         if (event.data && event.data.hasOwnProperty("health")){
             let data = event.data as {health: string};
             this.ui.playerHealth.text = "\u2764 " + data.health;
@@ -75,6 +65,8 @@ class Game implements Pausable, GameEventListener  {
 
         this.loadingScreen = new CustomLoadingScreen();
         this.engine.loadingScreen = this.loadingScreen;
+        
+        this.menuScreen = new MenuScreen(this);
 
         // game state ---------------------------------------------------------
         this.debug_fly_mode = false;
@@ -85,18 +77,18 @@ class Game implements Pausable, GameEventListener  {
         this.scene.gravity = new BABYLON.Vector3(0,-9.81, 0);
         this.scene.collisionsEnabled = true;
        
-        BABYLON.SceneLoader.OnPluginActivatedObservable.add(function (loader) {
-            if (loader.name === "gltf") {
-                // do something with the loader
-                // console.log("GLTF_Loader:", loader);
+        // BABYLON.SceneLoader.OnPluginActivatedObservable.add(function (loader) {
+        //     if (loader.name === "gltf") {
+        //         // do something with the loader
+        //         // console.log("GLTF_Loader:", loader);
                 
-                // does not work ???
-                // loader.animationStartMode = 0;
+        //         // does not work ???
+        //         // loader.animationStartMode = 0;
                 
-                // loader.animationStartMode = BABYLON.GLTFLoaderAnimationStartMode.NONE;
-                // loader.<option2> = <...>
-            }
-        });
+        //         // loader.animationStartMode = BABYLON.GLTFLoaderAnimationStartMode.NONE;
+        //         // loader.<option2> = <...>
+        //     }
+        // });
 
 
         if (BABYLON.Engine.audioEngine) {
@@ -137,7 +129,9 @@ class Game implements Pausable, GameEventListener  {
             this.loadingScreen.updateProgress(remaing, total, task)
         }
         this.assetManager.onFinish = () => {
-            this.onFinishedLoading();
+            // notfiy game menu that game can be started now currently menu is just hidden
+            // this.app.onReady();
+            // this.start();
         };
         this.pause();  
         
@@ -172,14 +166,11 @@ class Game implements Pausable, GameEventListener  {
         } 
     }
 
-    onFinishedLoading() {
+    start() {
+        this.app.onReady();
+        console.log("Game started!");
         this.player.mHealth.setHealthPoints(100);
-        this.resume();    
-        console.log(Date.now(), "AssetManager finished loading resources! Resuming game...");
-        // setTimeout(() => {
-        //     console.log("Play music:" + this.world.music);
-        //     this.world.music.play();        
-        // }, 5000);
+        this.resume();
     }
 
     pause() {

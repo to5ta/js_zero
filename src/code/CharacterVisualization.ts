@@ -127,9 +127,9 @@ export class CharacterVisualization extends GameEventDispatcher {
             this.soundsLoaded = true;
         }
         
-        if (this.meshLoaded==true && this.soundsLoaded==true) {
-            this.dispatchEvent({type: "ready", data: {author: CharacterVisualization.name}});
-        }
+        // if (this.meshLoaded==true && this.soundsLoaded==true) {
+        //     this.dispatchEvent({type: "ready", data: {author: CharacterVisualization.name}});
+        // }
     }
 
     finishedLoading(): boolean {return this.meshLoaded && this.soundsLoaded};
