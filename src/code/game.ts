@@ -1,6 +1,9 @@
 import * as BABYLON from "@babylonjs/core";
 import "@babylonjs/loaders";
 
+import thankyounote_path from '../assets/models/thank_you_note.gltf';
+
+
 import { Player } from './Player';
 import { GameWorld, Pausable } from './world';
 import { DebugView } from "./debug_view";
@@ -9,6 +12,7 @@ import { GameEvent, GameEventListener } from "./GameEvent";
 import { App } from "./app";
 import { CustomLoadingScreen } from "./LoadingScreen";
 import { MenuScreen } from "./MenuScreen";
+import { SphereSensor } from "./Sensors";
 
 class Game implements Pausable, GameEventListener  {
     engine: BABYLON.Engine;
@@ -22,6 +26,8 @@ class Game implements Pausable, GameEventListener  {
     player: Player;
     debug_view: DebugView;
     app: App;
+    sensor_test: SphereSensor;
+    thankyou_note: BABYLON.Mesh;
 
     updateLoop: (dTimeMs: number) => {};
 
@@ -50,6 +56,16 @@ class Game implements Pausable, GameEventListener  {
 
         if (event.type == "died") {
             this.onPlayerDied(event);
+        }
+
+        if (event.type == "sensor_activated") {
+            console.log("Sensor activated", event);
+            this.thankyou_note.setEnabled(true);
+        }
+
+        if (event.type == "sensor_deactivated") {
+            console.log("Sensor deactivated", event);
+            this.thankyou_note.setEnabled(false);
         }
     }
 
@@ -105,8 +121,28 @@ class Game implements Pausable, GameEventListener  {
 
         this.assetManager = new BABYLON.AssetsManager(this.scene);
 
+        var thank_you_note_task = this.assetManager.addMeshTask(
+            "thankyou_note", 
+            "", 
+            "./", 
+            thankyounote_path);
+
+        thank_you_note_task.onSuccess = (task) => {
+            this.thankyou_note = task.loadedMeshes[0] as BABYLON.Mesh;
+            this.scene.addMesh(this.thankyou_note);
+            this.thankyou_note.position = new BABYLON.Vector3(
+                -4,2.1,26.4);
+
+            this.thankyou_note.scaling = new BABYLON.Vector3(1.6,1.6,1.6);
+            this.thankyou_note.setEnabled(false);
+        };
+
         // create the level to play in ----------------------------------------
         this.world = new GameWorld(this.scene, this.assetManager);
+
+        this.sensor_test = new SphereSensor("sensor", 0.5, new BABYLON.Vector3(-3.5,0.0,23), this.scene);
+
+        this.sensor_test.addGameEventListener(this);
 
         this.player = new Player(
             this.scene, 
@@ -193,6 +229,7 @@ class Game implements Pausable, GameEventListener  {
         if(deltaTimeMs < 100) { 
             if(!this.paused){
                 this.player.update(deltaTimeMs);
+                this.sensor_test.update(this.player);
             }
         }
     }

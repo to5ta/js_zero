@@ -1,6 +1,3 @@
-// import * as BABYLON from "babylonjs";
-// import * as BABYLON from "babylonjs-gui";
-// import 'babylonjs-loaders';
 import * as BABYLON from "@babylonjs/core";
 import * as BABYLONGUI from "@babylonjs/gui";
 import "@babylonjs/loaders";
