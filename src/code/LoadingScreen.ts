@@ -3,20 +3,9 @@ import { ILoadingScreen } from "@babylonjs/core/Loading";
 
 import promoStartScreen from "./../../promotion/promo6.jpg";
 
-import "./LoadingScreenStyle.css";
+import "./styles.css";
 
-function Div(): HTMLDivElement {
-    return document.createElement('div');
-}
-
-function Text(): HTMLDivElement {
-    return document.createElement('p');
-}
-
-function Img(): HTMLImageElement {
-    return document.createElement("img");
-}
-
+import { Div, Text, Img } from "./html_utils";
 class CustomLoadingScreen implements ILoadingScreen {
     updateProgress(remaining: number, total: number, task: BABYLON.AbstractAssetTask): any {
         let percentage = Math.round(((total-remaining) / total) * 100);
@@ -38,9 +27,9 @@ class CustomLoadingScreen implements ILoadingScreen {
         
         this.background = Div();
         this.background.id = "loading_screen_background";
+        this.background.className = "background";
         this.background.appendChild(this.title);
         
-        // this.startButton = Div();
         this.titleImage = Img();
         this.titleImage.src = promoStartScreen;
         this.titleImage.id = "titleImage"; 

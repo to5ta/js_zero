@@ -1,38 +1,41 @@
 import { Game } from "./game";
 
-import "./LoadingScreenStyle.css";
+import "./styles.css";
 
+import { Div, Text, Img } from "./html_utils";
 class MenuScreen {
-    game: Game;   
+    game: Game;
     background: HTMLDivElement;
 
     constructor(game: Game) {
         this.game = game;
-        // red div that fills the whole screen
-        let background = document.createElement('div');
-        background.style.backgroundColor = "red";
 
-        background.style.margin  = "0px";
-        background.style.overflow  = "hidden";
-        background.style.display  = "block";
-        background.style.position = "absolute";
-        background.style.top      = "0px";
-        background.style.left     = "0px";
-        background.style.width    = "100%";
-        background.style.height   = "100%";
+        let background = Div();
         this.background = background;
+        this.background.className = "background";
+        this.background.id = "menu_background";
+        this.background.style.zIndex = "100";
+        document.body.appendChild(this.background);
 
-        background.onclick = () => {
+        let start_button = Div();
+        start_button.id = "start_button";
+        start_button.className = "button";
+        start_button.textContent = "Start";
+        background.appendChild(start_button);
+
+        start_button.onclick = () => {
             console.log("clicked");
             this.game.start();
-            this.background.style.opacity = "0";
-
+            this.hide();
         }
-        
-        background.id = "menu_screen_background";
-        document.body.appendChild(background);
+    }
+    show() {
+        this.background.hidden = false;
     }
 
+    hide() {
+        this.background.hidden = true;        
+    }
 }
 
 export { MenuScreen };

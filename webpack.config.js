@@ -21,6 +21,10 @@ module.exports = {
   module: {
     rules: [
       {
+        test: /\.html$/,
+        use: ['html-loader']
+      },
+      {
         test: /\.tsx?/,
         use: 'ts-loader',
         exclude: /node_modules/,
@@ -36,7 +40,7 @@ module.exports = {
         }
       },
       {
-        test: /\.(bin|png|jpg|jpeg|gif|gltf|glb|babylon|mp3|wav)$/,
+        test: /\.(bin|png|jpg|jpeg|gif|gltf|glb|babylon|mp3|wav|html)$/,
         use: [
           {
             loader: 'file-loader',
@@ -50,12 +54,15 @@ module.exports = {
         test: /\.css$/,
         use: [{ loader: 'style-loader' }, { loader: 'css-loader' }],
       },
-      
+
     ]
   },
   plugins: [
     new HtmlWebpackPlugin({
       title: "Project JS_Zero",
     }),
-      ],
+    // new HtmlWebpackPlugin({
+    //   filename: "MenuScreen.html",
+    // }),
+  ],
 };
