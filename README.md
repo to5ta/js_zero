@@ -1,8 +1,6 @@
 # Project Zero
 
-**Project JS_Zero** is third-person medieval online-game prototype, inspired by the awesome 'Sketchbook' Project made by swift502 (https://github.com/swift502/Sketchbook).
-
-Powered by blender, babylon.js, typescript, npm and github.
+**Project JS_Zero** is third-person medieval online-game prototype implmented with [Babylon.js](https://babylonjs.com/) inspired by the ['Sketchbook' Project](https://github.com/swift502/Sketchbook).
 
 ## Online-Demo
 
@@ -19,4 +17,4 @@ Go ahead an try it online directly: https://to5ta.github.io/js_zero/
 
 ## Credits
 
-* Some of the Texture Sets being used refer to the awesome work published on (https://texturehaven.com/textures/ and https://hdrihaven.com/)
+* Some of the Texture Sets being used refer to https://texturehaven.com/textures/ and https://hdrihaven.com.

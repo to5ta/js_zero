@@ -20,6 +20,7 @@
     "babel-loader": "^8.3.0",
     "css-loader": "^5.2.7",
     "file-loader": "^6.2.0",
+    "html-loader": "^4.2.0",
     "html-webpack-plugin": "^5.5.3",
     "ssri": "^10.0.5",
     "stats": "^1.0.0",
