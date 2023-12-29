@@ -54,7 +54,7 @@ class CustomLoadingScreen implements ILoadingScreen {
         }, 1500);
         setTimeout(()=> {
             document.body.removeChild(this.background);
-        }, 4500);
+        }, 1510);
     }
 }
 

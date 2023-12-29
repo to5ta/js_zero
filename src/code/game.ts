@@ -203,7 +203,7 @@ class Game implements Pausable, GameEventListener  {
     }
 
     start() {
-        this.app.onReady();
+        this.app.onStarted();
         console.log("Game started!");
         this.player.mHealth.setHealthPoints(100);
         this.resume();
