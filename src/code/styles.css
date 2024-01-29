@@ -92,8 +92,10 @@ canvas {
     border-radius: 5px;
     cursor: pointer;
     left: 50%;
-    top: 50%;
-    position: fixed;
+    width: 10%;
+    top: 20%;
+    margin: 30px 0px 0px 0px;
+    position: relative;
     font-size: 20px;
 }
 

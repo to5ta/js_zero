@@ -10,24 +10,36 @@ class MenuScreen {
     constructor(game: Game) {
         this.game = game;
 
-        let background = Div();
-        this.background = background;
+        this.background = Div();
         this.background.className = "background";
         this.background.id = "menu_background";
         this.background.style.zIndex = "100";
         document.body.appendChild(this.background);
 
-        let start_button = Div();
-        start_button.id = "start_button";
-        start_button.className = "button";
-        start_button.textContent = "Start";
-        background.appendChild(start_button);
+        const createButton = (id: string, text: string, onClick: () => void) => {
+            const button = Div();
+            button.id = id;
+            button.className = "button";
+            button.textContent = text;
+            button.onclick = onClick;
+            this.background.appendChild(button);
+        };
 
-        start_button.onclick = () => {
+        createButton("start_button", "Start", () => {
             console.log("clicked");
             this.game.start();
             this.hide();
-        }
+        });
+
+        createButton("save_button", "Save", () => {});
+        createButton("load_button", "Load", () => {});
+        createButton("help_button", "Help", () => {});
+        createButton("credits_button", "Credits", () => {});
+        createButton("quit_button", "Quit", () => { 
+            window.close();
+        });
+
+
     }
     show() {
         this.background.hidden = false;
