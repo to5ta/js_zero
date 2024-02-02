@@ -37,7 +37,7 @@ abstract class GameEventDispatcher {
     public dispatchEvent(event: GameEvent){
         event.dispatcher = this.name;
         this.listeners.forEach(listener => {
-            // console.log("\nDispatcher: ",event.dispatcher,", Type: ",event.type);
+            // Logging.info("\nDispatcher: ",event.dispatcher,", Type: ",event.type);
             listener.onEvent(event);
         });
     }

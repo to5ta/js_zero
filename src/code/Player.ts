@@ -16,6 +16,8 @@ import { CharacterHealth } from "./CharacterHealth";
 
 import { GameEvent, GameEventDispatcher, GameEventListener } from "./GameEvent";
 
+import { Logging } from "./Logging";
+
 class Player extends GameEventDispatcher implements GameEventListener {
 
     scene: BABYLON.Scene;
@@ -44,9 +46,9 @@ class Player extends GameEventDispatcher implements GameEventListener {
             this.dispatchEvent({type: "ready", data: {author: Player.name}});
         } else {
             this.dispatchEvent(event);
-            // console.log(`Player received event of type: ${event.type}`);
-            // console.log(`Event has data: ${event.data!=null}`);
-            // if (event.data) console.log("data: ", event.data);
+            // Logging.info(`Player received event of type: ${event.type}`);
+            // Logging.info(`Event has data: ${event.data!=null}`);
+            // if (event.data) Logging.info("data: ", event.data);
         }
     }
 
@@ -78,7 +80,7 @@ class Player extends GameEventDispatcher implements GameEventListener {
 
     onDying(event: GameEvent) {
         this.mCharacter.play("dieOnFall");
-        console.log("start dying animation...");
+        Logging.info("start dying animation...");
         this.inputDirectionBuffer = BABYLON.Vector3.Zero();
         this.mPhysics.reset();
         this.died = true;

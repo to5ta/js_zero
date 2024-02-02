@@ -1,7 +1,8 @@
 import { Environment } from "./environment";
-
 import { Game } from "./game";
 import '../css/style.css'
+
+import { Logging } from "./Logging";
 
 import * as BABYLON from "@babylonjs/core";
 
@@ -35,32 +36,26 @@ class App {
   
 
   addEventlisteners() {
-    
-        // Watch for browser/canvas resize events
-        window.addEventListener("resize", () => {
-          if (this.engine) {
-            this.engine.resize();
-          }
-        });
+    window.addEventListener("resize", () => { this.engine.resize() });
     
         window.addEventListener('focusin', () => {
-          console.log('App gets focus again...');
+          Logging.info('App gets focus again...');
           this.game.resume();
         });
     
         window.addEventListener('focusout', () => {
-          console.log('App lost focus...');
+          Logging.info('App lost focus...');
           this.game.pause();
         });
     
     
         window.addEventListener('focus', () => {
-          console.log('App gets focus again...');
+          Logging.info('App gets focus again...');
           this.game.resume();
         });
     
         window.addEventListener('blur', () => {
-          console.log('App lost focus...');
+          Logging.info('App lost focus...');
           this.game.pause();
         });
     
@@ -84,8 +79,10 @@ class App {
        
     
  onStarted() {
+    // while(!this.engine){};
+
     this.addEventlisteners();
-    console.log(Date.now(), "Resources loaded, register render loop function...");
+    Logging.info("Resources loaded, register render loop function...");
     // register renderloop
 
     this.game.menuScreen.hide();

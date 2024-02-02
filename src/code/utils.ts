@@ -30,8 +30,8 @@ function toRad(deg : number) : number {
 }
 
 function InjectVec3toLine(vec3: BABYLON.Vector3, line: BABYLON.LinesMesh) {
-    // console.log("vec3", vec3);
-    // console.log("line", line);
+    // Logging.info("vec3", vec3);
+    // Logging.info("line", line);
     line.updateVerticesData(BABYLON.VertexBuffer.PositionKind, [0,0,0,vec3.x, vec3.z, vec3.z]);
 }
 

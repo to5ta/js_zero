@@ -15,6 +15,9 @@ import box_model from  '../assets/models/box.gltf';
 import * as BABYLON from "@babylonjs/core";
 import "@babylonjs/loaders";
 
+import { Logging } from "./Logging";
+
+
 interface Pausable {
     pause(): void;
     resume(): void;
@@ -68,7 +71,7 @@ class GameWorld implements Pausable {
             test_level_model);   
 
         levelLoadTask.onSuccess = () => {
-            // console.log(levelLoadTask);
+            // Logging.info(levelLoadTask);
 
             // start ambient animations
             levelLoadTask.loadedAnimationGroups.forEach(animation => {
@@ -115,13 +118,14 @@ class GameWorld implements Pausable {
                     });
                 this.music_tracks[music.name].setVolume(music.volume);
 
-                console.log("loaded music track: ", music.name, " from ", music.url);
+                Logging.info( "loaded music track: ", music.name, "from", music.url);
 
                 if (music.default) {
                     this.music = this.music_tracks[music.name];
                     this.music.play();
-                    console.log("playing music track: ", this.music );
-                    console.log("available music tracks: ", Object.keys(this.music_tracks));
+                    while(!this.music){}
+                    Logging.info("playing music track: ", this.music );
+                    Logging.info("available music tracks: ", Object.keys(this.music_tracks));
                 }
 
                 // get keys from music_tracks, get next key, play it

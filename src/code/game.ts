@@ -14,6 +14,8 @@ import { CustomLoadingScreen } from "./LoadingScreen";
 import { MenuScreen } from "./MenuScreen";
 import { SphereSensor } from "./Sensors";
 
+import { Logging } from "./Logging";
+
 class Game implements Pausable, GameEventListener  {
     engine: BABYLON.Engine;
     canvas: HTMLCanvasElement;
@@ -44,7 +46,7 @@ class Game implements Pausable, GameEventListener  {
                 this.player.reset();
             }, 3000);
             this.player.onDying(event);
-            console.log("Player died", event);
+            Logging.info(`Player died: ${event}`);
         }
     }
 
@@ -59,12 +61,12 @@ class Game implements Pausable, GameEventListener  {
         }
 
         if (event.type == "sensor_activated") {
-            console.log("Sensor activated", event);
+            Logging.info(`Sensor activated: ${event}` );
             this.thankyou_note.setEnabled(true);
         }
 
         if (event.type == "sensor_deactivated") {
-            console.log("Sensor deactivated", event);
+            Logging.info(`Sensor deactivated: ${event}`);
             this.thankyou_note.setEnabled(false);
         }
     }
@@ -96,7 +98,7 @@ class Game implements Pausable, GameEventListener  {
         // BABYLON.SceneLoader.OnPluginActivatedObservable.add(function (loader) {
         //     if (loader.name === "gltf") {
         //         // do something with the loader
-        //         // console.log("GLTF_Loader:", loader);
+        //         // Logging.info("GLTF_Loader:", loader);
                 
         //         // does not work ???
         //         // loader.animationStartMode = 0;
@@ -187,7 +189,7 @@ class Game implements Pausable, GameEventListener  {
         }
 
         if(keyEvent.key == "c" && keyEvent.type == "keydown") { 
-            // console.log("Event", keyEvent);
+            // Logging.info("Event", keyEvent);
             this.debug_fly_mode = !this.debug_fly_mode;
             if (!this.debug_fly_mode) {
                 this.debug_view.deactivate();
@@ -204,7 +206,7 @@ class Game implements Pausable, GameEventListener  {
 
     start() {
         this.app.onStarted();
-        console.log("Game started!");
+        Logging.info("Game started!");
         this.player.mHealth.setHealthPoints(100);
         this.resume();
     }
@@ -212,7 +214,7 @@ class Game implements Pausable, GameEventListener  {
     pause() {
         this.paused = true;
         this.world.pause();
-        console.log("Game paused!")
+        Logging.info("Game paused!")
     }
 
     resume() {

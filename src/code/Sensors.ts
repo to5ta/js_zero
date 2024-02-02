@@ -2,6 +2,9 @@ import * as BABYLON from "@babylonjs/core";
 
 import { GameEvent, GameEventDispatcher, GameEventListener } from "./GameEvent";
 
+import { Logging } from "./Logging";
+
+
 interface TriggerObject {
     getPosition(): BABYLON.Vector3;
 }
@@ -47,14 +50,14 @@ class SphereSensor extends SensorBase {
         let distance = BABYLON.Vector3.Distance(this.position, TriggerObject.getPosition());
         if (distance < this.radius) {
             if (!this.isActivate) {
-                console.log("Sensor activated");
+                Logging.info("Sensor activated");
                 this.dispatchEvent({type: "sensor_activated", data: {trigger: this.name, object: TriggerObject}});
                 this.isActivate = true;
                 this.onActivate();
             }
         } else {
             if (this.isActivate) {
-                console.log("Sensor deactivated");
+                Logging.info("Sensor deactivated");
                 this.dispatchEvent({type: "sensor_deactivated", data: {trigger: this.name, object: TriggerObject}});
                 this.isActivate = false;
                 this.onDeactivate();
@@ -71,4 +74,4 @@ class SphereSensor extends SensorBase {
     }
 }
 
-export { TriggerObject, SphereSensor };
+export { TriggerObject, SphereSensor, SensorBase };

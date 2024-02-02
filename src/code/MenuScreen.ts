@@ -2,6 +2,8 @@ import { Game } from "./game";
 
 import "./styles.css";
 
+import { Logging } from "./Logging";
+
 import { Div, Text, Img } from "./html_utils";
 class MenuScreen {
     game: Game;
@@ -26,7 +28,7 @@ class MenuScreen {
         };
 
         createButton("start_button", "Start", () => {
-            console.log("clicked");
+            Logging.info("clicked");
             this.game.start();
             this.hide();
         });
