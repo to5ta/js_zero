@@ -1,39 +1,38 @@
-interface LoggingLevel {}
-abstract class DEBUG implements LoggingLevel {}
-abstract class INFO implements LoggingLevel {}
-abstract class WARN implements LoggingLevel {}
-abstract class ERROR implements LoggingLevel {}
+enum LogLevel { 
+    DEBUG = 0, 
+    INFO = 1, 
+    WARN = 2, 
+    ERROR = 3 }
 
 class Logging {
-    private static logLevel: LoggingLevel = DEBUG;
+    private static logLevel: LogLevel = LogLevel.INFO;
     
-    public static setLogLevel(level: LoggingLevel) {
+    public static setLogLevel(level: LogLevel) {
         Logging.logLevel = level;
     }
     
     public static debug(...args: any[]) {
-        if(Logging.logLevel == DEBUG) {
+        if(Logging.logLevel >= 0) {
             Logging.logMessage("DEBUG :", ...args);
         }
     }
     
     public static info(...args: any[]) {
-        if(Logging.logLevel == INFO ||
-            Logging.logLevel == DEBUG ) {
+        if(Logging.logLevel >= 1) {
             Logging.logMessage("INFO  :", ...args);
         }
     }
     
     public static warn(...args: any[]) {
-        if(Logging.logLevel == INFO ||
-            Logging.logLevel == DEBUG ||
-            Logging.logLevel == WARN ) {
+        if(Logging.logLevel >= 2) {
             Logging.logMessage("WARN  :", ...args);
         }
     }
     
     public static error(...args: any[]) {
-        Logging.logMessage("ERROR ", ...args);
+        if(Logging.logLevel >= 3) {
+            Logging.logMessage("ERROR ", ...args);
+        }
     }
 
     private static logMessage(...args: any[]) {
@@ -49,4 +48,4 @@ class Logging {
     }
 }
 
-export { Logging, DEBUG, WARN, INFO, ERROR };
+export { Logging, LogLevel };

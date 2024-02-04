@@ -50,14 +50,14 @@ class SphereSensor extends SensorBase {
         let distance = BABYLON.Vector3.Distance(this.position, TriggerObject.getPosition());
         if (distance < this.radius) {
             if (!this.isActivate) {
-                Logging.info("Sensor activated");
+                // Logging.info("Sensor activated");
                 this.dispatchEvent({type: "sensor_activated", data: {trigger: this.name, object: TriggerObject}});
                 this.isActivate = true;
                 this.onActivate();
             }
         } else {
             if (this.isActivate) {
-                Logging.info("Sensor deactivated");
+                // Logging.info("Sensor deactivated");
                 this.dispatchEvent({type: "sensor_deactivated", data: {trigger: this.name, object: TriggerObject}});
                 this.isActivate = false;
                 this.onDeactivate();

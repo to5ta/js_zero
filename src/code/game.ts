@@ -46,7 +46,7 @@ class Game implements Pausable, GameEventListener  {
                 this.player.reset();
             }, 3000);
             this.player.onDying(event);
-            Logging.info(`Player died: ${event}`);
+            Logging.info("Player died:", event);
         }
     }
 
@@ -61,12 +61,12 @@ class Game implements Pausable, GameEventListener  {
         }
 
         if (event.type == "sensor_activated") {
-            Logging.info(`Sensor activated: ${event}` );
+            Logging.debug(`Sensor activated:`, event );
             this.thankyou_note.setEnabled(true);
         }
 
         if (event.type == "sensor_deactivated") {
-            Logging.info(`Sensor deactivated: ${event}`);
+            Logging.debug(`Sensor deactivated:`, event);
             this.thankyou_note.setEnabled(false);
         }
     }
