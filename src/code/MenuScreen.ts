@@ -2,7 +2,7 @@ import { Game } from "./game";
 
 import "./styles.css";
 
-import { Logging } from "./Logging";
+import { Logging } from "./common/Logging";
 
 import { Div, Text, Img } from "./html_utils";
 class MenuScreen {

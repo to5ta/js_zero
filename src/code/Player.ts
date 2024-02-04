@@ -14,9 +14,9 @@ import { CharacterVisualization } from "./CharacterVisualization";
 import { CharacterController, ControllerConfig } from "./CharacterController";
 import { CharacterHealth } from "./CharacterHealth";
 
-import { GameEvent, GameEventDispatcher, GameEventListener } from "./GameEvent";
+import { GameEvent, GameEventDispatcher, GameEventListener } from "./common/GameEvent";
 
-import { Logging } from "./Logging";
+import { Logging } from "./common/Logging";
 
 class Player extends GameEventDispatcher implements GameEventListener {
 

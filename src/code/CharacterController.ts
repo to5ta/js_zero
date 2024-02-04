@@ -2,7 +2,7 @@ import * as BABYLON from "@babylonjs/core";
 import { CharacterVisualization } from "./CharacterVisualization";
 import { GameWorld } from "./world";
 import { Player } from "./Player";
-import { GameEventDispatcher } from "./GameEvent";
+import { GameEventDispatcher } from "./common/GameEvent";
 import { NormaltoSlopeXZ } from "./utils";
 
 class ControllerConfig {

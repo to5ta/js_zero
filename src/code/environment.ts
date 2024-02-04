@@ -4,7 +4,7 @@
  * also global settings like music / sound volume
 */
 
-import { Logging } from "./Logging";
+import { Logging } from "./common/Logging";
 
 class Environment {
     isMobile: boolean;

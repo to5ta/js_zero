@@ -2,7 +2,7 @@ import { Environment } from "./environment";
 import { Game } from "./game";
 import '../css/style.css'
 
-import { Logging } from "./Logging";
+import { Logging } from "./common/Logging";
 
 import * as BABYLON from "@babylonjs/core";
 

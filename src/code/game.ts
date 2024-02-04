@@ -8,13 +8,13 @@ import { Player } from './Player';
 import { GameWorld, Pausable } from './world';
 import { DebugView } from "./debug_view";
 import GameUI from "./GameUI";
-import { GameEvent, GameEventListener } from "./GameEvent";
+import { GameEvent, GameEventListener } from "./common/GameEvent";
 import { App } from "./app";
 import { CustomLoadingScreen } from "./LoadingScreen";
 import { MenuScreen } from "./MenuScreen";
 import { SphereSensor } from "./Sensors";
 
-import { Logging } from "./Logging";
+import { Logging } from "./common/Logging";
 
 class Game implements Pausable, GameEventListener  {
     engine: BABYLON.Engine;

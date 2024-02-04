@@ -9,7 +9,7 @@ interface animationProperties {
     soundfile?: string;
 }
 
-import { GameEventDispatcher } from "./GameEvent";
+import { GameEventDispatcher } from "./common/GameEvent";
 export class CharacterVisualization extends GameEventDispatcher {
     
     constructor(

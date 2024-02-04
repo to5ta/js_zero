@@ -1,8 +1,8 @@
 import * as BABYLON from "@babylonjs/core";
 
-import { GameEvent, GameEventDispatcher, GameEventListener } from "./GameEvent";
+import { GameEvent, GameEventDispatcher, GameEventListener } from "./common/GameEvent";
 
-import { Logging } from "./Logging";
+import { Logging } from "./common/Logging";
 
 
 interface TriggerObject {

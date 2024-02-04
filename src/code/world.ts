@@ -15,7 +15,7 @@ import box_model from  '../assets/models/box.gltf';
 import * as BABYLON from "@babylonjs/core";
 import "@babylonjs/loaders";
 
-import { Logging } from "./Logging";
+import { Logging } from "./common/Logging";
 
 
 interface Pausable {
