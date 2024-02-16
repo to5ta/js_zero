@@ -128,6 +128,11 @@ class CharacterController extends GameEventDispatcher {
     }
 
 
+    handleDirectionalMovementInput(direction: BABYLON.Vector2) {
+        this.localInputDirection.x = direction.x/2;
+        this.localInputDirection.z = direction.y;
+    }
+
     handleInput(keyEvent: KeyboardEvent) {
         
         const keyPressed = keyEvent.type == "keydown";

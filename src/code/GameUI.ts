@@ -1,12 +1,13 @@
 import * as BABYLON from "@babylonjs/core";
 import * as BABYLONGUI from "@babylonjs/gui";
 import { Logging } from "./common/Logging";
-
+import {Player} from "./Player";
 export default class GameUI {
 
     playerHealth: BABYLONGUI.TextBlock;
+    movement_button_pressed : boolean = false;
 
-    constructor() {
+    constructor(engine: BABYLON.Engine, canvas: HTMLCanvasElement, player: Player, isMobile: boolean) {
         var advancedTexture = BABYLONGUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
 
         this.playerHealth = new BABYLONGUI.TextBlock();
@@ -31,35 +32,50 @@ export default class GameUI {
 
         // TODO image button for interacting? maybe dynamically shown
 
-        var button = BABYLONGUI.Button.CreateSimpleButton("button", "Klick mich");
+        if (isMobile){
+        var button = BABYLONGUI.Button.CreateSimpleButton("Knopf", "<Move>");
         button.width = "150px";
-        button.height = "40px";
+        button.height = "150px";
         button.color = "white";
         button.background = "green";
+        button.cornerRadius = 20;
+        button.alpha = 0.3;
 
+        
         // get screen size from document
         var width = window.innerWidth;
         var height = window.innerHeight;
+        button.left = 0;
+        button.top = engine.getRenderHeight() / 4;
         Logging.info("Screen size: ", width, height);
 
-
-        function callback_factory(msg: string) {
-            return (eventData: BABYLONGUI.Vector2WithInfo, eventState: BABYLON.EventState) => {
-                Logging.info(msg)
-                Logging.info(eventData, eventState)
-                // Fügen Sie hier die Logik hinzu, die ausgeführt werden soll, wenn auf den Button geklickt wird
-        } 
+        function relative_position_in_button(screen_x: number, screen_y: number, element: BABYLONGUI.Button) {
+            return new BABYLON.Vector2(
+                2*(screen_x-button.centerX) / button._width.getValueInPixel(advancedTexture, 100),
+                2*(screen_y-button.centerY) / button._height.getValueInPixel(advancedTexture, 100));
         }
 
-        button.onPointerDownObservable.add(callback_factory("Button Down"));
-        button.onPointerUpObservable.add(callback_factory("Button up"));
-        button.onPointerClickObservable.add(callback_factory("Pointer Clicked up"));
+        this.movement_button_pressed = false;
 
-        button.onPointerClickObservable.add();
+        button.onPointerDownObservable.add((eventData, eventState) => {
+            this.movement_button_pressed = true;
+        });
+        button.onPointerUpObservable.add((eventData, eventState) => {
+            this.movement_button_pressed = false;
+            player.mPhysics.handleDirectionalMovementInput(BABYLON.Vector2.Zero());
+        });
+        button.onPointerMoveObservable.add((eventData, eventState) => {
+            if (this.movement_button_pressed) {
+                // Logging.info("Pointer Move", eventData, eventState);
+                var relative_position = relative_position_in_button(eventData.x, eventData.y, button);
+                player.mPhysics.handleDirectionalMovementInput(new BABYLON.Vector2(relative_position.x, -relative_position.y));
+            }
+        });
+        // button.onPointerClickObservable.add(callback_factory("Pointer Clicked up"));
 
         // Button zur AdvancedDynamicTexture hinzufügen
         advancedTexture.addControl(button);
-    }
+}    }
 }
 
 

@@ -155,7 +155,7 @@ class Game implements Pausable, GameEventListener  {
 
         this.player.addGameEventListener(this);
         
-        this.ui = new GameUI();
+        this.ui = new GameUI(engine, canvas, this.player, this.app.env.isMobile || true);
 
         // put debug functionality here 
         this.debug_view = new DebugView(
