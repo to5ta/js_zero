@@ -1,5 +1,5 @@
 import * as BABYLON from "@babylonjs/core";
-import { GameEvent, GameEventType, GameEventSubscriber, GameEventHandler } from "./common/GameEvent";
+import { GameEventType, GameEventHandler } from "./common/GameEvent";
 
 export class CharacterHealth  {
     setHealthPoints(hp: number) {

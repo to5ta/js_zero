@@ -21,7 +21,7 @@ interface GameEventSubscriber {
 class GameEventHandler {
     private static subscribers = new Map<GameEventType, Array<GameEventSubscriber>>(); 
 
-    public static addGameEventCallback(subscriber : GameEventSubscriber, type: GameEventType ) {
+    public static addGameEventCallback(type: GameEventType, subscriber : GameEventSubscriber) {
         if (GameEventHandler.subscribers.get(type) == undefined) {
             GameEventHandler.subscribers.set(type, new Array<GameEventSubscriber>());
         }
@@ -30,7 +30,7 @@ class GameEventHandler {
         }         
     }
     
-    public static removeGameEventCallback(subscriber : GameEventSubscriber, type: GameEventType ) {
+    public static removeGameEventCallback(type: GameEventType, subscriber : GameEventSubscriber) {
         if (GameEventHandler.subscribers.get(type) != undefined) {
             while (GameEventHandler.subscribers.get(type)!.indexOf(subscriber) > -1) {
                 GameEventHandler.subscribers.get(type)!.splice(
@@ -39,7 +39,6 @@ class GameEventHandler {
         }
     }
 
-    // public static dispatchEvent(event: GameEvent<GameEventType>){
     public static dispatchEvent(type: GameEventType, dispatcher: object, data: object){
         if (GameEventHandler.subscribers.get(type) != undefined) {
             GameEventHandler.subscribers.get(type)!.forEach(subscriber => {

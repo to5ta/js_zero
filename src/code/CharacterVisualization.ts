@@ -1,6 +1,7 @@
 import * as BABYLON from "@babylonjs/core";
 import "@babylonjs/loaders";
 
+
 interface animationProperties {
     loop: boolean;
     speed: number;
@@ -9,15 +10,13 @@ interface animationProperties {
     soundfile?: string;
 }
 
-import { GameEventDispatcher } from "./common/GameEvent";
-export class CharacterVisualization extends GameEventDispatcher {
+export class CharacterVisualization {
     
     constructor(
         modelfile: string,
         assetManager: BABYLON.AssetsManager,
         scene: BABYLON.Scene,
         namedAnimationProperties: {[key: string]: animationProperties}) {
-        super(CharacterVisualization.name);
         this.mNamedAnimationProperties = namedAnimationProperties;
         
         let soundsCount = 0;
