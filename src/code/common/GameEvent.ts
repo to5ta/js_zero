@@ -4,12 +4,14 @@ enum GameEventType {
     GameStarted,
     GamePaused,
     GameConinued,
+    PlayerHealthChanged,
+    PlayerDied
 }
 
 interface GameEvent<GameEventType> {
     type: GameEventType;
-    dispatcher: string;
-    data: GameEventSubscriber;
+    dispatcher: object;
+    data: object;
 }
 
 interface GameEventSubscriber {
@@ -19,7 +21,7 @@ interface GameEventSubscriber {
 class GameEventHandler {
     private static subscribers = new Map<GameEventType, Array<GameEventSubscriber>>(); 
 
-    public addGameEventCallback(subscriber : GameEventSubscriber, type: GameEventType ) {
+    public static addGameEventCallback(subscriber : GameEventSubscriber, type: GameEventType ) {
         if (GameEventHandler.subscribers.get(type) == undefined) {
             GameEventHandler.subscribers.set(type, new Array<GameEventSubscriber>());
         }
@@ -28,7 +30,7 @@ class GameEventHandler {
         }         
     }
     
-    public removeGameEventCallback(subscriber : GameEventSubscriber, type: GameEventType ) {
+    public static removeGameEventCallback(subscriber : GameEventSubscriber, type: GameEventType ) {
         if (GameEventHandler.subscribers.get(type) != undefined) {
             while (GameEventHandler.subscribers.get(type)!.indexOf(subscriber) > -1) {
                 GameEventHandler.subscribers.get(type)!.splice(
@@ -37,11 +39,11 @@ class GameEventHandler {
         }
     }
 
-    public dispatchEvent(event: GameEvent<GameEventType>){
-        var eventType = event.type;
-        if (GameEventHandler.subscribers.get(eventType) != undefined) {
-            GameEventHandler.subscribers.get(eventType)!.forEach(subscriber => {
-                subscriber.onEvent(event);
+    // public static dispatchEvent(event: GameEvent<GameEventType>){
+    public static dispatchEvent(type: GameEventType, dispatcher: object, data: object){
+        if (GameEventHandler.subscribers.get(type) != undefined) {
+            GameEventHandler.subscribers.get(type)!.forEach(subscriber => {
+                subscriber.onEvent({type: type, dispatcher: dispatcher, data: data  });
             })
         
         }
@@ -52,5 +54,6 @@ class GameEventHandler {
 export {
     GameEventType,
     GameEvent,
-    GameEventSubscriber
+    GameEventSubscriber,
+    GameEventHandler
 }
