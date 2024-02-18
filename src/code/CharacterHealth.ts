@@ -15,7 +15,7 @@ export class CharacterHealth  {
         totalHealthpoints: number){
             this.totalHealhPoints = totalHealthpoints;
             this.healthPoints = totalHealthpoints;
-        }
+    }
         
         private dealDamage(damage: number) {
             this.healthPoints -= damage;

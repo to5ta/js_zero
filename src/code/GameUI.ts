@@ -2,6 +2,7 @@ import * as BABYLON from "@babylonjs/core";
 import * as BABYLONGUI from "@babylonjs/gui";
 import { Logging } from "./common/Logging";
 import {Player} from "./Player";
+import { GameEvent, GameEventHandler, GameEventType } from "./common/GameEvent";
 export default class GameUI {
 
     playerHealth: BABYLONGUI.TextBlock;
@@ -11,7 +12,7 @@ export default class GameUI {
         var advancedTexture = BABYLONGUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
 
         this.playerHealth = new BABYLONGUI.TextBlock();
-        this.playerHealth.text = "Hello world";
+        this.playerHealth.text = "<Hello world>";
         this.playerHealth.color = "white";
         this.playerHealth.fontSize = 45;
         this.playerHealth.textHorizontalAlignment = BABYLONGUI.TextBlock.HORIZONTAL_ALIGNMENT_LEFT;
@@ -22,6 +23,8 @@ export default class GameUI {
         this.playerHealth.paddingLeft = 20;
 
         advancedTexture.addControl(this.playerHealth);   
+
+        
         
         // TODO image button for walking directionally
         // var button = BABYLONGUI.Button.CreateImageButton
@@ -75,8 +78,17 @@ export default class GameUI {
 
         // Button zur AdvancedDynamicTexture hinzufügen
         advancedTexture.addControl(button);
+        GameEventHandler.addGameEventListener(GameEventType.PlayerHealthChanged, this.onEvent.bind(this) );
 }    }
+
+    onEvent = (gameEvent: GameEvent) => {
+        if (gameEvent.data && gameEvent.data.hasOwnProperty("health")){
+            let data = gameEvent.data as {health: string};
+            this.playerHealth.text = "\u2764 " + data.health;
+        }
+    }
 }
+
 
 
 

@@ -5,46 +5,49 @@ enum GameEventType {
     GamePaused,
     GameConinued,
     PlayerHealthChanged,
-    PlayerDied
+    PlayerDied,
+    SensorActivated,
+    SensorDeactivated,
 }
 
-interface GameEvent<GameEventType> {
+interface GameEvent {
     type: GameEventType;
     dispatcher: object;
     data: object;
 }
 
-interface GameEventSubscriber {
-    onEvent<GameEventType>(gameEvent: GameEvent<GameEventType>) : boolean;
-}
-
 class GameEventHandler {
-    private static subscribers = new Map<GameEventType, Array<GameEventSubscriber>>(); 
+    private static callbacks = new Map<GameEventType, Array<(gameEvent: GameEvent) => void>>(); 
 
-    public static addGameEventCallback(type: GameEventType, subscriber : GameEventSubscriber) {
-        if (GameEventHandler.subscribers.get(type) == undefined) {
-            GameEventHandler.subscribers.set(type, new Array<GameEventSubscriber>());
-        }
-        if (GameEventHandler.subscribers.get(type)?.indexOf(subscriber) == -1) {
-            GameEventHandler.subscribers.get(type)?.push(subscriber);
-        }         
-    }
+    public static addGameEventsListener(types: Array<GameEventType>, callback : (gameEvent: GameEvent) => void ) {
+        types.forEach((type) => {
+            GameEventHandler.addGameEventListener(type, callback);
+        })
+    };
     
-    public static removeGameEventCallback(type: GameEventType, subscriber : GameEventSubscriber) {
-        if (GameEventHandler.subscribers.get(type) != undefined) {
-            while (GameEventHandler.subscribers.get(type)!.indexOf(subscriber) > -1) {
-                GameEventHandler.subscribers.get(type)!.splice(
-                    GameEventHandler.subscribers.get(type)!.indexOf(subscriber, 0), 1);
+    public static addGameEventListener(type: GameEventType, callback : (gameEvent: GameEvent) => void ) {
+        if (GameEventHandler.callbacks.get(type) == undefined) {
+            GameEventHandler.callbacks.set(type, new Array<(gameEvent: GameEvent) => void>);
+        }
+        if (GameEventHandler.callbacks.get(type)?.indexOf(callback) == -1) {
+            GameEventHandler.callbacks.get(type)?.push(callback);
+        }
+    }
+
+    public static removeGameEventListener(type: GameEventType, callback : (gameEvent: GameEvent) => {} ) {
+        if (GameEventHandler.callbacks.get(type) != undefined) {
+            while (GameEventHandler.callbacks.get(type)!.indexOf(callback) > -1) {
+                GameEventHandler.callbacks.get(type)!.splice(
+                    GameEventHandler.callbacks.get(type)!.indexOf(callback, 0), 1);
             }
         }
     }
 
     public static dispatchEvent(type: GameEventType, dispatcher: object, data: object){
-        if (GameEventHandler.subscribers.get(type) != undefined) {
-            GameEventHandler.subscribers.get(type)!.forEach(subscriber => {
-                subscriber.onEvent({type: type, dispatcher: dispatcher, data: data  });
+        if (GameEventHandler.callbacks.get(type) != undefined) {
+            GameEventHandler.callbacks.get(type)!.forEach(callback => {
+                callback({type: type, dispatcher: dispatcher, data: data  });
             })
-        
         }
     }
 }
@@ -53,6 +56,5 @@ class GameEventHandler {
 export {
     GameEventType,
     GameEvent,
-    GameEventSubscriber,
     GameEventHandler
 }

@@ -1,20 +1,14 @@
 import * as BABYLON from "@babylonjs/core";
 
-import { GameEvent, GameEventDispatcher, GameEventListener } from "./common/GameEvent";
-
 import { Logging } from "./common/Logging";
+import { GameEventHandler, GameEventType } from "./common/GameEvent";
 
 
 interface TriggerObject {
     getPosition(): BABYLON.Vector3;
 }
 
-abstract class SensorBase extends GameEventDispatcher {
-
-    constructor(name: string) {
-        super(name);
-    }
-
+abstract class SensorBase  {
     abstract update(TriggerObject: TriggerObject) : void;
 }
 
@@ -31,7 +25,7 @@ class SphereSensor extends SensorBase {
         radius: number, 
         position: BABYLON.Vector3,
         world: BABYLON.Scene) {
-        super(name);
+        super();
         this.radius = radius;
         // add shpere to world
         let sphere = BABYLON.MeshBuilder.CreateSphere(name, {diameter: radius*2}, world);
@@ -50,15 +44,13 @@ class SphereSensor extends SensorBase {
         let distance = BABYLON.Vector3.Distance(this.position, TriggerObject.getPosition());
         if (distance < this.radius) {
             if (!this.isActivate) {
-                // Logging.info("Sensor activated");
-                this.dispatchEvent({type: "sensor_activated", data: {trigger: this.name, object: TriggerObject}});
+                GameEventHandler.dispatchEvent(GameEventType.SensorActivated, this, {object: TriggerObject});
                 this.isActivate = true;
                 this.onActivate();
             }
         } else {
             if (this.isActivate) {
-                // Logging.info("Sensor deactivated");
-                this.dispatchEvent({type: "sensor_deactivated", data: {trigger: this.name, object: TriggerObject}});
+                GameEventHandler.dispatchEvent(GameEventType.SensorDeactivated, this, {object: TriggerObject});
                 this.isActivate = false;
                 this.onDeactivate();
             }

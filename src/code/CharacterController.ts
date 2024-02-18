@@ -2,8 +2,8 @@ import * as BABYLON from "@babylonjs/core";
 import { CharacterVisualization } from "./CharacterVisualization";
 import { GameWorld } from "./world";
 import { Player } from "./Player";
-import { GameEventDispatcher } from "./common/GameEvent";
 import { NormaltoSlopeXZ } from "./utils";
+import { GameEventHandler, GameEventType } from "./common/GameEvent";
 
 class ControllerConfig {
     jumpSpeed: number;
@@ -17,7 +17,7 @@ class ControllerConfig {
 
 
 
-class CharacterController extends GameEventDispatcher {
+class CharacterController {
 
     private world: GameWorld;
     readonly imposter: BABYLON.Mesh;
@@ -47,7 +47,6 @@ class CharacterController extends GameEventDispatcher {
         world: GameWorld,
         animatedModel: CharacterVisualization
     ) {
-        super(CharacterController.name);
         this.config             = config;
         this.world              = world;
         this.animatedModel      = animatedModel;
@@ -311,7 +310,7 @@ class CharacterController extends GameEventDispatcher {
 
 
         if (!this.parent.died && this.imposter.position.y < -50) {
-            this.dispatchEvent({type: "died", data: {reason: "abyss"}});
+            GameEventHandler.dispatchEvent(GameEventType.PlayerDied, this, {reason: "abyss"});
         }
     }
 }

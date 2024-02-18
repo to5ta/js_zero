@@ -14,11 +14,10 @@ import { CharacterVisualization } from "./CharacterVisualization";
 import { CharacterController, ControllerConfig } from "./CharacterController";
 import { CharacterHealth } from "./CharacterHealth";
 
-import { GameEvent, GameEventDispatcher, GameEventListener } from "./common/GameEvent";
-
 import { Logging } from "./common/Logging";
+import { GameEvent, GameEventHandler, GameEventType } from "./common/GameEvent";
 
-class Player extends GameEventDispatcher implements GameEventListener {
+class Player {
 
     scene: BABYLON.Scene;
     canvas: HTMLCanvasElement;
@@ -39,18 +38,6 @@ class Player extends GameEventDispatcher implements GameEventListener {
    
     died = false;
     weight: any;
-
-
-    onEvent(event: GameEvent) {
-        if (event.type == "ready") {
-            this.dispatchEvent({type: "ready", data: {author: Player.name}});
-        } else {
-            this.dispatchEvent(event);
-            // Logging.info(`Player received event of type: ${event.type}`);
-            // Logging.info(`Event has data: ${event.data!=null}`);
-            // if (event.data) Logging.info("data: ", event.data);
-        }
-    }
 
     getPosition() : BABYLON.Vector3 {
         return this.mPhysics.getPosition();
@@ -86,6 +73,10 @@ class Player extends GameEventDispatcher implements GameEventListener {
         this.died = true;
     }
 
+    onEvent(gameEvent: GameEvent): void {
+        
+    }
+
 
     reset() {
         this.died = false;
@@ -101,17 +92,15 @@ class Player extends GameEventDispatcher implements GameEventListener {
         scene: BABYLON.Scene, 
         world: GameWorld, 
         assetManager: BABYLON.AssetsManager) {
-        super(Player.name);
         this.scene = scene;
         this.world = world;
 
         this.debug_mode = false;
         
         this.mHealth = new CharacterHealth(100);
-        this.mHealth.addGameEventListener(this);
-        this.mHealth.addGameEventListener(this);
-        
-        
+
+        GameEventHandler.addGameEventsListener([GameEventType.PlayerHealthChanged, GameEventType.PlayerDied], this.onEvent.bind(this));
+
         this.mCharacter = new CharacterVisualization(
             player_model,
             assetManager,
@@ -124,7 +113,6 @@ class Player extends GameEventDispatcher implements GameEventListener {
                 "sprint": {loop: true, speed: 1.5, from: 0, to: 100, soundfile: sprint_sound},
                 "dieOnFall": {loop: false, speed: 1.0, from: 0, to: 100}
             }); 
-            this.mCharacter.addGameEventListener(this);
             
             
             var ctrlConfig: ControllerConfig = {
@@ -137,7 +125,6 @@ class Player extends GameEventDispatcher implements GameEventListener {
                 weight: 75.0 //kg
             };
             this.mPhysics = new CharacterController(ctrlConfig, this, world, this.mCharacter);
-            this.mPhysics.addGameEventListener(this);
             
             
             // CAMERA ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
