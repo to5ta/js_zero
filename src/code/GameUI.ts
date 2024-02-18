@@ -74,11 +74,10 @@ export default class GameUI {
                 player.mPhysics.handleDirectionalMovementInput(new BABYLON.Vector2(relative_position.x, -relative_position.y));
             }
         });
-        // button.onPointerClickObservable.add(callback_factory("Pointer Clicked up"));
 
         // Button zur AdvancedDynamicTexture hinzufügen
         advancedTexture.addControl(button);
-        GameEventHandler.addGameEventListener(GameEventType.PlayerHealthChanged, this.onEvent.bind(this) );
+        GameEventHandler.addGameEventsListener([GameEventType.PlayerHealthChanged, GameEventType.PlayerDied], this.onEvent.bind(this) );
 }    }
 
     onEvent = (gameEvent: GameEvent) => {

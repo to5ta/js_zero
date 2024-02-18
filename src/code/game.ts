@@ -53,10 +53,6 @@ class Game implements Pausable  {
     }
 
     onEvent(event: GameEvent) {
-        if (event.data && event.data.hasOwnProperty("health")){
-        let data = event.data as {health: string};
-        this.ui.playerHealth.text = "\u2764 " + data.health;
-        }
 
         if (event.type == GameEventType.PlayerDied) {
             this.onPlayerDied(event);
