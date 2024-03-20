@@ -1,4 +1,4 @@
-name: Deploy
+name: Deploy to GH Pages and Website
 
 on:
   workflow_dispatch:
@@ -8,7 +8,7 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
+  Deploy:
 
     runs-on: ubuntu-latest
 
@@ -36,15 +36,27 @@ jobs:
         CLEAN: true
         SSH: false
         
-    - name: Installing SSH Key
-      uses: webfactory/ssh-agent@v0.5.3
-      with:
-        ssh-private-key: ${{ secrets.DEPLOY_KEY }}
+    - name: Add SSH key and Server to Known Hosts
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.DEPLOY_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        echo "${{ secrets.DEPLOY_KNOWN_HOST }}" >> ~/.ssh/known_hosts
+        chmod 644 ~/.ssh/known_hosts
 
     - name: Deploy folder via SFTP
       run: |
-        sftp -oPort=22 ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_SERVER }} <<EOF
+        sftp -oPort=22 -i ~/.ssh/id_rsa ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_SERVER }} <<EOF
         cd games/js_zero
         put -r dist
         bye
         EOF
+
+    - name: Cleanup SSH Key and Known Hosts
+      if: always() # Ensure this step runs even if previous steps fail
+      run: |
+        # Remove the SSH private key file
+        rm -f ~/.ssh/id_rsa
+        
+        # Clear the known hosts file
+        > ~/.ssh/known_hosts
