@@ -47,7 +47,7 @@ jobs:
     - name: Deploy folder via SFTP
       run: |
         sftp -oPort=22 -i ~/.ssh/id_rsa ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_SERVER }} <<EOF
-        cd games/js_zero
+        cd public_html/games/js_zero
         put -r dist
         bye
         EOF
