@@ -48,7 +48,7 @@ jobs:
       run: |
         sftp -oPort=22 -i ~/.ssh/id_rsa ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_SERVER }} <<EOF
         cd public_html/games/js_zero
-        put -r dist
+        put -r dist/*
         bye
         EOF
 
