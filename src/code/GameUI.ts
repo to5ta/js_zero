@@ -15,10 +15,10 @@ export default class GameUI {
         this.playerHealth.text = "<Hello world>";
         this.playerHealth.color = "white";
         this.playerHealth.fontSize = 45;
-        this.playerHealth.textHorizontalAlignment = BABYLONGUI.TextBlock.HORIZONTAL_ALIGNMENT_LEFT;
-        this.playerHealth.textVerticalAlignment = BABYLONGUI.TextBlock.VERTICAL_ALIGNMENT_TOP;
-        this.playerHealth.horizontalAlignment = BABYLONGUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
-        this.playerHealth.verticalAlignment = BABYLONGUI.Control.VERTICAL_ALIGNMENT_TOP;
+        this.playerHealth.textHorizontalAlignment        = BABYLONGUI.TextBlock.HORIZONTAL_ALIGNMENT_LEFT;
+        this.playerHealth.textVerticalAlignment        = BABYLONGUI.TextBlock.VERTICAL_ALIGNMENT_TOP;
+        this.playerHealth.horizontalAlignment        = BABYLONGUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
+        this.playerHealth.verticalAlignment        = BABYLONGUI.Control.VERTICAL_ALIGNMENT_TOP;
         this.playerHealth.paddingTop = 60;
         this.playerHealth.paddingLeft = 20;
 
@@ -62,16 +62,19 @@ export default class GameUI {
 
         button.onPointerDownObservable.add((eventData, eventState) => {
             this.movement_button_pressed = true;
+            var relative_position = relative_position_in_button(eventData.x, eventData.y, button);
+            player.mPhysics.handleMoveButtonInput(new BABYLON.Vector2(relative_position.x, -relative_position.y));
         });
         button.onPointerUpObservable.add((eventData, eventState) => {
             this.movement_button_pressed = false;
-            player.mPhysics.handleDirectionalMovementInput(BABYLON.Vector2.Zero());
+            player.mPhysics.handleMoveButtonInput(BABYLON.Vector2.Zero());
         });
+        
         button.onPointerMoveObservable.add((eventData, eventState) => {
             if (this.movement_button_pressed) {
-                // Logging.info("Pointer Move", eventData, eventState);
                 var relative_position = relative_position_in_button(eventData.x, eventData.y, button);
-                player.mPhysics.handleDirectionalMovementInput(new BABYLON.Vector2(relative_position.x, -relative_position.y));
+                Logging.info("Relative position: ", relative_position);
+                player.mPhysics.handleMoveButtonInput(new BABYLON.Vector2(relative_position.x, -relative_position.y));
             }
         });
 
