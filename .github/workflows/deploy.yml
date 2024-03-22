@@ -1,0 +1,62 @@
+name: Deploy to GH Pages and Website
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  Deploy:
+
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+    - uses: actions/checkout@v2
+      
+    - name: Install and Build 🔧
+      run: |
+        npm install
+        npm run build
+        chmod +x ./prebuild.sh
+        ./prebuild.sh
+      env:
+        CI: true
+
+    - name: Deploy to GitHub Pages
+      uses: JamesIves/github-pages-deploy-action@3.7.1
+      with:
+        ACCESS_TOKEN: ${{ secrets.GHTOKEN }}  
+        BASE_BRANCH: main
+        BRANCH: gh-pages
+        FOLDER: dist
+        CLEAN: true
+        SSH: false
+        
+    - name: Add SSH key and Server to Known Hosts
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.DEPLOY_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        echo "${{ secrets.DEPLOY_KNOWN_HOST }}" >> ~/.ssh/known_hosts
+        chmod 644 ~/.ssh/known_hosts
+
+    - name: Deploy folder via SFTP
+      run: |
+        sftp -oPort=22 -i ~/.ssh/id_rsa ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_SERVER }} <<EOF
+        cd public_html/games/js_zero
+        put -r dist/*
+        bye
+        EOF
+
+    - name: Cleanup SSH Key and Known Hosts
+      if: always() # Ensure this step runs even if previous steps fail
+      run: |
+        # Remove the SSH private key file
+        rm -f ~/.ssh/id_rsa
+        
+        # Clear the known hosts file
+        > ~/.ssh/known_hosts
