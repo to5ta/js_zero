@@ -8,6 +8,8 @@ enum GameEventType {
     PlayerDied,
     SensorActivated,
     SensorDeactivated,
+    DebuggingShowValue,
+    DebuggingRemoveValue
 }
 
 interface GameEvent {

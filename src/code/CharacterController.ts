@@ -184,6 +184,10 @@ class CharacterController {
     update(dTimeMs: number) {
         const dTimeSec = dTimeMs / 1000;
 
+        GameEventHandler.dispatchEvent(
+            GameEventType.DebuggingShowValue, this, 
+            {key: "localInputDirection", value: this.localInputDirection});
+
         // log inputdirection
         var isSprinting = this.sprint && this.localInputDirection.z > 0.9 && this.localInputDirection.x < 0.1;
 
@@ -251,7 +255,7 @@ class CharacterController {
             pitch,
             -roll);
 
-        let inputVelocity = this.localInputDirection;
+        let inputVelocity = this.localInputDirection.clone();
         if(this.localInputDirection.length() > 1.0){
             inputVelocity = this.localInputDirection.normalizeToNew();
         } 
