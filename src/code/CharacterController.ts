@@ -128,8 +128,8 @@ class CharacterController {
 
 
     handleDirectionalMovementInput(direction: BABYLON.Vector2) {
-        this.localInputDirection.x = direction.x/2;
-        this.localInputDirection.z = direction.y;
+        this.localInputDirection.x = direction.x / 2;   // left/right
+        this.localInputDirection.z = direction.y;       // forward/backward
     }
 
     handleInput(keyEvent: KeyboardEvent) {

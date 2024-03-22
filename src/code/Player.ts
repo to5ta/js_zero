@@ -16,6 +16,7 @@ import { CharacterHealth } from "./CharacterHealth";
 
 import { Logging } from "./common/Logging";
 import { GameEvent, GameEventHandler, GameEventType } from "./common/GameEvent";
+import { Environment } from "./environment";
 
 class Player {
 
@@ -207,7 +208,9 @@ class Player {
         const dTimeSec = dTimeMs / 1000;
 
         if(!this.died) {
-            this.mPhysics.setOrientation(Math.PI/2 - this.camera.alpha + Math.PI);
+            if(!Environment.isMobile) {
+                this.mPhysics.setOrientation(Math.PI/2 - this.camera.alpha + Math.PI);
+            }
             this.mPhysics.update(dTimeMs);
         }
     }

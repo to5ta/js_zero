@@ -15,6 +15,7 @@ import { MenuScreen } from "./MenuScreen";
 import { SphereSensor } from "./Sensors";
 
 import { Logging } from "./common/Logging";
+import { Environment } from "./environment";
 
 class Game implements Pausable  {
     engine: BABYLON.Engine;
@@ -155,7 +156,7 @@ class Game implements Pausable  {
         
         this.player.setPosition(this.world.player_start_position.clone());
         
-        this.ui = new GameUI(engine, canvas, this.player, this.app.env.isMobile || true);
+        this.ui = new GameUI(engine, canvas, this.player, Environment.isMobile || true);
 
         // put debug functionality here 
         this.debug_view = new DebugView(
