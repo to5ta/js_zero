@@ -38,6 +38,7 @@ export default class GameUI {
         this.debug_values_textblock.paddingTop = 120;
         this.debug_values_textblock.paddingLeft = 20;
         fullScreenDebugUI.addControl(this.debug_values_textblock);
+        // fullScreenDebugUI.layer!.isEnabled = false;
         
         // TODO image button for walking directionally
         // var button = BABYLONGUI.Button.CreateImageButton
