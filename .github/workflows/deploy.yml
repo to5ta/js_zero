@@ -39,14 +39,14 @@ jobs:
     - name: Add SSH key and Server to Known Hosts
       run: |
         mkdir -p ~/.ssh
-        echo "${{ secrets.DEPLOY_KEY }}" > ~/.ssh/id_rsa
+        echo "${{ secrets.DEPLOYMENT_SFTP_KEY }}" > ~/.ssh/id_rsa
         chmod 600 ~/.ssh/id_rsa
-        echo "${{ secrets.DEPLOY_KNOWN_HOST }}" >> ~/.ssh/known_hosts
+        echo "${{ secrets.DEPLOYMENT_KNOWN_HOST }}" >> ~/.ssh/known_hosts
         chmod 644 ~/.ssh/known_hosts
 
     - name: Deploy folder via SFTP
       run: |
-        sftp -oPort=22 -i ~/.ssh/id_rsa ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_SERVER }} <<EOF
+        sftp -oPort=22 -i ~/.ssh/id_rsa ${{ secrets.DEPLOYMENT_SFTP_USER }}@${{ secrets.DEPLOYMENT_SERVER }} <<EOF
         cd public_html/games/js_zero
         put -r dist/*
         bye
