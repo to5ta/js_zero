@@ -1,0 +1,21 @@
+name: Build PR
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  Deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install and Build 🔧
+      run: |
+        npm install
+        npm run build
+        chmod +x ./prebuild.sh
+        ./prebuild.sh
+      env:
+        CI: true
+        
