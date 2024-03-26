@@ -4,12 +4,9 @@ on:
   workflow_dispatch:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
 
 jobs:
   Deploy:
-
     runs-on: ubuntu-latest
 
     # Steps represent a sequence of tasks that will be executed as part of the job
