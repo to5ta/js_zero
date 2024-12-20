@@ -156,7 +156,7 @@ class Game implements Pausable  {
         
         this.player.setPosition(this.world.player_start_position.clone());
         
-        this.ui = new GameUI(engine, canvas, this.player, Environment.isMobile || true);
+        this.ui = new GameUI(engine, canvas, this.player, Environment.isMobile );
 
         // put debug functionality here 
         this.debug_view = new DebugView(
