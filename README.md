@@ -1,6 +1,6 @@
-# Project JS_Zero
+# Project js_zero
 
-![JS_Zero](src\promotion\promo6_cut.PNG)
+![JS_Zero](src/promotion/promo6_cut.PNG)
   - Third-Person Medieval Online-Game Prototype
   - Assets created with [Blender](https://www.blender.org/)
   - Built with [Babylon.js](https://www.babylonjs.com/), [webpack](https://webpack.js.org/), and [Node.js](https://nodejs.org/)
