@@ -5,10 +5,11 @@
     <img src="src/promotion/promo2_circle.PNG" width="20%"/>
   </div>
 <div style="display: flex; align-items: center;">
-<ul>
+  <ul>
     <li> Third-Person Medieval Online-Game Prototype</li>
     <li> Assets created with <a href="https://www.blender.org/">Blender</a> </li>
     <li> Built with <a href="https://www.babylonjs.com/">Babylon.js</a>, <a href="https://webpack.js.org/">webpack</a>, and <a href="https://nodejs.org/">Node.js</a></li>
+    </ul>
   </div>
 </div>
 
