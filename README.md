@@ -1,18 +1,10 @@
 # Project JS_Zero
 
-<div style="display: flex; align-items: center; width: 40%;">
-  <div style="flex: 1; text-align: center;">
-    <img src="src/promotion/promo2_circle.PNG" width="20%"/>
-  </div>
-<div style="display: flex; align-items: center;">
-  <ul>
-    <li> Third-Person Medieval Online-Game Prototype</li>
-    <li> Assets created with <a href="https://www.blender.org/">Blender</a> </li>
-    <li> Built with <a href="https://www.babylonjs.com/">Babylon.js</a>, <a href="https://webpack.js.org/">webpack</a>, and <a href="https://nodejs.org/">Node.js</a></li>
-    </ul>
-  </div>
-</div>
-
+![JS_Zero](src\promotion\promo6_cut.PNG)
+  - Third-Person Medieval Online-Game Prototype
+  - Assets created with [Blender](https://www.blender.org/)
+  - Built with [Babylon.js](https://www.babylonjs.com/), [webpack](https://webpack.js.org/), and [Node.js](https://nodejs.org/)
+  - Inspired by [Sketchbook](https://github.com/swift502/Sketchbook) ([Jan Bláha](https://jblaha.art/)) built with [Three.js](https://threejs.org/)
 
 ## Live Demo
 
