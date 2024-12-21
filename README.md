@@ -1,7 +1,7 @@
-# Project js_zero
+# Third-Person Medieval Online-Game Prototype
 
 ![JS_Zero](src/promotion/promo6_cut.PNG)
-  - Third-Person Medieval Online-Game Prototype
+
   - Assets created with [Blender](https://www.blender.org/)
   - Built with [Babylon.js](https://www.babylonjs.com/), [webpack](https://webpack.js.org/), and [Node.js](https://nodejs.org/)
   - Inspired by [Sketchbook](https://github.com/swift502/Sketchbook) ([Jan Bláha](https://jblaha.art/)) built with [Three.js](https://threejs.org/)
