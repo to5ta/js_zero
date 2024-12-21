@@ -28,16 +28,19 @@ export default class GameUI {
         this.playerHealth.paddingLeft = 20;
 
         fullScreenUI.addControl(this.playerHealth);
-        this.debug_values_textblock = new BABYLONGUI.TextBlock();
-        this.debug_values_textblock.text = "Debug values";
-        this.debug_values_textblock.color = "red";
-        this.debug_values_textblock.textHorizontalAlignment = BABYLONGUI.TextBlock.HORIZONTAL_ALIGNMENT_LEFT;
-        this.debug_values_textblock.textVerticalAlignment = BABYLONGUI.TextBlock.VERTICAL_ALIGNMENT_TOP;
-        this.debug_values_textblock.horizontalAlignment = BABYLONGUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
-        this.debug_values_textblock.verticalAlignment = BABYLONGUI.Control.VERTICAL_ALIGNMENT_TOP;
-        this.debug_values_textblock.paddingTop = 120;
-        this.debug_values_textblock.paddingLeft = 20;
-        fullScreenDebugUI.addControl(this.debug_values_textblock);
+        if(process.env.NODE_ENV === "development") {
+
+            this.debug_values_textblock = new BABYLONGUI.TextBlock();
+            this.debug_values_textblock.text = "Debug values";
+            this.debug_values_textblock.color = "red";
+            this.debug_values_textblock.textHorizontalAlignment = BABYLONGUI.TextBlock.HORIZONTAL_ALIGNMENT_LEFT;
+            this.debug_values_textblock.textVerticalAlignment = BABYLONGUI.TextBlock.VERTICAL_ALIGNMENT_TOP;
+            this.debug_values_textblock.horizontalAlignment = BABYLONGUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
+            this.debug_values_textblock.verticalAlignment = BABYLONGUI.Control.VERTICAL_ALIGNMENT_TOP;
+            this.debug_values_textblock.paddingTop = 120;
+            this.debug_values_textblock.paddingLeft = 20;
+            fullScreenDebugUI.addControl(this.debug_values_textblock);
+        }
         // fullScreenDebugUI.layer!.isEnabled = false;
 
         // TODO image button for walking directionally
@@ -120,6 +123,9 @@ export default class GameUI {
     }
 
     update_debug_values() {
+        if (!this.debug_values_textblock) {
+            return;
+        }
         let text = "";
         this.debug_values.forEach((value, key) => {
             text += key + ": " + value + "\n";
