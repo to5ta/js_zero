@@ -2,7 +2,7 @@
 
 <div style="display: flex; align-items: center; width: 40%;">
   <div style="flex: 1; text-align: center;">
-    <img src="src/promotion/promo2_circle.PNG"/>
+    <img src="src/promotion/promo2_circle.PNG" width="20%"/>
   </div>
 <div style="display: flex; align-items: center;">
 <ul>
