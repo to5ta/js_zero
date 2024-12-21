@@ -17,26 +17,18 @@ jobs:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
       
-    - name: Install and Build 🔧
+    - name: Install Dependencies 🔧
       run: |
         npm install
+
+      - name: Build Web Application 🔨
+      run: |
         npm run build
-        chmod +x ./prebuild.sh
-        ./prebuild.sh
       env:
         CI: true
 
-    - name: Deploy to GitHub Pages
-      uses: JamesIves/github-pages-deploy-action@3.7.1
-      with:
-        ACCESS_TOKEN: ${{ secrets.GHTOKEN }}  
-        BASE_BRANCH: main
-        BRANCH: gh-pages
-        FOLDER: dist
-        CLEAN: true
-        SSH: false
         
-    - name: Add SSH key and Server to Known Hosts
+    - name: Add Key and Server to Known Hosts
       run: |
         mkdir -p ~/.ssh
         echo "${{ secrets.DEPLOY_KEY }}" > ~/.ssh/id_rsa
@@ -44,11 +36,13 @@ jobs:
         echo "${{ secrets.DEPLOY_KNOWN_HOST }}" >> ~/.ssh/known_hosts
         chmod 644 ~/.ssh/known_hosts
 
-    - name: Deploy folder via SFTP
+    - name: Deploy via SFTP
       run: |
         sftp -oPort=22 -i ~/.ssh/id_rsa ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_SERVER }} <<EOF
         cd public_html/games/js_zero
-        put -r dist/*
+        put dist/index.html
+        put dist/js_zero.bundle.js
+        put dist/js_zero.bundle.js.map
         bye
         EOF
 
