@@ -5,7 +5,7 @@ const path = require('path');
 module.exports = {
   entry: './src/code/index.ts',
   output: {
-    filename: '[name].bundle.js',
+    filename: 'js_zero.bundle.js',
     path: path.resolve(__dirname, 'dist'),
     publicPath: ''
   },
@@ -45,7 +45,7 @@ module.exports = {
           {
             loader: 'file-loader',
             options: {
-              name: '[name].[ext]'
+              name: 'assets/[name].[ext]'
             }
           },
         ],

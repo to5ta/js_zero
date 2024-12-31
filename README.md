@@ -1,20 +1,22 @@
-# Project Zero
+# Third-Person Medieval Online-Game Prototype
 
-**Project JS_Zero** is third-person medieval online-game prototype implmented with [Babylon.js](https://babylonjs.com/) inspired by the ['Sketchbook' Project](https://github.com/swift502/Sketchbook).
+![JS_Zero](src/promotion/promo6_cut.PNG)
 
-## Online-Demo
+  - Assets created with [Blender](https://www.blender.org/)
+  - Built with [Babylon.js](https://www.babylonjs.com/), [webpack](https://webpack.js.org/), and [Node.js](https://nodejs.org/)
+  - Inspired by [Sketchbook](https://github.com/swift502/Sketchbook) ([Jan Bláha](https://jblaha.art/)) built with [Three.js](https://threejs.org/)
 
-Go ahead an try it online directly: https://to5ta.github.io/js_zero/
+## Live Demo
 
-![Promo](promotion/promo6.jpg)
+⚔️ https://games.staib.dev/js_zero/
 
 ## Installation
 
-1. Install NPM from https://nodejs.org/de/, then run the following commands where your checked out repository resides 
-2. `npm install` to install all dependencies
-3. `npm run dev` to host the app locally
-4. open `localhost:8080` in your Browser
+1. Install NPM from https://nodejs.org/de/
+2. Run `npm install` to install all dependencies
+3. Run `npm run dev` to build and host the app locally
+4. Open `localhost:8080` in your Browser
 
 ## Credits
 
-* Some of the Texture Sets being used refer to https://texturehaven.com/textures/ and https://hdrihaven.com.
+* Some of the used Texture Sets are from https://texturehaven.com/textures/ and https://hdrihaven.com.

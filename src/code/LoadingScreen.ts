@@ -1,7 +1,7 @@
 import * as BABYLON from "@babylonjs/core";
 import { ILoadingScreen } from "@babylonjs/core/Loading";
 
-import promoStartScreen from "./../../promotion/promo6.jpg";
+import promoStartScreen from "./../promotion/promo6.jpg";
 
 import "./styles.css";
 

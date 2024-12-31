@@ -12,21 +12,17 @@ import Stats from "stats-js";
  * Contains and handles all the dependencies to the outer world
  */
 class App {
-  env: Environment;
   engine: BABYLON.Engine;
   game: Game;
   stats: Stats;
 
   constructor() {
-    this.env = new Environment();
-
-    this.engine = new BABYLON.Engine(
-      this.env.canvas,
-      true);
+    Environment.init()
+    this.engine = new BABYLON.Engine(Environment.canvas, true);
 
     this.game = new Game(
       this.engine,
-      this.env.canvas,
+      Environment.canvas,
       this);
 
     this.stats = new Stats();
@@ -70,9 +66,9 @@ class App {
         // mouse? if we'd implement an own camera handler
 
         // catch the cursor to control the camera
-        if (!this.env.isMobile) {
+        if (!Environment.isMobile) {
           document.body.addEventListener("click", (event) => {
-            this.env.canvas.requestPointerLock();
+            Environment.canvas.requestPointerLock();
           });
         }
       }

@@ -8,15 +8,16 @@ import { Player } from './Player';
 import { GameWorld, Pausable } from './world';
 import { DebugView } from "./debug_view";
 import GameUI from "./GameUI";
-import { GameEvent, GameEventListener } from "./common/GameEvent";
+import { GameEvent, GameEventHandler, GameEventType } from "./common/GameEvent";
 import { App } from "./app";
 import { CustomLoadingScreen } from "./LoadingScreen";
 import { MenuScreen } from "./MenuScreen";
 import { SphereSensor } from "./Sensors";
 
 import { Logging } from "./common/Logging";
+import { Environment } from "./environment";
 
-class Game implements Pausable, GameEventListener  {
+class Game implements Pausable  {
     engine: BABYLON.Engine;
     canvas: HTMLCanvasElement;
     debug_fly_mode: boolean;
@@ -40,7 +41,8 @@ class Game implements Pausable, GameEventListener  {
     loadingScreen: CustomLoadingScreen;
     menuScreen: MenuScreen;
     
-    onPlayerDied(event: GameEvent) {
+
+    onPlayerDied(event: GameEvent): boolean {
         if (!this.player.died) {
             setTimeout(()=> {
                 this.player.reset();
@@ -48,24 +50,21 @@ class Game implements Pausable, GameEventListener  {
             this.player.onDying(event);
             Logging.info("Player died:", event);
         }
+        return true;
     }
 
     onEvent(event: GameEvent) {
-        if (event.data && event.data.hasOwnProperty("health")){
-            let data = event.data as {health: string};
-            this.ui.playerHealth.text = "\u2764 " + data.health;
-        }
 
-        if (event.type == "died") {
+        if (event.type == GameEventType.PlayerDied) {
             this.onPlayerDied(event);
         }
 
-        if (event.type == "sensor_activated") {
+        if (event.type == GameEventType.SensorActivated) {
             Logging.debug(`Sensor activated:`, event );
             this.thankyou_note.setEnabled(true);
         }
 
-        if (event.type == "sensor_deactivated") {
+        if (event.type == GameEventType.SensorDeactivated) {
             Logging.debug(`Sensor deactivated:`, event);
             this.thankyou_note.setEnabled(false);
         }
@@ -144,7 +143,11 @@ class Game implements Pausable, GameEventListener  {
 
         this.sensor_test = new SphereSensor("sensor", 0.5, new BABYLON.Vector3(-3.5,0.0,23), this.scene);
 
-        this.sensor_test.addGameEventListener(this);
+        GameEventHandler.addGameEventsListener(
+            [GameEventType.PlayerDied,
+            GameEventType.SensorActivated,
+            GameEventType.SensorDeactivated], 
+            this.onEvent.bind(this));
 
         this.player = new Player(
             this.scene, 
@@ -152,10 +155,8 @@ class Game implements Pausable, GameEventListener  {
             this.assetManager);
         
         this.player.setPosition(this.world.player_start_position.clone());
-
-        this.player.addGameEventListener(this);
         
-        this.ui = new GameUI();
+        this.ui = new GameUI(engine, canvas, this.player, Environment.isMobile );
 
         // put debug functionality here 
         this.debug_view = new DebugView(

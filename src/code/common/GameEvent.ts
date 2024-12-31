@@ -1,54 +1,62 @@
+import { Logging } from "./Logging";
+
+enum GameEventType {
+    GameStarted,
+    GamePaused,
+    GameConinued,
+    PlayerHealthChanged,
+    PlayerDied,
+    SensorActivated,
+    SensorDeactivated,
+    DebuggingShowValue,
+    DebuggingRemoveValue
+}
 
 interface GameEvent {
-    type: string;
-    dispatcher?: string;
-    data?: Object;
+    type: GameEventType;
+    dispatcher: object;
+    data: object;
 }
 
-abstract class GameEventDispatcher {
-    private listeners = new Array<GameEventListener>(); 
+class GameEventHandler {
+    private static callbacks = new Map<GameEventType, Array<(gameEvent: GameEvent) => void>>(); 
 
-    private static takenNames = new Array<string>(); 
-    readonly name: string;
-
-    // derived classes should call this with a proper, unique name 
-    constructor(name: string) {
-        if (GameEventDispatcher.takenNames.indexOf(name) > -1) {
-            this.name = name.concat("_", Math.random().toString(36).substring(7));
-            throw new Error(`Name "${name}" is already used, using ${this.name} instead!`);
-        } else {
-            this.name = name;
+    public static addGameEventsListener(types: Array<GameEventType>, callback : (gameEvent: GameEvent) => void ) {
+        types.forEach((type) => {
+            GameEventHandler.addGameEventListener(type, callback);
+        })
+    };
+    
+    public static addGameEventListener(type: GameEventType, callback : (gameEvent: GameEvent) => void ) {
+        if (GameEventHandler.callbacks.get(type) == undefined) {
+            GameEventHandler.callbacks.set(type, new Array<(gameEvent: GameEvent) => void>);
         }
-        GameEventDispatcher.takenNames.push(this.name);
-    }
-
-    public addGameEventListener(listener: GameEventListener) {
-        if (this.listeners.indexOf(listener) == -1) {
-            this.listeners.push(listener);
+        if (GameEventHandler.callbacks.get(type)?.indexOf(callback) == -1) {
+            GameEventHandler.callbacks.get(type)?.push(callback);
         }
     }
 
-    public removeGameEventListener(listener: GameEventListener) {
-        while (this.listeners.indexOf(listener) > -1) {
-            this.listeners.splice(this.listeners.indexOf(listener, 0), 1);
+    public static removeGameEventListener(type: GameEventType, callback : (gameEvent: GameEvent) => {} ) {
+        if (GameEventHandler.callbacks.get(type) != undefined) {
+            while (GameEventHandler.callbacks.get(type)!.indexOf(callback) > -1) {
+                GameEventHandler.callbacks.get(type)!.splice(
+                    GameEventHandler.callbacks.get(type)!.indexOf(callback, 0), 1);
+            }
         }
     }
 
-    public dispatchEvent(event: GameEvent){
-        event.dispatcher = this.name;
-        this.listeners.forEach(listener => {
-            // Logging.info("\nDispatcher: ",event.dispatcher,", Type: ",event.type);
-            listener.onEvent(event);
-        });
+    public static dispatchEvent(type: GameEventType, dispatcher: object, data: object){
+        if (GameEventHandler.callbacks.get(type) != undefined) {
+            GameEventHandler.callbacks.get(type)!.forEach(callback => {
+                callback({type: type, dispatcher: dispatcher, data: data  });
+            })
+        }
     }
 }
 
-interface GameEventListener {
-    onEvent(event: GameEvent): void;
-}
 
 export {
+    GameEventType,
     GameEvent,
-    GameEventDispatcher,
-    GameEventListener
+    GameEventHandler
 }

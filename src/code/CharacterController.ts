@@ -2,8 +2,9 @@ import * as BABYLON from "@babylonjs/core";
 import { CharacterVisualization } from "./CharacterVisualization";
 import { GameWorld } from "./world";
 import { Player } from "./Player";
-import { GameEventDispatcher } from "./common/GameEvent";
 import { NormaltoSlopeXZ } from "./utils";
+import { GameEventHandler, GameEventType } from "./common/GameEvent";
+import { Logging } from "./common/Logging";
 
 class ControllerConfig {
     jumpSpeed: number;
@@ -17,7 +18,7 @@ class ControllerConfig {
 
 
 
-class CharacterController extends GameEventDispatcher {
+class CharacterController {
 
     private world: GameWorld;
     readonly imposter: BABYLON.Mesh;
@@ -31,6 +32,7 @@ class CharacterController extends GameEventDispatcher {
     private sprint = false;
 
     private localInputDirection: BABYLON.Vector3;
+    private localInputRotation: number  = 0;
     private anzimuth: number;
     
     private velocity: BABYLON.Vector3;
@@ -47,7 +49,6 @@ class CharacterController extends GameEventDispatcher {
         world: GameWorld,
         animatedModel: CharacterVisualization
     ) {
-        super(CharacterController.name);
         this.config             = config;
         this.world              = world;
         this.animatedModel      = animatedModel;
@@ -127,6 +128,16 @@ class CharacterController extends GameEventDispatcher {
         return this.currentVelocity;
     }
 
+    handleMoveButtonInput(direction: BABYLON.Vector2) {
+        this.localInputRotation    = -direction.x;
+        this.localInputDirection.z =  direction.y;       // forward/backward
+    }
+
+
+    handleDirectionalMovementInput(direction: BABYLON.Vector2) {   
+        this.localInputDirection.x = direction.x / 2;   // left/right
+        this.localInputDirection.z = direction.y;       // forward/backward
+    }
 
     handleInput(keyEvent: KeyboardEvent) {
         
@@ -173,9 +184,14 @@ class CharacterController extends GameEventDispatcher {
     update(dTimeMs: number) {
         const dTimeSec = dTimeMs / 1000;
 
-        var isSprinting = this.sprint && this.localInputDirection.z == 1 && this.localInputDirection.x == 0;
+        GameEventHandler.dispatchEvent(
+            GameEventType.DebuggingShowValue, this, 
+            {key: "localInputDirection", value: this.localInputDirection});
 
+        // log inputdirection
+        var isSprinting = this.sprint && this.localInputDirection.z > 0.9 && this.localInputDirection.x < 0.1;
 
+        this.parent.camera.alpha += (this.localInputRotation * dTimeSec);
 
         // collision detection for player ------------------------------------------------------------------------------------
         var externalPhysicalImpact = false;
@@ -239,7 +255,10 @@ class CharacterController extends GameEventDispatcher {
             pitch,
             -roll);
 
-        let inputVelocity = this.localInputDirection.normalizeToNew();
+        let inputVelocity = this.localInputDirection.clone();
+        if(this.localInputDirection.length() > 1.0){
+            inputVelocity = this.localInputDirection.normalizeToNew();
+        } 
 
         inputVelocity
             .scaleInPlace(
@@ -302,11 +321,12 @@ class CharacterController extends GameEventDispatcher {
   
         if(this.localInputDirection.length() > 0.1){
             this.animatedModel.setOrientation(this.anzimuth - Math.PI);
+            //his.animatedModel.setOrientation(this.anzimuth - Math.PI - (this.localInputRotation/2));
         }
 
 
         if (!this.parent.died && this.imposter.position.y < -50) {
-            this.dispatchEvent({type: "died", data: {reason: "abyss"}});
+            GameEventHandler.dispatchEvent(GameEventType.PlayerDied, this, {reason: "abyss"});
         }
     }
 }

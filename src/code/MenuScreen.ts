@@ -18,10 +18,15 @@ class MenuScreen {
         this.background.style.zIndex = "100";
         document.body.appendChild(this.background);
 
-        const createButton = (id: string, text: string, onClick: () => void) => {
+        const createButton = (id: string, text: string, onClick: () => void, disabled = false) => {
             const button = Div();
             button.id = id;
             button.className = "button";
+            if (disabled) {
+                button.style.opacity = "0.5";
+                button.style.pointerEvents = "none";
+                button.style.cursor = "not-allowed";
+            }
             button.textContent = text;
             button.onclick = onClick;
             this.background.appendChild(button);
@@ -33,10 +38,10 @@ class MenuScreen {
             this.hide();
         });
 
-        createButton("save_button", "Save", () => {});
-        createButton("load_button", "Load", () => {});
-        createButton("help_button", "Help", () => {});
-        createButton("credits_button", "Credits", () => {});
+        createButton("save_button", "Save", () => {}, true);
+        createButton("load_button", "Load", () => {}, true);
+        createButton("help_button", "Help", () => {}, true);
+        createButton("credits_button", "Credits", () => {}, true);
         createButton("quit_button", "Quit", () => { 
             window.close();
         });

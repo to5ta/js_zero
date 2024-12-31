@@ -7,19 +7,21 @@
 import { Logging } from "./common/Logging";
 
 class Environment {
-    isMobile: boolean;
-    canvas: HTMLCanvasElement;
-    constructor() {
-        this.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+    static isMobile: boolean;
+    static canvas: HTMLCanvasElement;
+
+    static init() {
+        Environment.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
             navigator.userAgent);
 
-        this.canvas = document.createElement("canvas");
-        this.canvas.height = window.innerHeight;
-        this.canvas.width = window.innerWidth;
-        Logging.info(this.canvas);
+        Environment.canvas = document.createElement("canvas");
+        Environment.canvas.height = window.innerHeight;
+        Environment.canvas.width = window.innerWidth;
+        Logging.info(Environment.canvas);
         Logging.info(window);
-        document.body.appendChild(this.canvas);
+        document.body.appendChild(Environment.canvas);
     }
+
 }
 
 export { Environment };
