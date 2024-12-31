@@ -20,15 +20,17 @@ jobs:
     - name: Install Dependencies 🔧
       run: |
         npm install
+      
+    - name: Download assets 📦
+      run: src/assets.py --download
 
-      - name: Build Web Application 🔨
+    - name: Build Web Application 🔨
       run: |
         npm run build
       env:
         CI: true
 
-    - name: Add Key and Server to Known Hosts
-      # only if main
+     - name: Add Key and Server to Known Hosts 🔑    # only if main
       if: github.ref == 'refs/heads/main'
       run: |
         mkdir -p ~/.ssh
@@ -37,7 +39,7 @@ jobs:
         echo "${{ secrets.DEPLOY_KNOWN_HOST }}" >> ~/.ssh/known_hosts
         chmod 644 ~/.ssh/known_hosts
 
-    - name: Deploy via SFTP
+    - name: Deploy via SFTP 🚀
       if: github.ref == 'refs/heads/main'
       run: |
         sftp -oPort=22 -i ~/.ssh/id_rsa ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_SERVER }} <<EOF
@@ -51,7 +53,7 @@ jobs:
         bye
         EOF
 
-    - name: Cleanup SSH Key and Known Hosts
+    - name: Cleanup SSH Key and Known Hosts 🧹
       if: always() # Ensure this step runs even if previous steps fail
       run: |
         # Remove the SSH private key file
