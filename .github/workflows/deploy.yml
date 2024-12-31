@@ -1,4 +1,4 @@
-name: Deploy to Website
+name: Build and Deploy
 
 on:
   workflow_dispatch:
@@ -44,12 +44,8 @@ jobs:
       run: |
         sftp -oPort=22 -i ~/.ssh/id_rsa ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_SERVER }} <<EOF
         cd public_html/games/js_zero
-        rm dist/*.html
-        rm dist/*.js
-        rm dist/*.js.map
-        put dist/index.html
-        put dist/js_zero.bundle.js
-        put dist/js_zero.bundle.js.map
+        rm *
+        put -r dist/*
         bye
         EOF
 
