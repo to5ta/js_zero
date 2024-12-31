@@ -27,7 +27,7 @@ jobs:
       env:
         CI: true
 
-     - name: Add Key and Server to Known Hosts 🔑    # only if main
+    - name: Add Key and Server to Known Hosts 🔑    # only if main
       if: github.ref == 'refs/heads/main'
       run: |
         mkdir -p ~/.ssh
