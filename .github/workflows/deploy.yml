@@ -1,4 +1,4 @@
-name: Deploy to GH Pages and Website
+name: Deploy to Website
 
 on:
   workflow_dispatch:
@@ -27,8 +27,9 @@ jobs:
       env:
         CI: true
 
-        
     - name: Add Key and Server to Known Hosts
+      # only if main
+      if: github.ref == 'refs/heads/main'
       run: |
         mkdir -p ~/.ssh
         echo "${{ secrets.DEPLOY_KEY }}" > ~/.ssh/id_rsa
@@ -37,6 +38,7 @@ jobs:
         chmod 644 ~/.ssh/known_hosts
 
     - name: Deploy via SFTP
+      if: github.ref == 'refs/heads/main'
       run: |
         sftp -oPort=22 -i ~/.ssh/id_rsa ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_SERVER }} <<EOF
         cd public_html/games/js_zero

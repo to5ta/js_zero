@@ -1,0 +1,19 @@
+{
+    "assets": {
+        "src\\assets\\models\\wache02.gltf": "games/assets/ea6a5d345a4bdd63bf3188752aafdfc05be511b6533c4f85838c8e97d5b68de2",
+        "src\\assets\\textures\\skybox\\kloppenheim_06_2k.png": "games/assets/f8a576f4559d85ff9ecd9c43f17a8c466ccd1636148355d71fd4dc972952c074",
+        "src\\assets\\textures\\skybox\\skybox0000_nx.png": "games/assets/df852d011dc77720470051e97e41f6834671e068d10c56ae5a0e2f404c69ce54",
+        "src\\assets\\models\\thank_you_note.gltf": "games/assets/53cfc6ce3c34f79a2bfd805e48f04b45337b0360f5761a43109d7ffe4374e700",
+        "src\\assets\\textures\\skybox\\skybox0000_pz.png": "games/assets/4eb32c23b0f1a7b8de1ce30fded181d03af917f5b1712fc7e8a777a2a30c126b",
+        "src\\assets\\music\\medieval_theme_01.mp3": "games/assets/ce347ddb9ba5e16dd78628e29468e365e7ec467e0daa5b9843cedab290d0dfa3",
+        "src\\assets\\models\\box.gltf": "games/assets/4366ff4a1576f9cbeedd83fb402407916ee2fc579fdc50cf7ad41c4b4af84ba5",
+        "src\\assets\\textures\\skybox\\skybox0000_ny.png": "games/assets/f32f60cbf459cd24b33cfb407f0aa88694a877911e8157c196f225dc8596a074",
+        "src\\assets\\sound\\simple_steps.mp3": "games/assets/488374db0068d9dba2a6a228f2fb0e357c4c2d569a6412df8ad513a6a21cbcd1",
+        "src\\assets\\music\\medieval_theme_02.mp3": "games/assets/3a53949acc1312dd6577c32a2c072ed22c1f154ab67298ed4867362af4bd85d7",
+        "src\\assets\\textures\\skybox\\skybox0000_py.png": "games/assets/9e9a66eb13428f11cdad417e0da91605490b6070d8591ca97bca162a884eca7a",
+        "src\\assets\\textures\\skybox\\skybox0000_nz.png": "games/assets/9b7019fa0506b18e33de20664c35159a51f4a3fdfa610aaba538b92e6d025442",
+        "src\\assets\\sound\\simple_sprint.mp3": "games/assets/a6c11b2c40d7aba4d34b795da39af3f5976bb34aff1df3ffaa78723f377b363c",
+        "src\\assets\\textures\\skybox\\skybox0000_px.png": "games/assets/ed0fe2b5e9d1d4cd57b81955c4b61dfa4635b5c9079889f278cdc881ad2f39b5",
+        "src\\promotion\\promo6.jpg": "games/assets/ff8caaf1a2185ea8f725d72f6fc25b077e3f15f7c0493a7cb67ff1df97e0520d"
+    }
+}
