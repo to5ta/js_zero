@@ -20,7 +20,7 @@ jobs:
       
     - name: Download assets 📦
       run: |
-        chmod +x src/assets.py
+        chmod +x scripts/assets.py
         scripts/assets.py --download
 
     - name: Build Web Application 🔨
