@@ -19,7 +19,7 @@ logging.addLevelName(logging.ERROR, "\033[1;31m%s\033[1;0m" % logging.getLevelNa
 logger = logging.getLogger(__name__)
 
 ROOT = Path(os.path.abspath(__file__)).parent.parent
-ASSETS_JSON_PATH = ROOT / 'src' / 'assets'/ 'assets.json'
+ASSETS_JSON_PATH = ROOT / 'src' / 'assets' / 'assets.json'
 ASSET_EXTENSIONS = ['.png', '.gltf', '.glb', '.jpg', '.jpeg', '.svg', '.ogg', '.mp3', '.wav', '.flac' ]
 
 BASE_URL = "staib.dev"

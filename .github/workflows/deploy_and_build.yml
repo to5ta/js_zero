@@ -42,7 +42,7 @@ jobs:
     - name: Deploy via SFTP 🚀
       if: github.ref == 'refs/heads/main'
       run: |
-        rsync -avz --delete -e "ssh -i ~/.ssh/id_rsa" dist/* ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_SERVER }}:public_html/games/js_zero/
+        rsync -avz -e "ssh -i ~/.ssh/id_rsa" /dist/ ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_SERVER }}:public_html/games/js_zero/
 
     - name: Cleanup SSH Key and Known Hosts 🧹
       if: always() # Ensure this step runs even if previous steps fail
