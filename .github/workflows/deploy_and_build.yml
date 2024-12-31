@@ -17,11 +17,12 @@ jobs:
     - name: Install Dependencies 🔧
       run: |
         npm install
+        pip install -r scripts/requirements.txt --user
       
     - name: Download assets 📦
       run: |
         chmod +x scripts/assets.py
-        scripts/assets.py --download
+        python scripts/assets.py --download
 
     - name: Build Web Application 🔨
       run: |
