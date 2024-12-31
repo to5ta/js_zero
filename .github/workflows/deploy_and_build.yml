@@ -19,7 +19,7 @@ jobs:
         npm install
       
     - name: Download assets 📦
-      run: src/assets.py --download
+      run: scripts/assets.py --download
 
     - name: Build Web Application 🔨
       run: |
