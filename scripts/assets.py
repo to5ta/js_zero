@@ -160,10 +160,10 @@ def main():
 
     args = parser.parse_args()
 
-    if not SFTP_SSH_KEY_PATH and args.ssh_key:
+    if args.ssh_key:
         SFTP_SSH_KEY_PATH = args.ssh_key
     
-    if not SFTP_USERNAME and args.username:
+    if args.username:
         SFTP_USERNAME = args.username
 
     if args.analyze: analyze_assets()
