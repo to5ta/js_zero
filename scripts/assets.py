@@ -12,7 +12,7 @@ import hashlib
 import paramiko
 import requests
 
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 # color error red
 logging.addLevelName(logging.ERROR, "\033[1;31m%s\033[1;0m" % logging.getLevelName(logging.ERROR))
 
@@ -22,14 +22,9 @@ ROOT = Path(os.path.abspath(__file__)).parent.parent
 ASSETS_JSON_PATH = ROOT / 'src' / 'assets' / 'assets.json'
 ASSET_EXTENSIONS = ['.png', '.gltf', '.glb', '.jpg', '.jpeg', '.svg', '.ogg', '.mp3', '.wav', '.flac' ]
 
-BASE_URL = "staib.dev"
 SFTP_USERNAME = os.environ.get('JS_ZERO_SFTP_USERNAME', None)
 SFTP_SSH_KEY_PATH = os.environ.get('JS_ZERO_SFTP_SSH_KEY_PATH', None)
-
-if not SFTP_USERNAME:
-    logger.warning('Environment variable JS_ZERO_SFTP_USERNAME not set. SFTP upload will not work.')
-if not SFTP_SSH_KEY_PATH:
-    logger.warning('Environment variable JS_ZERO_SFTP_SSH_KEY_PATH not set. SFTP upload will not work.')
+BASE_URL = "staib.dev"
 
 def find_paths(file):
     paths = []
@@ -91,6 +86,12 @@ def download_file_https(url, local_filename):
         with open(local_filename, 'wb') as file:
             for chunk in response.iter_content(chunk_size=8192):
                 file.write(chunk)
+        # check if the file was downloaded correctly
+        if not os.path.exists(local_filename):
+            logger.error(f'Failed to download {url} to {local_filename}')
+            exit(1)
+        else:
+            logger.info(f"Downloaded {local_filename} (verified)")
     print(f"Downloaded {local_filename}")
 
 def download_assets(dry_run=False):
@@ -126,7 +127,7 @@ def upload_assets(dry_run=False):
 
 def write_assets_manifest(path_to_url):
     with open(ASSETS_JSON_PATH, 'w') as f:
-        f.write(json.dumps({'assets': {str(path): url for path, url in path_to_url.items()}}, indent=4))
+        f.write(json.dumps({'assets': {str(path): url for path, url in sorted(path_to_url.items())}}, indent=4))
 
 def read_assets_manifest(path):
     with open(path, 'r') as f:
@@ -152,27 +153,35 @@ def hash_to_upload_url(hash):
 def main():
     parser = argparse.ArgumentParser(description='Manage assets in the project')
 
-    parser.add_argument('--analyze', help='Analyze assets in the project', action='store_true')
-    parser.add_argument('--upload', help='Upload assets to a remote server', action='store_true')
-    parser.add_argument('--download', help='Download assets from a remote server', action='store_true')
-    parser.add_argument('--username', help='SFTP username')
-    parser.add_argument('--ssh-key', help='Path to the SSH key for SFTP')
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument('--analyze',  action='store_true', help='Analyze assets in the project')
+    group.add_argument('--upload',   action='store_true', help='Upload assets to a remote server')
+    group.add_argument('--download', action='store_true', help='Download assets from a remote server')
+    
+    parser.add_argument('--username', help='SFTP username [Upload only]')
+    parser.add_argument('--ssh-key',  help='Path to the SSH key for SFTP [Upload only]')
 
     args = parser.parse_args()
 
     if args.ssh_key:
+        global SFTP_SSH_KEY_PATH
         SFTP_SSH_KEY_PATH = args.ssh_key
     
     if args.username:
+        global SFTP_USERNAME
         SFTP_USERNAME = args.username
 
-    if args.analyze: analyze_assets()
+    if args.analyze: 
+        analyze_assets()
            
     if args.upload:
+        if not BASE_URL or not SFTP_SSH_KEY_PATH or not SFTP_USERNAME:
+            logger.error('Base URL, SFTP username or SSH key not set. Cannot upload assets.')
         upload_assets(dry_run=False)
 
     if args.download:
         download_assets(dry_run=False)
+
 
 if __name__ == '__main__':
     main()
