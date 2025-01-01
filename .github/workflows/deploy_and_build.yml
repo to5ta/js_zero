@@ -16,6 +16,7 @@ jobs:
       
     - name: Install Dependencies 🔧
       run: |
+        docker ps
         npm install
         pip install -r scripts/requirements.txt --user
       
