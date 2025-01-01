@@ -23,13 +23,15 @@ jobs:
       run: |
         chmod +x scripts/assets.py
         python scripts/assets.py --download --ssh-key ~/.ssh/id_rsa --username ${{ secrets.DEPLOY_USER }}
-        ls -lshR ..
+        pwd
+        ls -lshR src/assets
+      env:
+          HOME: ${{ runner.temp }}  # Ensure pip and Python paths align
 
     - name: Build Web Application 🔨
       run: |
+        pwd
         npm run build
-      env:
-        CI: true
 
     - name: Add Key and Server to Known Hosts 🔑    # only if main
       if: github.ref == 'refs/heads/main'
