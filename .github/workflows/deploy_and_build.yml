@@ -23,7 +23,7 @@ jobs:
       run: |
         chmod +x scripts/assets.py
         python scripts/assets.py --download
-
+        ls -lshR scr/
     - name: Build Web Application 🔨
       run: |
         npm run build
