@@ -2,3 +2,5 @@ node_modules*
 _*
 dist/*
 .vscode/*
+src/assets/
+!src/assets/assets.json

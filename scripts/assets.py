@@ -155,8 +155,16 @@ def main():
     parser.add_argument('--analyze', help='Analyze assets in the project', action='store_true')
     parser.add_argument('--upload', help='Upload assets to a remote server', action='store_true')
     parser.add_argument('--download', help='Download assets from a remote server', action='store_true')
-    
+    parser.add_argument('--username', help='SFTP username')
+    parser.add_argument('--ssh-key', help='Path to the SSH key for SFTP')
+
     args = parser.parse_args()
+
+    if not SFTP_SSH_KEY_PATH and args.ssh_key:
+        SFTP_SSH_KEY_PATH = args.ssh_key
+    
+    if not SFTP_USERNAME and args.username:
+        SFTP_USERNAME = args.username
 
     if args.analyze: analyze_assets()
            

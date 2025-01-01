@@ -22,7 +22,7 @@ jobs:
     - name: Download assets 📦
       run: |
         chmod +x scripts/assets.py
-        python scripts/assets.py --download
+        python scripts/assets.py --download --ssh-key ~/.ssh/id_rsa --username ${{ secrets.DEPLOY_USER }}
 
     - name: Build Web Application 🔨
       run: |
