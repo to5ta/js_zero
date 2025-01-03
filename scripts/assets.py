@@ -111,6 +111,7 @@ def download_assets(dry_run=False):
             logger.info(f'Would download {url} to {ROOT / path}')    
 
 def upload_assets(dry_run=False):
+    import paramiko
     hashed_assets = get_hashed_assets()
     path_to_url = {path: hash_to_upload_url(hash) for path, hash in hashed_assets.items()}
     client = paramiko.SSHClient()
@@ -181,7 +182,6 @@ def main():
         analyze_assets()
            
     if args.upload:
-        import paramiko
         if not BASE_URL or not SFTP_SSH_KEY_PATH or not SFTP_USERNAME:
             logger.error('Base URL, SFTP username or SSH key not set. Cannot upload assets.')
         upload_assets(dry_run=False)
