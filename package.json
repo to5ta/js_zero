@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "webpack-dev-server --mode development",
     "build": "webpack --mode production",
-    "download-and-build": "python scripts/assets.py --download && webpack --mode production",
+    "download-and-build": "python3 scripts/assets.py --download && webpack --mode production",
     "build-online": "webpack --config webpack.config.js"
   },
   "author": "",

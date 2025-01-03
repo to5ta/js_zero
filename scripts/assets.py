@@ -134,7 +134,7 @@ def upload_assets(dry_run=False):
 
 def write_assets_manifest(path_to_url):
     with open(ASSETS_JSON_PATH, 'w') as f:
-        f.write(json.dumps({'assets': {str(path): url for path, url in sorted(path_to_url.items())}}, indent=4))
+        f.write(json.dumps({'assets': {Path(path).as_posix(): url for path, url in sorted(path_to_url.items())}}, indent=4))
 
 def read_assets_manifest(path):
     with open(path, 'r') as f:

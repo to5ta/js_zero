@@ -16,16 +16,18 @@ jobs:
       
     - name: Install Dependencies 🔧
       run: |
-        docker ps
         npm install
         pip install -r scripts/requirements.txt --user
       
+    - name: Download assets 📦
+      run: |
+        chmod +x scripts/assets.py
+        python scripts/assets.py --download
+        ls -lshR src/assets/
+
     - name: Build Web Application 🔨
       run: |
-        pwd
-        chmod +x scripts/assets.py
-        npm run download-and-build
-        ls -lshR src/assets/
+        npm run build
 
     - name: Add Key and Server to Known Hosts 🔑    # only if main
       if: github.ref == 'refs/heads/main'
