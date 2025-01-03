@@ -1,0 +1,61 @@
+name: Build and Deploy
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - 'README.md'
+      - src/documentation/*
+
+jobs:
+  Deploy-and-Build:
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+    - uses: actions/checkout@v2
+      
+    - name: Install Dependencies 🔧
+      run: |
+        npm install
+        pip install -r scripts/requirements.txt --user
+      
+    - name: Download assets 📦
+      run: |
+        chmod +x scripts/assets.py
+        python scripts/assets.py --download
+        ls -lshR src/assets/
+
+    - name: Build Web Application 🔨
+      run: |
+        npm run build
+
+    - name: Add Key and Server to Known Hosts 🔑    # only if main
+      if: github.ref == 'refs/heads/main'
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.DEPLOY_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        echo "${{ secrets.DEPLOY_KNOWN_HOST }}" >> ~/.ssh/known_hosts
+        chmod 644 ~/.ssh/known_hosts
+
+    - name: Deploy via SFTP 🚀
+      if: github.ref == 'refs/heads/main'
+      run: |
+        sftp -oPort=22 -i ~/.ssh/id_rsa ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_SERVER }} <<EOF
+        cd public_html/games/js_zero
+        rm *
+        put dist/*
+        bye
+        EOF
+
+    - name: Cleanup SSH Key and Known Hosts 🧹
+      if: always() # Ensure this step runs even if previous steps fail
+      run: |
+        # Remove the SSH private key file
+        rm -f ~/.ssh/id_rsa
+        
+        # Clear the known hosts file
+        > ~/.ssh/known_hosts

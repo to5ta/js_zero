@@ -1,0 +1,124 @@
+@keyframes fadeOutBackground {
+    from { 
+        background: rgba(0,0,0,1);
+        opacity: 1;
+    }
+    to {
+        background: rgba(0,0,0,0);
+        opacity: 0;
+    }
+  }
+
+div, p {
+    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+}
+
+
+p {
+    top: 40px;
+    position: absolute;
+    color: black;
+    z-index: 100;
+    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+}
+
+#loadingtitle {
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    font-size:  300%;
+    color: whitesmoke;
+    position: absolute;
+    top: 80%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+body {
+    margin: 0px;
+    overflow: hidden;
+    display: block;
+}
+html, body {
+    height: 100%;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: black; /* Grey background */
+}
+
+canvas {
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    position: fixed;
+    display: block; /* fix necessary to remove space at bottom of canvas */
+}
+
+#titleImage {
+    top: 45%;
+    width: 50%;
+    left: 50%;
+    position: fixed;
+    display: block;
+    animation-name: fadeOutBackground;
+    animation-play-state: paused;
+    animation-duration: 1500ms;
+    animation-fill-mode: both;
+    transform: translate(-50%, -50%);
+}
+
+
+.background {
+    left: 0%;
+    top: 0%;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    background-color: black;
+    z-index: 100;
+    text-align: center;
+    animation-name: fadeOutBackground;
+    animation-play-state: paused;
+    animation-duration: 3000ms;
+    animation-fill-mode: both;
+}
+
+
+.button {
+    padding: 15px 25px;
+    background-color: #1f69b8; /* Blue background */
+    color: white;
+    text-align: center;
+    border-radius: 5px;
+    cursor: pointer;
+    
+    width:  20%;
+    left:   40%;
+    top:    20%;
+    margin: 30px 0px 0px 0px;
+    position: relative;
+    font-size: 20px;
+}
+
+.button:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+}
+
+.menu_background {
+    left: 0%;
+    top: 0%;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    background-color: rgb(177, 43, 43);
+    z-index: 100;
+    text-align: center;
+    animation-name: fadeOutBackground;
+    animation-play-state: paused;
+    animation-duration: 3000ms;
+    animation-fill-mode: both;
+}
+
+canvas {
+    left: 0%;
+}
