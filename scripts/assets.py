@@ -9,7 +9,6 @@ import re
 import logging
 import hashlib
 
-import paramiko
 import requests
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -182,6 +181,7 @@ def main():
         analyze_assets()
            
     if args.upload:
+        import paramiko
         if not BASE_URL or not SFTP_SSH_KEY_PATH or not SFTP_USERNAME:
             logger.error('Base URL, SFTP username or SSH key not set. Cannot upload assets.')
         upload_assets(dry_run=False)
