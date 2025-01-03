@@ -79,6 +79,14 @@ def upload_file_sftp(sftp_session, local_file, remote_file, overwrite=False):
     except Exception as e:
         logger.error(f'Failed to upload {local_file} to {remote_file}: {e}')
 
+def download_file_curl(url, local_filename):
+    os.system(f'curl -o {local_filename} {url}')
+    if not os.path.exists(local_filename):
+        logger.error(f'Failed to download {url} to {local_filename}')
+        exit(1)
+    else:
+        logger.info(f"Downloaded {local_filename} (verified)")
+
 def download_file_https(url, local_filename):
     with requests.get(url, stream=True) as response:
         response.raise_for_status()  # Raise an error for bad responses (4xx or 5xx)
@@ -92,7 +100,6 @@ def download_file_https(url, local_filename):
             exit(1)
         else:
             logger.info(f"Downloaded {local_filename} (verified)")
-    print(f"Downloaded {local_filename}")
 
 def download_assets(dry_run=False):
     assets = read_assets_manifest(ASSETS_JSON_PATH)
@@ -100,7 +107,7 @@ def download_assets(dry_run=False):
         if not dry_run:
             dest_path = ROOT / path
             dest_path.parent.mkdir(parents=True, exist_ok=True)
-            download_file_https(f'https://{url}', dest_path)
+            download_file_curl(f'https://{url}', dest_path)
         else:
             logger.info(f'Would download {url} to {ROOT / path}')    
 
