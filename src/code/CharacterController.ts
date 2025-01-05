@@ -5,6 +5,7 @@ import { Player } from "./Player";
 import { NormaltoSlopeXZ } from "./utils";
 import { GameEventHandler, GameEventType } from "./common/GameEvent";
 import { Logging } from "./common/Logging";
+import { Environment } from "./environment";
 
 class ControllerConfig {
     jumpSpeed: number;
@@ -15,7 +16,6 @@ class ControllerConfig {
     height: number;
     weight: number;
 }
-
 
 
 class CharacterController {
@@ -134,7 +134,7 @@ class CharacterController {
     }
 
 
-    handleDirectionalMovementInput(direction: BABYLON.Vector2) {   
+    handleDirectionalMovementInput(direction: BABYLON.Vector2) {
         this.localInputDirection.x = direction.x / 2;   // left/right
         this.localInputDirection.z = direction.y;       // forward/backward
     }
@@ -187,8 +187,8 @@ class CharacterController {
         GameEventHandler.dispatchEvent(
             GameEventType.DebuggingShowValue, this, 
             {key: "localInputDirection", value: this.localInputDirection});
+        
 
-        // log inputdirection
         var isSprinting = this.sprint && this.localInputDirection.z > 0.9 && this.localInputDirection.x < 0.1;
 
         this.parent.camera.alpha += (this.localInputRotation * dTimeSec);
@@ -320,8 +320,11 @@ class CharacterController {
         }
   
         if(this.localInputDirection.length() > 0.1){
-            this.animatedModel.setOrientation(this.anzimuth - Math.PI);
-            //his.animatedModel.setOrientation(this.anzimuth - Math.PI - (this.localInputRotation/2));
+            if (Environment.isMobile) { 
+                // this.animatedModel.setOrientation(this.anzimuth - Math.PI - (this.localInputRotation/2));
+            } else {
+                this.animatedModel.setOrientation(this.anzimuth - Math.PI);
+            }
         }
 
 

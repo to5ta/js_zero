@@ -16,6 +16,7 @@ import { SphereSensor } from "./Sensors";
 
 import { Logging } from "./common/Logging";
 import { Environment } from "./environment";
+import { motionBlurPixelShader } from "@babylonjs/core/Shaders/motionBlur.fragment";
 
 class Game implements Pausable  {
     engine: BABYLON.Engine;
@@ -84,6 +85,14 @@ class Game implements Pausable  {
         this.engine.loadingScreen = this.loadingScreen;
         
         this.menuScreen = new MenuScreen(this);
+
+        // disable scrolling on mobile ----------------------------------------
+        if (Environment.isMobile) {
+            document.body.style.position = 'fixed';
+            document.body.style.top = `-${window.scrollY}px`;
+            document.body.style.width = '100%';
+            document.body.style.overflow = 'hidden';
+        }
 
         // game state ---------------------------------------------------------
         this.debug_fly_mode = false;
@@ -202,7 +211,8 @@ class Game implements Pausable  {
         }
         if(!this.debug_fly_mode) {
             this.player.handleInput(keyEvent);
-        } 
+        }
+
     }
 
     start() {
@@ -227,6 +237,10 @@ class Game implements Pausable  {
     mainloop(deltaTimeMs: number){
         var now_ms = Date.now(); 
         var elapsedTime_ms = now_ms - this.timeStampStart_ms;
+
+        if(Environment.isMobile){
+            this.ui.handleMobileInput(this.player);
+        }
 
         // fake physics screws up with large dt
         if(deltaTimeMs < 100) { 

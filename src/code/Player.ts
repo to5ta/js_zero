@@ -160,7 +160,9 @@ class Player {
                     this.scene,
                     true);
                     
-                    this.camera.attachControl(this.canvas, true);
+                    if(!Environment.isMobile) {
+                        this.camera.attachControl(this.canvas, true);
+                    }
                     this.camera.inputs.remove(this.camera.inputs.attached.keyboard);
                     this.camera.inputs.remove(this.camera.inputs.attached.mousewheel);
                     
@@ -208,7 +210,7 @@ class Player {
         const dTimeSec = dTimeMs / 1000;
 
         if(!this.died) {
-            if(!Environment.isMobile) {
+            if(!Environment.isMobile || true) {
                 this.mPhysics.setOrientation(Math.PI/2 - this.camera.alpha + Math.PI);
             }
             this.mPhysics.update(dTimeMs);

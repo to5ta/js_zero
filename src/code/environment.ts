@@ -12,7 +12,7 @@ class Environment {
 
     static init() {
         Environment.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-            navigator.userAgent);
+            navigator.userAgent) || true;
 
         Environment.canvas = document.createElement("canvas");
         Environment.canvas.height = window.innerHeight;
