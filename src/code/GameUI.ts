@@ -21,7 +21,11 @@ export default class GameUI {
         this.playerHealth = new BABYLONGUI.TextBlock();
         this.playerHealth.text = "\u2764 100";
         this.playerHealth.color = "white";
-        this.playerHealth.fontSize = 45;
+        if (isMobile) {
+            this.playerHealth.fontSize = 30;
+        } else {
+            this.playerHealth.fontSize = 45;
+        }
         this.playerHealth.textHorizontalAlignment = BABYLONGUI.TextBlock.HORIZONTAL_ALIGNMENT_LEFT;
         this.playerHealth.textVerticalAlignment = BABYLONGUI.TextBlock.VERTICAL_ALIGNMENT_TOP;
         this.playerHealth.horizontalAlignment = BABYLONGUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
@@ -83,8 +87,8 @@ export default class GameUI {
             
             // set rotation based on direction
             var anzimuth = Math.atan2(left.x, left.y);
-            player.mPhysics.setOrientation(anzimuth);
-            player.mCharacter.setOrientation(anzimuth - Math.PI );
+
+            player.setOrientation(anzimuth);
             
         } else {
             player.mPhysics.handleDirectionalMovementInput(new BABYLON.Vector2(0, 0));
@@ -92,9 +96,9 @@ export default class GameUI {
 
         if (this.rightJoystick.pressed) {
             var right = this.rightJoystick.deltaPosition;
-            player.camera.alpha += right.x / 100;
-            player.setOrientation(player.camera.alpha);
-            player.camera.beta += right.y / 100;
+            player.camera.alpha -= right.x / 25;
+            player.camera.beta -= right.y / 150;
+            // player.setOrientation(player.camera.alpha);
         }
     }
     

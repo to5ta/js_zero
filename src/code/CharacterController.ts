@@ -139,7 +139,7 @@ class CharacterController {
         this.localInputDirection.z = direction.y;       // forward/backward
     }
 
-    handleInput(keyEvent: KeyboardEvent) {
+    handleKeyEvent(keyEvent: KeyboardEvent) {
         
         const keyPressed = keyEvent.type == "keydown";
 
@@ -319,11 +319,14 @@ class CharacterController {
                 this.imposter.position.z));
         }
   
+        
+        let temporalAnzimuth = Math.atan2(this.localInputDirection.x, this.localInputDirection.z) + this.anzimuth; 
+        
         if(this.localInputDirection.length() > 0.1){
             if (Environment.isMobile) { 
-                // this.animatedModel.setOrientation(this.anzimuth - Math.PI - (this.localInputRotation/2));
+                this.animatedModel.setOrientation(temporalAnzimuth - Math.PI);
             } else {
-                this.animatedModel.setOrientation(this.anzimuth - Math.PI);
+                this.animatedModel.setOrientation(temporalAnzimuth - Math.PI);
             }
         }
 

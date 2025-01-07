@@ -148,7 +148,11 @@ class Player {
                 // // this.camera.attachControl(this.canvas, true);
                 
                 // we can tweak that value later for narrow parts of the map / indoor scenes
-                this.distanceToCharacter = 4.5;
+                if (Environment.isMobile) {
+                    this.distanceToCharacter = 6.0;
+                } else {
+                    this.distanceToCharacter = 4.5;
+                }
                 
                 
                 this.camera = new BABYLON.ArcRotateCamera(
@@ -199,7 +203,7 @@ class Player {
     // process player input ---------------------------------------------------
     handleInput(keyEvent: KeyboardEvent) {
         if (!this.died) {
-            this.mPhysics.handleInput(keyEvent);
+            this.mPhysics.handleKeyEvent(keyEvent);
         }
     }
 
