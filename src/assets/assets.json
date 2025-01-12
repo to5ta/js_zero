@@ -1,7 +1,6 @@
 {
     "assets": {
-        "src/assets/models/box.gltf": "games/assets/4366ff4a1576f9cbeedd83fb402407916ee2fc579fdc50cf7ad41c4b4af84ba5",
-        "src/assets/models/level0.gltf": "games/assets/e13746e821711821b4f3302a87c3267b46cb70fcbbf12329d7934b826aef5b93",
+        "src/assets/models/level1.glb": "games/assets/70407cb39d784c57b4392c1b796b719cfd32b56397bb303853c0ef8b2ba0e35e",
         "src/assets/models/thank_you_note.gltf": "games/assets/53cfc6ce3c34f79a2bfd805e48f04b45337b0360f5761a43109d7ffe4374e700",
         "src/assets/models/wache02.gltf": "games/assets/ea6a5d345a4bdd63bf3188752aafdfc05be511b6533c4f85838c8e97d5b68de2",
         "src/assets/music/medieval_theme_01.mp3": "games/assets/ce347ddb9ba5e16dd78628e29468e365e7ec467e0daa5b9843cedab290d0dfa3",
