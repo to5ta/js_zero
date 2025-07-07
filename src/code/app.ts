@@ -15,6 +15,7 @@ class App {
   engine: BABYLON.Engine;
   game: Game;
   stats: Stats;
+  audioContext: AudioContext | null = null;
 
   constructor() {
     Environment.init()
@@ -28,6 +29,48 @@ class App {
     this.stats = new Stats();
     this.stats.showPanel(0);
     document.body.appendChild(this.stats.dom);
+    this.initAudio();
+    this.sessionCommunication();
+  }
+
+
+  sessionCommunication() {
+    let userId = localStorage.getItem('userId') || crypto.randomUUID();
+    localStorage.setItem('userId', userId);
+
+    let sessionStart = new Date().toISOString().slice(0, 19).replace('T', ' ');
+
+    // Start session
+    fetch('/games/session_start.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, sessionStart })
+    })
+      .then(res => res.json())
+      .then(data => {
+        // Save sessionId returned by PHP
+        localStorage.setItem('sessionId', data.sessionId);
+      });
+    window.addEventListener('beforeunload', () => {
+      let sessionId = localStorage.getItem('sessionId');
+      if (!sessionId) return;
+
+      fetch('/games/session_end.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          sessionId, 
+          sessionEnd: new Date().toISOString().slice(0, 19).replace('T', ' ') })
+      });
+    });
+  }
+
+  initAudio() {
+    try {
+      this.audioContext = new window.AudioContext();
+    } catch (e) {
+      Logging.error("Web Audio API is not supported in this browser");
+  }
   }
   
 

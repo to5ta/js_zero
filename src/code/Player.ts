@@ -6,7 +6,7 @@ import "@babylonjs/loaders";
 
 import steps_sound from '../assets/sound/simple_steps.mp3';
 import sprint_sound from '../assets/sound/simple_sprint.mp3';
-import player_model from '../assets/models/wache02.gltf';
+import player_model from '../assets/models/wache02.glb';
 
 import { GameWorld } from './world';
 

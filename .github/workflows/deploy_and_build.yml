@@ -41,6 +41,18 @@ jobs:
         echo "${{ secrets.DEPLOY_KNOWN_HOST }}" >> ~/.ssh/known_hosts
         chmod 644 ~/.ssh/known_hosts
 
+    - name: Replace placeholders in PHP files
+      run: |
+        sed -i "s|<db-server>|${{ secrets.DB_SERVER }}|g" dist/session_start.php
+        sed -i "s|<db-user>|${{ secrets.DB_USER }}|g" dist/session_start.php
+        sed -i "s|<db-pass>|${{ secrets.DB_PASSWORD }}|g" dist/session_start.php
+        sed -i "s|<db-name>|${{ secrets.DB_NAME }}|g" dist/session_start.php
+
+        sed -i "s|<db-server>|${{ secrets.DB_SERVER }}|g" dist/session_end.php
+        sed -i "s|<db-user>|${{ secrets.DB_USER }}|g" dist/session_end.php
+        sed -i "s|<db-pass>|${{ secrets.DB_PASSWORD }}|g" dist/session_end.php
+        sed -i "s|<db-name>|${{ secrets.DB_NAME }}|g" dist/session_end.php🔍
+
     - name: Deploy via SFTP 🚀
       if: github.ref == 'refs/heads/main'
       run: |
