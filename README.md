@@ -10,7 +10,7 @@
 
 ⚔️ https://games.staib.dev/js_zero/
 
-## Installation
+## Run it locally 
 
 1. Install NPM from https://nodejs.org/de/
 2. Run `npm install` to install all dependencies
@@ -22,6 +22,6 @@
 
 * Some of the used Texture Sets are from https://texturehaven.com/textures/ and https://hdrihaven.com.
 
-## History
+## Previous Versions 
 
-* Refer to https://github.com/to5ta/js_zero/tree/main_archive for historical details
+The content files have recently been outsourced and the repo has been reset, refer to https://github.com/to5ta/js_zero/tree/main_archive for older versions 
