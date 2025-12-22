@@ -12,25 +12,25 @@ class Logging {
     }
     
     public static debug(...args: any[]) {
-        if(Logging.logLevel >= 0) {
+        if(Logging.logLevel <= LogLevel.DEBUG) {
             Logging.logMessage("DEBUG :", ...args);
         }
     }
     
     public static info(...args: any[]) {
-        if(Logging.logLevel >= 1) {
+        if(Logging.logLevel <= LogLevel.INFO) {
             Logging.logMessage("INFO  :", ...args);
         }
     }
     
     public static warn(...args: any[]) {
-        if(Logging.logLevel >= 2) {
+        if(Logging.logLevel <= LogLevel.WARN) {
             Logging.logMessage("WARN  :", ...args);
         }
     }
     
     public static error(...args: any[]) {
-        if(Logging.logLevel >= 3) {
+        if(Logging.logLevel <= LogLevel.ERROR) {
             Logging.logMessage("ERROR ", ...args);
         }
     }

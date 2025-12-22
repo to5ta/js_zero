@@ -15,7 +15,6 @@ class App {
   engine: BABYLON.Engine;
   game: Game;
   stats: Stats;
-  audioContext: AudioContext | null = null;
 
   constructor() {
     Environment.init()
@@ -29,7 +28,6 @@ class App {
     this.stats = new Stats();
     this.stats.showPanel(0);
     document.body.appendChild(this.stats.dom);
-    this.initAudio();
     this.sessionCommunication();
   }
 
@@ -55,38 +53,18 @@ class App {
       let sessionId = localStorage.getItem('sessionId');
       if (!sessionId) return;
 
-      fetch('/games/session_end.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          sessionId, 
-          sessionEnd: new Date().toISOString().slice(0, 19).replace('T', ' ') })
+      const data = JSON.stringify({ 
+        sessionId, 
+        sessionEnd: new Date().toISOString().slice(0, 19).replace('T', ' ')
       });
+      
+      // Use sendBeacon for reliable tracking on page unload
+      navigator.sendBeacon('/games/session_end.php', data);
     });
   }
 
-  initAudio() {
-    try {
-      this.audioContext = new window.AudioContext();
-    } catch (e) {
-      Logging.error("Web Audio API is not supported in this browser");
-  }
-  }
-  
-
   addEventlisteners() {
     window.addEventListener("resize", () => { this.engine.resize() });
-    
-        window.addEventListener('focusin', () => {
-          Logging.info('App gets focus again...');
-          this.game.resume();
-        });
-    
-        window.addEventListener('focusout', () => {
-          Logging.info('App lost focus...');
-          this.game.pause();
-        });
-    
     
         window.addEventListener('focus', () => {
           Logging.info('App gets focus again...');

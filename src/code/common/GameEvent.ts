@@ -36,7 +36,7 @@ class GameEventHandler {
         }
     }
 
-    public static removeGameEventListener(type: GameEventType, callback : (gameEvent: GameEvent) => {} ) {
+    public static removeGameEventListener(type: GameEventType, callback : (gameEvent: GameEvent) => void ) {
         if (GameEventHandler.callbacks.get(type) != undefined) {
             while (GameEventHandler.callbacks.get(type)!.indexOf(callback) > -1) {
                 GameEventHandler.callbacks.get(type)!.splice(

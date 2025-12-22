@@ -6,6 +6,7 @@ import { NormaltoSlopeXZ } from "./utils";
 import { GameEventHandler, GameEventType } from "./common/GameEvent";
 import { Logging } from "./common/Logging";
 import { Environment } from "./environment";
+import { PhysicsConfig } from "./config/PhysicsConfig";
 
 class ControllerConfig {
     jumpSpeed: number;
@@ -86,7 +87,7 @@ class CharacterController {
         this.contactRay = new BABYLON.Ray(
             this.imposter.position,
             new BABYLON.Vector3(0, -1.1, 0));
-        this.contactRay.length = this.config.height/2 + 0.01;  
+        this.contactRay.length = this.config.height/2 + PhysicsConfig.groundCheckRayLength;  
 
     }
 
@@ -212,7 +213,7 @@ class CharacterController {
         var pitch=0;
         var roll=0;
 
-        if (rayCastToGroundHit) {
+        if (rayCastToGroundHit && rayCastResults[0]) {
             let dist = rayCastResults[0].distance;
 
             this.standingNormal = rayCastResults[0].getNormal(true) ?? BABYLON.Vector3.Up();
@@ -224,7 +225,7 @@ class CharacterController {
             }
 
             // we could also use slope here or other surface attributes such as "marked-as-sticky"
-            if(dist - 0.05 <= this.config.height/2) {
+            if(dist - PhysicsConfig.groundContactThreshold <= this.config.height/2) {
                 this.falling = false;
                 let matref = this.imposter.material as BABYLON.StandardMaterial;  
                 matref.emissiveColor = new BABYLON.Color3(1, 0, 0);
@@ -273,7 +274,7 @@ class CharacterController {
         // combine kinematic impacts such as gravity ----------------------------------------------------------------
         if (this.falling || externalPhysicalImpact) {
             // calc falling
-            velocityPhysics.y = this.velocity.y - 20 * dTimeSec; // g = 9.81 looks shitty, use 20 instead
+            velocityPhysics.y = this.velocity.y - PhysicsConfig.fakeFallingAcceleration * dTimeSec; // g = 9.81 looks shitty, use fakeFalling instead
             // mix in furhter externalPhysicalImpact if any.. (TODO)        
             
             // cache current falling
@@ -333,6 +334,15 @@ class CharacterController {
 
         if (!this.parent.died && this.imposter.position.y < -50) {
             GameEventHandler.dispatchEvent(GameEventType.PlayerDied, this, {reason: "abyss"});
+        }
+    }
+
+    dispose() {
+        if (this.imposter) {
+            if (this.imposter.material) {
+                this.imposter.material.dispose();
+            }
+            this.imposter.dispose();
         }
     }
 }
