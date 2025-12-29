@@ -254,13 +254,32 @@ export class App {
         // Make camera follow player
         this.cameraController.setTarget(this.player);
         
+        // Expose player to window for console access
+        (window as any).player = this.player;
+        
         Logger.info('Player added to entity manager');
+        Logger.info('💡 Tip: Access player via console with: window.player.setMaxWalkableSlope(30)');
     }
     
     /**
      * Create ground plane with grid material and physics
      */
     private createGround(): void {
+        // Create white solid ground base
+        const groundBase = BABYLON.MeshBuilder.CreateGround(
+            'groundBase',
+            { width: 100, height: 100, subdivisions: 2 },
+            this.scene
+        );
+        
+        const baseMaterial = new BABYLON.StandardMaterial('groundBaseMat', this.scene);
+        baseMaterial.diffuseColor = new BABYLON.Color3(1.0, 1.0, 1.0); // White
+        baseMaterial.specularColor = new BABYLON.Color3(0.1, 0.1, 0.1);
+        groundBase.material = baseMaterial;
+        groundBase.position.y = 0;
+        groundBase.checkCollisions = true;
+        
+        // Create grid overlay
         const ground = BABYLON.MeshBuilder.CreateGround(
             'ground',
             { width: 100, height: 100, subdivisions: 20 },
@@ -274,15 +293,13 @@ export class App {
         groundMaterial.wireframe = true;
         
         ground.material = groundMaterial;
-        ground.position.y = 0;
-        
-        // Enable collision detection for moveWithCollisions
-        ground.checkCollisions = true;
+        ground.position.y = 0.001; // Slightly above base to prevent z-fighting
+        ground.checkCollisions = false; // Only base needs collisions
         
         // Store reference for physics initialization later
-        (this as any)._ground = ground;
+        (this as any)._ground = groundBase;
         
-        Logger.info('Ground grid created');
+        Logger.info('Ground with white base and grid overlay created');
     }
     
     /**
@@ -328,9 +345,6 @@ export class App {
             this.testLevel.dispose();
         }
         
-        // Dispose physics manager
-        this.physicsManager.dispose();
-        
         // Dispose camera controller
         this.cameraController.dispose();
         
@@ -350,12 +364,15 @@ export class App {
             Logger.info('Shared debug texture disposed');
         }
         
-        // Dispose input system 
-        
         // Dispose input system
         this.inputSystem.dispose();
         
+        // Dispose scene first (this will dispose physics bodies)
         this.scene.dispose();
+        
+        // Dispose physics manager after scene
+        this.physicsManager.dispose();
+        
         this.engine.dispose();
         this.eventBus.clear();
     }

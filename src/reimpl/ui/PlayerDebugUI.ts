@@ -109,7 +109,7 @@ export class PlayerDebugUI {
         
         // Create slope indicator with background (standalone, upper left)
         this.slopeContainer = new BABYLONGUI.Rectangle();
-        this.slopeContainer.width = '150px';
+        this.slopeContainer.width = '250px';
         this.slopeContainer.height = '50px';
         this.slopeContainer.cornerRadius = 5;
         this.slopeContainer.color = 'yellow'; // Bright color for debugging
@@ -117,7 +117,7 @@ export class PlayerDebugUI {
         this.slopeContainer.background = 'rgba(0, 0, 0, 0.7)';
         this.slopeContainer.horizontalAlignment = BABYLONGUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
         this.slopeContainer.verticalAlignment = BABYLONGUI.Control.VERTICAL_ALIGNMENT_TOP;
-        this.slopeContainer.left = 10;
+        this.slopeContainer.left = 80;
         this.slopeContainer.top = 10;
         this.advancedTexture.addControl(this.slopeContainer);
         
@@ -148,10 +148,35 @@ export class PlayerDebugUI {
         const groundEmoji = isGrounded ? '🟢' : '🔴';
         this.stateText.text = `Grounded: ${groundEmoji} ${isGrounded ? 'Yes' : 'No'}`;
         
-        // Update slope display (no slope detection without physics)
-        this.slopeText.color = 'gray';
-        if (this.slopeContainer) this.slopeContainer.color = 'gray';
-        this.slopeText.text = `⛰️ Slope: N/A (no physics)`;
+        // Update slope display
+        const slopeAngle = this.player.getSlopeAngle();
+        const groundDist = this.player.getGroundDistance();
+        const maxSlope = 45;
+        
+        // Show slope if hit detected (even if not grounded)
+        if (groundDist > 0) {
+            if (isGrounded) {
+                // Grounded - show yellow for walkable, red for too steep
+                if (slopeAngle <= maxSlope) {
+                    this.slopeText.color = 'yellow';
+                    if (this.slopeContainer) this.slopeContainer.color = 'yellow';
+                } else {
+                    this.slopeText.color = 'red';
+                    if (this.slopeContainer) this.slopeContainer.color = 'red';
+                }
+                this.slopeText.text = `⛰️ Slope: ${slopeAngle.toFixed(1)}° | Dist: ${groundDist.toFixed(3)}`;
+            } else {
+                // Not grounded but hit detected - show in cyan/blue
+                this.slopeText.color = 'cyan';
+                if (this.slopeContainer) this.slopeContainer.color = 'cyan';
+                this.slopeText.text = `⛰️ Slope: ${slopeAngle.toFixed(1)}° | Dist: ${groundDist.toFixed(3)} (preview)`;
+            }
+        } else {
+            // No hit detected
+            this.slopeText.color = 'gray';
+            if (this.slopeContainer) this.slopeContainer.color = 'gray';
+            this.slopeText.text = `⛰️ No Ground Detected`;
+        }
         
         // Show velocity magnitude instead of force
         this.forceText.text = `Speed: ${speed.toFixed(1)} m/s`;

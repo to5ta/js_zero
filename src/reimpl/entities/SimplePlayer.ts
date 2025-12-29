@@ -23,7 +23,11 @@ export class SimplePlayer extends Entity {
     private isGrounded: boolean = false;
     private capsuleHeight: number = 2.0;
     private capsuleRadius: number = 0.5;
-    private groundCheckDistance: number = 0.01; // Extra distance beyond half height
+    private groundCheckDistance: number = 0.3; // Extra distance beyond half height for slope detection
+    private groundNormal: BABYLON.Vector3 = BABYLON.Vector3.Up(); // Current ground surface normal
+    private slopeAngle: number = 0; // Slope angle in degrees
+    private maxWalkableSlope: number = 45; // Maximum slope angle in degrees that player can walk on
+    private groundDistance: number = 0; // Distance to ground from raycast hit
     
     // Debug properties
     private lastMoveDirection: BABYLON.Vector3 = BABYLON.Vector3.Zero();
@@ -154,7 +158,34 @@ export class SimplePlayer extends Entity {
             return mesh !== this.mesh;
         });
         
-        this.isGrounded = hit?.hit ?? false;
+        // Store ground distance for debugging
+        this.groundDistance = hit?.distance ?? 0;
+        
+        // Get ground normal if hit (even if not grounded, for slope preview)
+        if (hit?.hit) {
+            this.groundNormal = hit.getNormal(true) ?? BABYLON.Vector3.Up();
+            // Calculate slope angle in degrees
+            this.slopeAngle = Math.acos(BABYLON.Vector3.Dot(this.groundNormal, BABYLON.Vector3.Up())) * (180 / Math.PI);
+        } else {
+            this.groundNormal = BABYLON.Vector3.Up();
+            this.slopeAngle = 0;
+        }
+        
+        // Only consider grounded if:
+        // 1. Hit detected
+        // 2. Distance is within capsule half-height (plus tolerance that accounts for slopes)
+        // 3. Slope angle is walkable (not too steep)
+        // On slopes, the raycast distance is longer because contact point isn't directly below
+        // Use a more generous tolerance to account for this
+        const baseThreshold = this.capsuleHeight / 2;
+        const slopeTolerance = 0.1 + (this.slopeAngle / 90) * 0.2; // More tolerance on steeper slopes
+        const groundThreshold = baseThreshold + slopeTolerance;
+        
+        this.isGrounded = (
+            hit?.hit && 
+            this.groundDistance <= groundThreshold && 
+            this.slopeAngle <= this.maxWalkableSlope
+        ) ?? false;
         
         // Update ray visualization
         if (this.groundRayLine) {
@@ -165,10 +196,15 @@ export class SimplePlayer extends Entity {
                 this.scene
             );
             
-            // Change color based on hit
-            this.groundRayLine.color = this.isGrounded 
-                ? new BABYLON.Color3(1, 1, 0)  // Yellow when hit
-                : new BABYLON.Color3(0.5, 0.5, 0.5); // Grey when no hit
+            // Change color based on hit and slope
+            if (this.isGrounded) {
+                // Yellow for flat/walkable, red for too steep
+                this.groundRayLine.color = this.slopeAngle <= this.maxWalkableSlope
+                    ? new BABYLON.Color3(1, 1, 0)  // Yellow when walkable
+                    : new BABYLON.Color3(1, 0, 0);  // Red when too steep
+            } else {
+                this.groundRayLine.color = new BABYLON.Color3(0.5, 0.5, 0.5); // Grey when no hit
+            }
         }
     }
     
@@ -221,6 +257,27 @@ export class SimplePlayer extends Entity {
             // Reset vertical velocity when grounded
             if (this.currentVelocity.y < 0) {
                 this.currentVelocity.y = 0;
+            }
+            
+            // Anti-slide logic for slopes
+            if (this.slopeAngle > 0.1 && this.slopeAngle <= this.maxWalkableSlope) {
+                // Project gravity onto the slope plane to get slide force
+                const gravityVec = new BABYLON.Vector3(0, this.gravity, 0);
+                const slideForce = gravityVec.subtract(this.groundNormal.scale(BABYLON.Vector3.Dot(gravityVec, this.groundNormal)));
+                
+                // If not moving (or moving very little), apply counter-force to prevent sliding
+                const movementMagnitude = movement.length();
+                if (movementMagnitude < 0.1) {
+                    // Apply full friction - cancel out slide force
+                    this.currentVelocity.x -= slideForce.x * deltaTimeSec;
+                    this.currentVelocity.z -= slideForce.z * deltaTimeSec;
+                } else {
+                    // When moving, apply partial friction based on movement direction
+                    // This helps prevent sliding when walking across slopes
+                    const frictionFactor = 0.5;
+                    this.currentVelocity.x -= slideForce.x * deltaTimeSec * frictionFactor;
+                    this.currentVelocity.z -= slideForce.z * deltaTimeSec * frictionFactor;
+                }
             }
         }
         
@@ -340,6 +397,42 @@ export class SimplePlayer extends Entity {
      */
     public getIsGrounded(): boolean {
         return this.isGrounded;
+    }
+    
+    /**
+     * Get current slope angle in degrees for debugging
+     */
+    public getSlopeAngle(): number {
+        return this.slopeAngle;
+    }
+    
+    /**
+     * Get ground normal vector for debugging
+     */
+    public getGroundNormal(): BABYLON.Vector3 {
+        return this.groundNormal;
+    }
+    
+    /**
+     * Get ground distance for debugging
+     */
+    public getGroundDistance(): number {
+        return this.groundDistance;
+    }
+    
+    /**
+     * Get max walkable slope angle
+     */
+    public getMaxWalkableSlope(): number {
+        return this.maxWalkableSlope;
+    }
+    
+    /**
+     * Set max walkable slope angle (surfaces steeper than this won't be considered grounded)
+     */
+    public setMaxWalkableSlope(angle: number): void {
+        this.maxWalkableSlope = Math.max(0, Math.min(90, angle)); // Clamp between 0-90 degrees
+        Logger.info(`Max walkable slope set to ${this.maxWalkableSlope.toFixed(1)}°`);
     }
     
     /**
