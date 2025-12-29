@@ -18,9 +18,10 @@ export class SimplePlayer extends Entity {
     private currentVelocity: BABYLON.Vector3 = BABYLON.Vector3.Zero();
     
     // Physics properties
-    private gravity: number = -9.81; // m/s^2
-    private jumpSpeed: number = 6; // Initial jump velocity
+    private gravity: number = -19.62; // m/s^2 (2x normal gravity for snappier feel)
+    private jumpSpeed: number = 8; // Initial jump velocity (increased to compensate for stronger gravity)
     private isGrounded: boolean = false;
+    private hasJumped: boolean = false; // Prevents re-jumping while space is held
     private capsuleHeight: number = 2.0;
     private capsuleRadius: number = 0.5;
     private groundCheckDistance: number = 0.3; // Extra distance beyond half height for slope detection
@@ -31,11 +32,13 @@ export class SimplePlayer extends Entity {
     
     // Debug properties
     private lastMoveDirection: BABYLON.Vector3 = BABYLON.Vector3.Zero();
+    private static debugVisualsEnabled: boolean = true; // Global debug toggle
     
     // Orientation axis visualization
     private axisX?: BABYLON.LinesMesh; // Red - Forward
     private axisY?: BABYLON.LinesMesh; // Green - Up
     private axisZ?: BABYLON.LinesMesh; // Blue - Left
+    private slopeForwardLine?: BABYLON.LinesMesh; // Orange-red - Slope-adjusted forward
     private playerRotation: number = 0; // Current rotation angle
     private groundRayLine?: BABYLON.LinesMesh; // Ground detection ray visualization
     
@@ -79,6 +82,9 @@ export class SimplePlayer extends Entity {
         
         // Create orientation axis lines
         this.createOrientationAxes();
+        
+        // Set initial visibility based on debug flag
+        this.updateDebugLineVisibility();
         
         Logger.info('🎮 Player created with moveWithCollisions');
     }
@@ -139,6 +145,30 @@ export class SimplePlayer extends Entity {
         );
         this.groundRayLine.color = new BABYLON.Color3(0.5, 0.5, 0.5); // Grey by default
         this.groundRayLine.alwaysSelectAsActiveMesh = true;
+        
+        // Slope-adjusted forward direction - updatable
+        this.slopeForwardLine = BABYLON.MeshBuilder.CreateLines(
+            'slopeForward',
+            {
+                points: [origin, origin.add(new BABYLON.Vector3(axisLength, 0, 0))],
+                updatable: true
+            },
+            this.scene
+        );
+        this.slopeForwardLine.color = new BABYLON.Color3(1, 0.4, 0.2); // Orange-red
+        this.slopeForwardLine.alwaysSelectAsActiveMesh = true;
+    }
+    
+    /**
+     * Update visibility of debug lines based on global flag
+     */
+    private updateDebugLineVisibility(): void {
+        const visible = SimplePlayer.debugVisualsEnabled;
+        if (this.axisX) this.axisX.isVisible = visible;
+        if (this.axisY) this.axisY.isVisible = visible;
+        if (this.axisZ) this.axisZ.isVisible = visible;
+        if (this.slopeForwardLine) this.slopeForwardLine.isVisible = visible;
+        if (this.groundRayLine) this.groundRayLine.isVisible = visible;
     }
     
     /**
@@ -223,6 +253,19 @@ export class SimplePlayer extends Entity {
         // Check if grounded
         this.checkGrounded();
         
+        // Handle jump input - only allow one jump per key press
+        if (input.isJumpPressed()) {
+            if (this.isGrounded && !this.hasJumped) {
+                this.currentVelocity.y = this.jumpSpeed;
+                this.isGrounded = false; // Immediately mark as not grounded so gravity applies next frame
+                this.hasJumped = true; // Mark that we've jumped
+                Logger.debug(`Jump initiated! velocity.y = ${this.currentVelocity.y}`);
+            }
+        } else {
+            // Reset jump flag when space is released
+            this.hasJumped = false;
+        }
+        
         // Calculate desired speed
         const currentSpeed = input.isSprintPressed() 
             ? this.moveSpeed * this.sprintMultiplier 
@@ -237,6 +280,21 @@ export class SimplePlayer extends Entity {
             
             moveDirection = forward.scale(-movement.y).add(right.scale(movement.x));
             moveDirection.normalize();
+            
+            // If grounded on a slope, project movement onto slope plane for smooth traversal
+            if (this.isGrounded && this.slopeAngle > 0.1) {
+                // Project movement direction onto slope plane
+                // This removes the component perpendicular to the slope
+                moveDirection = moveDirection.subtract(
+                    this.groundNormal.scale(BABYLON.Vector3.Dot(moveDirection, this.groundNormal))
+                );
+                
+                // Renormalize after projection
+                if (moveDirection.length() > 0.01) {
+                    moveDirection.normalize();
+                }
+            }
+            
             this.lastMoveDirection = moveDirection.clone();
             
             // Update player rotation based on movement direction
@@ -245,22 +303,24 @@ export class SimplePlayer extends Entity {
             this.lastMoveDirection = BABYLON.Vector3.Zero();
         }
         
-        // Handle jump input
-        if (input.isJumpPressed() && this.isGrounded) {
-            this.currentVelocity.y = this.jumpSpeed;
-        }
-        
         // Apply gravity when not grounded
         if (!this.isGrounded) {
             this.currentVelocity.y += this.gravity * deltaTimeSec;
+            if (this.currentVelocity.y > 5) {
+                Logger.debug(`In air: velocity.y = ${this.currentVelocity.y.toFixed(2)}, gravity applied = ${(this.gravity * deltaTimeSec).toFixed(2)}`);
+            }
         } else {
-            // Reset vertical velocity when grounded
-            if (this.currentVelocity.y < 0) {
-                this.currentVelocity.y = 0;
+            // When grounded, only apply downward force if not jumping
+            // Check if we just jumped (Y velocity is positive/upward)
+            if (this.currentVelocity.y < 0.5) {
+                // Not jumping, apply grounding forces
+                if (movement.length() < 0.01) {
+                    this.currentVelocity.y = -0.5; // Small constant downward velocity to stay grounded
+                }
             }
             
-            // Anti-slide logic for slopes
-            if (this.slopeAngle > 0.1 && this.slopeAngle <= this.maxWalkableSlope) {
+            // Anti-slide logic for slopes (only if not jumping)
+            if (this.currentVelocity.y < 0.5 && this.slopeAngle > 0.1 && this.slopeAngle <= this.maxWalkableSlope) {
                 // Project gravity onto the slope plane to get slide force
                 const gravityVec = new BABYLON.Vector3(0, this.gravity, 0);
                 const slideForce = gravityVec.subtract(this.groundNormal.scale(BABYLON.Vector3.Dot(gravityVec, this.groundNormal)));
@@ -281,13 +341,26 @@ export class SimplePlayer extends Entity {
             }
         }
         
-        // Calculate horizontal velocity
-        this.currentVelocity.x = moveDirection.x * currentSpeed;
-        this.currentVelocity.z = moveDirection.z * currentSpeed;
+        // Calculate velocity from move direction
+        // On slopes, moveDirection is already slope-corrected and includes Y component
+        if (this.isGrounded && this.slopeAngle > 0.1 && movement.length() > 0.01) {
+            // Use full 3D slope-corrected direction when moving on slopes
+            this.currentVelocity.x = moveDirection.x * currentSpeed;
+            this.currentVelocity.y = moveDirection.y * currentSpeed;
+            this.currentVelocity.z = moveDirection.z * currentSpeed;
+        } else {
+            // On flat ground or not moving, only set horizontal components
+            this.currentVelocity.x = moveDirection.x * currentSpeed;
+            this.currentVelocity.z = moveDirection.z * currentSpeed;
+            // Y velocity is handled above (gravity or ground contact)
+        }
         
         // Use moveWithCollisions for automatic collision response
         const velocity = this.currentVelocity.scale(deltaTimeSec);
         (this.mesh as BABYLON.Mesh).moveWithCollisions(velocity);
+        
+        // Update debug line visibility
+        this.updateDebugLineVisibility();
         
         // Update debug visualization
         this.updateOrientationAxes();
@@ -297,6 +370,7 @@ export class SimplePlayer extends Entity {
      * Update orientation axes to reflect current rotation and player world position
      */
     private updateOrientationAxes(): void {
+        if (!SimplePlayer.debugVisualsEnabled) return; // Skip if debug disabled
         if (!this.axisX || !this.axisY || !this.axisZ || !this.mesh) return;
         
         // Get player's current world position
@@ -355,6 +429,23 @@ export class SimplePlayer extends Entity {
             { points: [playerWorldPos, upOuter], instance: this.axisY },
             this.scene
         );
+        
+        // Update slope-adjusted forward direction
+        if (this.slopeForwardLine) {
+            // Project forward direction onto slope plane
+            // Remove the component perpendicular to the slope
+            const slopeAdjustedForward = forwardRotated.subtract(
+                this.groundNormal.scale(BABYLON.Vector3.Dot(forwardRotated, this.groundNormal))
+            ).normalize();
+            
+            const slopeForwardOuter = playerWorldPos.add(slopeAdjustedForward.scale(axisLength));
+            
+            this.slopeForwardLine = BABYLON.MeshBuilder.CreateLines(
+                'slopeForward',
+                { points: [playerWorldPos, slopeForwardOuter], instance: this.slopeForwardLine },
+                this.scene
+            );
+        }
     }
     
     /**
@@ -421,6 +512,21 @@ export class SimplePlayer extends Entity {
     }
     
     /**
+     * Enable or disable debug visuals (axis lines, rays, etc.)
+     */
+    public static setDebugVisualsEnabled(enabled: boolean): void {
+        SimplePlayer.debugVisualsEnabled = enabled;
+        Logger.info(`Debug visuals ${enabled ? 'enabled' : 'disabled'}`);
+    }
+    
+    /**
+     * Get debug visuals enabled state
+     */
+    public static getDebugVisualsEnabled(): boolean {
+        return SimplePlayer.debugVisualsEnabled;
+    }
+    
+    /**
      * Get max walkable slope angle
      */
     public getMaxWalkableSlope(): number {
@@ -462,6 +568,7 @@ export class SimplePlayer extends Entity {
         if (this.axisX) this.axisX.dispose();
         if (this.axisY) this.axisY.dispose();
         if (this.axisZ) this.axisZ.dispose();
+        if (this.slopeForwardLine) this.slopeForwardLine.dispose();
         if (this.groundRayLine) this.groundRayLine.dispose();
         
         super.dispose();

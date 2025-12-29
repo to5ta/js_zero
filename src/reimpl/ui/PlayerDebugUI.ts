@@ -42,9 +42,10 @@ export class PlayerDebugUI {
         title.fontWeight = 'bold';
         title.textHorizontalAlignment = BABYLONGUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
         title.textVerticalAlignment = BABYLONGUI.Control.VERTICAL_ALIGNMENT_TOP;
-        title.top = 5;
+        title.top = 8;
         title.left = 10;
         title.height = '20px';
+        title.paddingTop = 0;
         this.container.addControl(title);
         
         // Create position text

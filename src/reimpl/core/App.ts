@@ -256,9 +256,17 @@ export class App {
         
         // Expose player to window for console access
         (window as any).player = this.player;
+        (window as any).setDebugVisuals = (enabled: boolean) => SimplePlayer.setDebugVisualsEnabled(enabled);
+        (window as any).toggleDebugUI = () => {
+            if (this.playerDebugUI) this.playerDebugUI.toggle();
+            if (this.inputDebugUI) this.inputDebugUI.toggle();
+        };
         
         Logger.info('Player added to entity manager');
-        Logger.info('💡 Tip: Access player via console with: window.player.setMaxWalkableSlope(30)');
+        Logger.info('💡 Console commands:');
+        Logger.info('  - window.player.setMaxWalkableSlope(angle)');
+        Logger.info('  - window.setDebugVisuals(true/false) - Toggle 3D debug lines');
+        Logger.info('  - window.toggleDebugUI() - Toggle debug UI panels');
     }
     
     /**

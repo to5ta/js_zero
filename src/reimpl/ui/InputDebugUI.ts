@@ -9,6 +9,7 @@ export class InputDebugUI {
     private advancedTexture: BABYLONGUI.AdvancedDynamicTexture;
     private keyIndicators: Map<string, BABYLONGUI.Rectangle> = new Map();
     private mouseIndicator: BABYLONGUI.TextBlock;
+    private container?: BABYLONGUI.Container;
     
     constructor(private inputSystem: InputSystem, sharedTexture?: BABYLONGUI.AdvancedDynamicTexture) {
         this.advancedTexture = sharedTexture || BABYLONGUI.AdvancedDynamicTexture.CreateFullscreenUI('DebugUI');
@@ -93,6 +94,17 @@ export class InputDebugUI {
         // Update mouse position
         const mousePos = input.getMousePosition();
         this.mouseIndicator.text = `Mouse: (${Math.round(mousePos.x)}, ${Math.round(mousePos.y)})`;
+    }
+    
+    /**
+     * Toggle visibility of input debug UI
+     */
+    public toggle(): void {
+        const newVisibility = !this.mouseIndicator.isVisible;
+        this.mouseIndicator.isVisible = newVisibility;
+        this.keyIndicators.forEach((rect) => {
+            rect.isVisible = newVisibility;
+        });
     }
     
     /**
