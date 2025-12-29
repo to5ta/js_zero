@@ -54,6 +54,9 @@ export class TestLevel {
             
             box.position = pos;
             
+            // Enable collision detection for moveWithCollisions
+            box.checkCollisions = true;
+            
             // Add colorful material
             const material = new BABYLON.StandardMaterial(`BoxMat_${index}`, this.scene);
             const hue = (index * 60) % 360;
@@ -148,6 +151,9 @@ export class TestLevel {
         ramp.position.y = height / 2;
         ramp.rotation.x = -angleRadians;
         
+        // Enable collision detection for moveWithCollisions
+        ramp.checkCollisions = true;
+        
         // Material
         const material = new BABYLON.StandardMaterial(`${name}_Mat`, this.scene);
         material.diffuseColor = color;
@@ -197,6 +203,9 @@ export class TestLevel {
                 stepHeight / 2 + (i * stepHeight),
                 -5 + (i * stepDepth)
             );
+            
+            // Enable collision detection for moveWithCollisions
+            step.checkCollisions = true;
             
             // Material
             const material = new BABYLON.StandardMaterial(`StepMat_${i}`, this.scene);

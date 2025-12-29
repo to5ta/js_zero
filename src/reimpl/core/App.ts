@@ -276,6 +276,9 @@ export class App {
         ground.material = groundMaterial;
         ground.position.y = 0;
         
+        // Enable collision detection for moveWithCollisions
+        ground.checkCollisions = true;
+        
         // Store reference for physics initialization later
         (this as any)._ground = ground;
         

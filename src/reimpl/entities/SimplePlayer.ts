@@ -64,10 +64,19 @@ export class SimplePlayer extends Entity {
         material.specularColor = new BABYLON.Color3(0.3, 0.3, 0.3);
         (this.mesh as BABYLON.Mesh).material = material;
         
+        // Enable collision detection
+        const capsuleMesh = this.mesh as BABYLON.Mesh;
+        capsuleMesh.checkCollisions = true;
+        capsuleMesh.ellipsoid = new BABYLON.Vector3(
+            this.capsuleRadius,
+            this.capsuleHeight / 2,
+            this.capsuleRadius
+        );
+        
         // Create orientation axis lines
         this.createOrientationAxes();
         
-        Logger.info('🎮 Player created with direct movement control (NO PHYSICS)');
+        Logger.info('🎮 Player created with moveWithCollisions');
     }
     
     /**
@@ -219,8 +228,9 @@ export class SimplePlayer extends Entity {
         this.currentVelocity.x = moveDirection.x * currentSpeed;
         this.currentVelocity.z = moveDirection.z * currentSpeed;
         
-        // Apply movement directly to position
-        this.position.addInPlace(this.currentVelocity.scale(deltaTimeSec));
+        // Use moveWithCollisions for automatic collision response
+        const velocity = this.currentVelocity.scale(deltaTimeSec);
+        (this.mesh as BABYLON.Mesh).moveWithCollisions(velocity);
         
         // Update debug visualization
         this.updateOrientationAxes();
