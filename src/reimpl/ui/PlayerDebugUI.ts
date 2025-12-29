@@ -143,8 +143,10 @@ export class PlayerDebugUI {
         const speed = Math.sqrt(velocity.x * velocity.x + velocity.y * velocity.y + velocity.z * velocity.z);
         this.velocityText.text = `Velocity: (${velocity.x.toFixed(2)}, ${velocity.y.toFixed(2)}, ${velocity.z.toFixed(2)}) | ${speed.toFixed(2)} m/s`;
         
-        // Show state (no grounding checks without physics)
-        this.stateText.text = `Direct Movement: 🟢 Active`;
+        // Show grounded state
+        const isGrounded = this.player.getIsGrounded();
+        const groundEmoji = isGrounded ? '🟢' : '🔴';
+        this.stateText.text = `Grounded: ${groundEmoji} ${isGrounded ? 'Yes' : 'No'}`;
         
         // Update slope display (no slope detection without physics)
         this.slopeText.color = 'gray';

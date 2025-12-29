@@ -17,6 +17,14 @@ export class SimplePlayer extends Entity {
     private sprintMultiplier: number = 2.0;
     private currentVelocity: BABYLON.Vector3 = BABYLON.Vector3.Zero();
     
+    // Physics properties
+    private gravity: number = -9.81; // m/s^2
+    private jumpSpeed: number = 6; // Initial jump velocity
+    private isGrounded: boolean = false;
+    private capsuleHeight: number = 2.0;
+    private capsuleRadius: number = 0.5;
+    private groundCheckDistance: number = 0.01; // Extra distance beyond half height
+    
     // Debug properties
     private lastMoveDirection: BABYLON.Vector3 = BABYLON.Vector3.Zero();
     
@@ -25,6 +33,7 @@ export class SimplePlayer extends Entity {
     private axisY?: BABYLON.LinesMesh; // Green - Up
     private axisZ?: BABYLON.LinesMesh; // Blue - Left
     private playerRotation: number = 0; // Current rotation angle
+    private groundRayLine?: BABYLON.LinesMesh; // Ground detection ray visualization
     
     constructor(scene: BABYLON.Scene, inputSystem: InputSystem) {
         super('Player', scene);
@@ -39,8 +48,8 @@ export class SimplePlayer extends Entity {
         this.mesh = BABYLON.MeshBuilder.CreateCapsule(
             this.name, 
             { 
-                radius: 0.5, 
-                height: 2.0,
+                radius: this.capsuleRadius, 
+                height: this.capsuleHeight,
                 subdivisions: 16
             }, 
             this.scene
@@ -105,7 +114,53 @@ export class SimplePlayer extends Entity {
         this.axisZ.color = new BABYLON.Color3(0, 0, 1);
         this.axisZ.alwaysSelectAsActiveMesh = true; // Prevent frustum culling
         
-        Logger.debug('Player orientation axes created');
+        // Ground detection ray visualization
+        const rayLength = (this.capsuleHeight / 2) + this.groundCheckDistance;
+        this.groundRayLine = BABYLON.MeshBuilder.CreateLines(
+            'groundRay',
+            {
+                points: [origin, origin.add(new BABYLON.Vector3(0, -rayLength, 0))],
+                updatable: true
+            },
+            this.scene
+        );
+        this.groundRayLine.color = new BABYLON.Color3(0.5, 0.5, 0.5); // Grey by default
+        this.groundRayLine.alwaysSelectAsActiveMesh = true;
+    }
+    
+    /**
+     * Check if player is grounded using raycast
+     */
+    private checkGrounded(): void {
+        if (!this.mesh) return;
+        
+        // Cast ray from player position downwards
+        const rayOrigin = this.mesh.position.clone();
+        const rayDirection = new BABYLON.Vector3(0, -1, 0);
+        const rayLength = (this.capsuleHeight / 2) + this.groundCheckDistance;
+        
+        const ray = new BABYLON.Ray(rayOrigin, rayDirection, rayLength);
+        const hit = this.scene.pickWithRay(ray, (mesh) => {
+            // Don't collide with self
+            return mesh !== this.mesh;
+        });
+        
+        this.isGrounded = hit?.hit ?? false;
+        
+        // Update ray visualization
+        if (this.groundRayLine) {
+            const rayEnd = rayOrigin.add(rayDirection.scale(rayLength));
+            this.groundRayLine = BABYLON.MeshBuilder.CreateLines(
+                'groundRay',
+                { points: [rayOrigin, rayEnd], instance: this.groundRayLine },
+                this.scene
+            );
+            
+            // Change color based on hit
+            this.groundRayLine.color = this.isGrounded 
+                ? new BABYLON.Color3(1, 1, 0)  // Yellow when hit
+                : new BABYLON.Color3(0.5, 0.5, 0.5); // Grey when no hit
+        }
     }
     
     /**
@@ -118,6 +173,10 @@ export class SimplePlayer extends Entity {
         
         const input = this.inputSystem.getState();
         const movement = input.getMovementInput();
+        const deltaTimeSec = deltaTime / 1000; // Convert ms to seconds
+        
+        // Check if grounded
+        this.checkGrounded();
         
         // Calculate desired speed
         const currentSpeed = input.isSprintPressed() 
@@ -141,25 +200,30 @@ export class SimplePlayer extends Entity {
             this.lastMoveDirection = BABYLON.Vector3.Zero();
         }
         
-        // Calculate velocity
-        this.currentVelocity = new BABYLON.Vector3(
-            moveDirection.x * currentSpeed,
-            0,
-            moveDirection.z * currentSpeed
-        );
+        // Handle jump input
+        if (input.isJumpPressed() && this.isGrounded) {
+            this.currentVelocity.y = this.jumpSpeed;
+        }
+        
+        // Apply gravity when not grounded
+        if (!this.isGrounded) {
+            this.currentVelocity.y += this.gravity * deltaTimeSec;
+        } else {
+            // Reset vertical velocity when grounded
+            if (this.currentVelocity.y < 0) {
+                this.currentVelocity.y = 0;
+            }
+        }
+        
+        // Calculate horizontal velocity
+        this.currentVelocity.x = moveDirection.x * currentSpeed;
+        this.currentVelocity.z = moveDirection.z * currentSpeed;
         
         // Apply movement directly to position
-        // deltaTime is in milliseconds, convert to seconds
-        this.position.addInPlace(this.currentVelocity.scale(deltaTime / 1000));
+        this.position.addInPlace(this.currentVelocity.scale(deltaTimeSec));
         
         // Update debug visualization
         this.updateOrientationAxes();
-        
-        // Debug: Log occasionally
-        if (Math.random() < 0.01) {
-            const vel = this.currentVelocity;
-            Logger.debug(`[PLAYER] Pos: (${this.position.x.toFixed(1)}, ${this.position.y.toFixed(1)}, ${this.position.z.toFixed(1)}) Vel: (${vel.x.toFixed(2)}, ${vel.y.toFixed(2)}, ${vel.z.toFixed(2)})`);
-        }
     }
     
     /**
@@ -238,7 +302,6 @@ export class SimplePlayer extends Entity {
      */
     public setCameraController(cameraController: CameraController): void {
         this.cameraController = cameraController;
-        Logger.debug('Camera controller set for player movement');
     }
     
     /**
@@ -253,7 +316,6 @@ export class SimplePlayer extends Entity {
      */
     public setMoveSpeed(speed: number): void {
         this.moveSpeed = speed;
-        Logger.debug(`Player move speed set to ${speed}`);
     }
     
     /**
@@ -261,6 +323,13 @@ export class SimplePlayer extends Entity {
      */
     public getLastMoveDirection(): BABYLON.Vector3 {
         return this.lastMoveDirection;
+    }
+    
+    /**
+     * Get grounded state for debugging
+     */
+    public getIsGrounded(): boolean {
+        return this.isGrounded;
     }
     
     /**
@@ -290,6 +359,7 @@ export class SimplePlayer extends Entity {
         if (this.axisX) this.axisX.dispose();
         if (this.axisY) this.axisY.dispose();
         if (this.axisZ) this.axisZ.dispose();
+        if (this.groundRayLine) this.groundRayLine.dispose();
         
         super.dispose();
     }
