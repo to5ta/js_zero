@@ -16,7 +16,6 @@ import { SphereSensor } from "./Sensors";
 
 import { Logging } from "./common/Logging";
 import { Environment } from "./environment";
-import { motionBlurPixelShader } from "@babylonjs/core/Shaders/motionBlur.fragment";
 import { PlayerConfig } from "./config/PlayerConfig";
 
 class Game implements Pausable  {
