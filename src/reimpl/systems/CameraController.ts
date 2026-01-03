@@ -16,22 +16,19 @@ export enum CameraMode {
  * Configuration for camera behavior
  */
 export interface CameraConfig {
-    distance?: number;          // Distance from target (third-person)
-    height?: number;            // Height above target
-    rotationSpeed?: number;     // Mouse rotation speed
-    smoothing?: number;         // Camera smoothing (0-1, higher = smoother)
-    minDistance?: number;       // Minimum zoom distance
-    maxDistance?: number;       // Maximum zoom distance
-    minPitch?: number;          // Minimum pitch angle (looking down, negative)
-    maxPitch?: number;          // Maximum pitch angle (looking up, positive)
+    distance?: number;          // Distance from target (radius)
+    angularSensibilityX?: number;  // Horizontal rotation sensitivity
+    angularSensibilityY?: number;  // Vertical rotation sensitivity
+    upperBetaLimit?: number;    // Upper vertical limit (looking down)
+    lowerBetaLimit?: number;    // Lower vertical limit (looking up)
 }
 
 /**
  * Camera controller - handles following targets and smooth camera movement
- * Uses FreeCamera approach similar to BabylonJS character controller example
+ * Uses ArcRotateCamera for intuitive third-person controls
  */
 export class CameraController {
-    private camera: BABYLON.FreeCamera;
+    private camera: BABYLON.ArcRotateCamera;
     private scene: BABYLON.Scene;
     private canvas: HTMLCanvasElement;
     private target?: Entity;
@@ -39,19 +36,11 @@ export class CameraController {
     private inputSystem: InputSystem;
     
     // Configuration
-    private distance: number = 10;
-    private height: number = 5;
-    private rotationSpeed: number = 0.005;
-    private smoothing: number = 0.1;
-    private minDistance: number = 3;
-    private maxDistance: number = 30;
-    private minPitch: number = -Math.PI / 10; // -60 degrees (steep downward)
-    private maxPitch: number = Math.PI / 2.5;  // +15 degrees (slight upward)
-    
-    // Smoothing
-    private targetPosition: BABYLON.Vector3 = BABYLON.Vector3.Zero();
-    private azimuth: number = 0; // Camera rotation angle around target (horizontal)
-    private pitch: number = 0;    // Camera pitch angle (vertical, + is up, - is down)
+    private distance: number = 8;
+    private angularSensibilityX: number = 1500;
+    private angularSensibilityY: number = 1500;
+    private upperBetaLimit: number = 1.5;  // ~97° (near horizon)
+    private lowerBetaLimit: number = 0.1;  // slight restriction from looking straight up
     
     constructor(scene: BABYLON.Scene, canvas: HTMLCanvasElement, inputSystem: InputSystem, config?: CameraConfig) {
         this.scene = scene;
@@ -61,29 +50,37 @@ export class CameraController {
         // Apply config
         if (config) {
             this.distance = config.distance ?? this.distance;
-            this.height = config.height ?? this.height;
-            this.rotationSpeed = config.rotationSpeed ?? this.rotationSpeed;
-            this.smoothing = config.smoothing ?? this.smoothing;
-            this.minDistance = config.minDistance ?? this.minDistance;
-            this.maxDistance = config.maxDistance ?? this.maxDistance;
-            this.minPitch = config.minPitch ?? this.minPitch;
-            this.maxPitch = config.maxPitch ?? this.maxPitch;
+            this.angularSensibilityX = config.angularSensibilityX ?? this.angularSensibilityX;
+            this.angularSensibilityY = config.angularSensibilityY ?? this.angularSensibilityY;
+            this.upperBetaLimit = config.upperBetaLimit ?? this.upperBetaLimit;
+            this.lowerBetaLimit = config.lowerBetaLimit ?? this.lowerBetaLimit;
         }
         
-        // Create free camera
-        this.camera = new BABYLON.FreeCamera(
+        // Create ArcRotateCamera
+        this.camera = new BABYLON.ArcRotateCamera(
             'MainCamera',
-            new BABYLON.Vector3(0, this.height, -this.distance),
-            this.scene
+            -Math.PI / 2,  // alpha (horizontal rotation)
+            Math.PI / 2,   // beta (vertical rotation)
+            this.distance, // radius
+            BABYLON.Vector3.Zero(),
+            this.scene,
+            true
         );
         
-        // Initialize azimuth based on initial camera position
-        this.azimuth = Math.PI; // Start behind the player (looking forward)
+        // Configure camera
+        this.camera.attachControl(this.canvas, true);
+        this.camera.inputs.remove(this.camera.inputs.attached.keyboard);
+        this.camera.inputs.remove(this.camera.inputs.attached.mousewheel);
+        
+        this.camera.angularSensibilityX = this.angularSensibilityX;
+        this.camera.angularSensibilityY = this.angularSensibilityY;
+        this.camera.upperBetaLimit = this.upperBetaLimit;
+        this.camera.lowerBetaLimit = this.lowerBetaLimit;
         
         // Set as active camera
         this.scene.activeCamera = this.camera;
         
-        Logger.info('Camera controller initialized with pointer lock support');
+        Logger.info('Camera controller initialized with ArcRotateCamera');
     }
 
     /**
@@ -91,8 +88,11 @@ export class CameraController {
      */
     public setTarget(entity: Entity): void {
         this.target = entity;
-        this.targetPosition = entity.position.clone();
-        this.camera.setTarget(this.targetPosition);
+        // ArcRotateCamera will follow the mesh directly
+        const mesh = entity.getMesh();
+        if (mesh) {
+            this.camera.lockedTarget = mesh;
+        }
         Logger.info(`Camera now following: ${entity.name}`);
     }
     
@@ -101,6 +101,7 @@ export class CameraController {
      */
     public clearTarget(): void {
         this.target = undefined;
+        this.camera.lockedTarget = null;
         Logger.debug('Camera target cleared');
     }
     
@@ -113,49 +114,17 @@ export class CameraController {
     }
     
     /**
-     * Update camera each frame - smoothly follow target
+     * Update camera each frame - ArcRotateCamera handles rotation automatically
      */
     public update(deltaTime: number): void {
-        if (!this.target) return;
-
-        // Update rotation from mouse delta (pointer lock)
-        const mouseDelta = this.inputSystem.getState().getMouseDelta();
-        this.azimuth += mouseDelta.x * this.rotationSpeed;
-        this.pitch -= mouseDelta.y * this.rotationSpeed; // Negative because mouse down = look down
-        
-        // Clamp pitch within limits
-        this.pitch = BABYLON.Scalar.Clamp(this.pitch, this.minPitch, this.maxPitch);
-        
-        const targetPos = this.target.position.clone();
-
-        // Smoothly lerp target position
-        this.targetPosition = BABYLON.Vector3.Lerp(
-            this.targetPosition,
-            targetPos,
-            this.smoothing
-        );
-
-        // Calculate camera position using spherical coordinates
-        // Orbit around the player's center of mass (their position)
-        const orbitCenter = this.targetPosition.clone();
-        
-        // Calculate camera position relative to orbit center using spherical coordinates
-        const horizontalDistance = this.distance * Math.cos(this.pitch);
-        const cameraX = orbitCenter.x + Math.sin(this.azimuth) * horizontalDistance;
-        const cameraZ = orbitCenter.z + Math.cos(this.azimuth) * horizontalDistance;
-        const cameraY = orbitCenter.y + this.distance * Math.sin(this.pitch);
-        
-        // Set camera position (no lerp on position to avoid lag)
-        this.camera.position.set(cameraX, cameraY, cameraZ);
-        
-        // Always look at the orbit center (player's center of mass)
-        this.camera.setTarget(orbitCenter);
+        // ArcRotateCamera handles following and rotation automatically
+        // No manual updates needed
     }
     
     /**
      * Get the camera instance
      */
-    public getCamera(): BABYLON.FreeCamera {
+    public getCamera(): BABYLON.ArcRotateCamera {
         return this.camera;
     }
     
@@ -163,40 +132,41 @@ export class CameraController {
      * Set camera distance from target
      */
     public setDistance(distance: number): void {
-        this.distance = BABYLON.Scalar.Clamp(distance, this.minDistance, this.maxDistance);
+        this.distance = distance;
+        this.camera.radius = distance;
         Logger.debug(`Camera distance set to: ${this.distance}`);
     }
     
     /**
-     * Set camera height above target
+     * Get camera's alpha (horizontal rotation angle)
      */
-    public setHeight(height: number): void {
-        this.height = height;
-        Logger.debug(`Camera height set to: ${this.height}`);
+    public getAlpha(): number {
+        return this.camera.alpha;
     }
     
     /**
-     * Set camera smoothing
+     * Get camera's beta (vertical rotation angle)
      */
-    public setSmoothing(smoothing: number): void {
-        this.smoothing = BABYLON.Scalar.Clamp(smoothing, 0, 1);
-        Logger.debug(`Camera smoothing set to: ${this.smoothing}`);
+    public getBeta(): number {
+        return this.camera.beta;
     }
     
     /**
      * Get current camera forward direction (useful for relative movement)
      */
     public getForwardDirection(): BABYLON.Vector3 {
-        // Use azimuth to calculate forward direction
-        return new BABYLON.Vector3(Math.sin(this.azimuth), 0, Math.cos(this.azimuth)).normalize();
+        // Inverted controls
+        const alpha = this.camera.alpha;
+        return new BABYLON.Vector3(Math.cos(alpha), 0, Math.sin(alpha)).normalize();
     }
     
     /**
      * Get current camera right direction
      */
     public getRightDirection(): BABYLON.Vector3 {
-        // Right is perpendicular to forward
-        return new BABYLON.Vector3(Math.cos(this.azimuth), 0, -Math.sin(this.azimuth)).normalize();
+        // Inverted controls - right is 90° clockwise from forward
+        const alpha = this.camera.alpha;
+        return new BABYLON.Vector3(Math.sin(alpha), 0, -Math.cos(alpha)).normalize();
     }
     
     /**

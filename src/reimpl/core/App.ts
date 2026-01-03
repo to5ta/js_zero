@@ -92,8 +92,10 @@ export class App {
         // Initialize camera controller
         this.cameraController = new CameraController(this.scene, Environment.canvas, this.inputSystem, {
             distance: 8,
-            height: 3,
-            smoothing: 0.1
+            angularSensibilityX: 1500,
+            angularSensibilityY: 1500,
+            upperBetaLimit: 1.7,
+            lowerBetaLimit: 0.1
         });
         
         // Initialize entity manager
