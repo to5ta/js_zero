@@ -189,7 +189,7 @@ export class TestLevel {
         const stepCount = 5;
         const stepWidth = 3;
         const stepDepth = 1;
-        const stepHeight = 0.5;
+        const stepHeight = 0.25;
         
         for (let i = 0; i < stepCount; i++) {
             const step = BABYLON.MeshBuilder.CreateBox(

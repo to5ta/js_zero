@@ -6,6 +6,7 @@ import { Logger } from './Logger';
 import { LoadingScreen } from '../ui/LoadingScreen';
 import { InputDebugUI } from '../ui/InputDebugUI';
 import { PlayerDebugUI } from '../ui/PlayerDebugUI';
+import { FullscreenButton } from '../ui/FullscreenButton';
 import { InputSystem } from '../systems/InputSystem';
 import { CameraController } from '../systems/CameraController';
 import { PhysicsManager } from '../systems/PhysicsManager';
@@ -30,6 +31,7 @@ export class App {
     private physicsManager: PhysicsManager;
     private inputDebugUI?: InputDebugUI;
     private playerDebugUI?: PlayerDebugUI;
+    private fullscreenButton?: FullscreenButton;
     private sharedDebugTexture?: BABYLONGUI.AdvancedDynamicTexture;
     private player?: SimplePlayer;
     private testLevel?: TestLevel;
@@ -81,11 +83,14 @@ export class App {
         // Initialize input system
         this.inputSystem = new InputSystem(Environment.canvas);
         
+        // Initialize fullscreen button (F key to toggle)
+        this.fullscreenButton = new FullscreenButton(this.inputSystem.getState());
+        
         // Initialize physics manager
         this.physicsManager = new PhysicsManager(this.scene);
         
         // Initialize camera controller
-        this.cameraController = new CameraController(this.scene, Environment.canvas, {
+        this.cameraController = new CameraController(this.scene, Environment.canvas, this.inputSystem, {
             distance: 8,
             height: 3,
             smoothing: 0.1

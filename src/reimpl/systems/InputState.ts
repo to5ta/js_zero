@@ -20,6 +20,19 @@ export class InputState {
     
     constructor(private canvas: HTMLCanvasElement) {
         this.setupEventListeners();
+        this.setupPointerLock();
+    }
+    
+    /**
+     * Setup pointer lock on canvas click
+     */
+    private setupPointerLock(): void {
+        this.canvas.addEventListener('click', () => {
+            if (!this.pointerLocked) {
+                console.log('[TRACE] Canvas clicked, requesting pointer lock only');
+                this.requestPointerLock();
+            }
+        });
     }
     
     /**
@@ -81,7 +94,7 @@ export class InputState {
         
         // Pointer lock events
         document.addEventListener('pointerlockchange', () => {
-            this.pointerLocked = document.pointerLockElement === this.canvas;
+            this.pointerLocked = document.pointerLockElement === (this.canvas as unknown as Element);
         });
     }
     
@@ -172,12 +185,86 @@ export class InputState {
     public requestPointerLock(): void {
         this.canvas.requestPointerLock();
     }
+
+    /**
+     * Request fullscreen
+     */
+    public requestFullscreen(): void {
+        console.log('[TRACE] requestFullscreen() called');
+        console.log('[TRACE] document.documentElement:', document.documentElement);
+        console.log('[TRACE] requestFullscreen exists?', !!document.documentElement.requestFullscreen);
+        
+        try {
+            if (document.documentElement.requestFullscreen) {
+                console.log('[TRACE] Calling document.documentElement.requestFullscreen()');
+                const promise = document.documentElement.requestFullscreen();
+                console.log('[TRACE] requestFullscreen() returned promise:', promise);
+
+                promise
+                    .then(() => {
+                        console.log('[SUCCESS] Fullscreen request succeeded!');
+                    })
+                    .catch((err) => {
+                        console.error('[ERROR] Fullscreen request failed:', err);
+                        console.error('[ERROR] Error name:', err.name);
+                        console.error('[ERROR] Error message:', err.message);
+                        console.error('[ERROR] Error stack:', err.stack);
+                    });
+            } else {
+                console.warn('[WARN] requestFullscreen not available on document.documentElement');
+            }
+        } catch (error) {
+            console.error('[EXCEPTION] Exception during requestFullscreen:', error);
+        }
+    }
+    
+    /**
+     * Request both pointer lock and fullscreen
+     */
+    public requestPointerLockAndFullscreen(): void {
+        console.log('[TRACE] requestPointerLockAndFullscreen() called');
+        this.requestFullscreen();
+        this.requestPointerLock();
+    }
     
     /**
      * Exit pointer lock
      */
     public exitPointerLock(): void {
-        document.exitPointerLock();
+        console.log('[TRACE] exitPointerLock() called');
+        try {
+            document.exitPointerLock();
+            console.log('[SUCCESS] exitPointerLock() completed');
+        } catch (error) {
+            console.warn('[ERROR] Exit pointer lock failed:', error);
+        }
+    }
+    
+    /**
+     * Exit fullscreen
+     */
+    public exitFullscreen(): void {
+        console.log('[TRACE] exitFullscreen() called');
+        console.log('[TRACE] document.exitFullscreen exists?', !!document.exitFullscreen);
+        
+        try {
+            if (document.exitFullscreen) {
+                console.log('[TRACE] Calling document.exitFullscreen()');
+                const promise = document.exitFullscreen();
+
+                promise
+                    .then(() => {
+                        console.log('[SUCCESS] Exit fullscreen succeeded!');
+                    })
+                    .catch((err) => {
+                        console.error('[ERROR] Exit fullscreen failed:', err);
+                    });
+            } else {
+                console.warn('[WARN] exitFullscreen not available');
+            }
+        } catch (error) {
+            console.error('[EXCEPTION] Exception during exitFullscreen:', error);
+        }
     }
     
     /**

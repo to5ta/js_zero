@@ -20,7 +20,7 @@ module.exports = (env, argv) => {
       static: {
         directory: path.join(__dirname, 'dist-reimpl')
       },
-      port: 8082, // Different port from main app (changed from 8081)
+      port: 8080, // Different port from main app (changed from 8081)
     },
     module: {
       rules: [

@@ -1,6 +1,7 @@
 import * as BABYLON from '@babylonjs/core';
 import { Entity } from '../entities/Entity';
 import { Logger } from '../core/Logger';
+import { InputSystem } from './InputSystem';
 
 /**
  * Camera controller modes
@@ -21,6 +22,8 @@ export interface CameraConfig {
     smoothing?: number;         // Camera smoothing (0-1, higher = smoother)
     minDistance?: number;       // Minimum zoom distance
     maxDistance?: number;       // Maximum zoom distance
+    minPitch?: number;          // Minimum pitch angle (looking down, negative)
+    maxPitch?: number;          // Maximum pitch angle (looking up, positive)
 }
 
 /**
@@ -33,30 +36,38 @@ export class CameraController {
     private canvas: HTMLCanvasElement;
     private target?: Entity;
     private mode: CameraMode = CameraMode.THIRD_PERSON;
+    private inputSystem: InputSystem;
     
     // Configuration
     private distance: number = 10;
     private height: number = 5;
+    private rotationSpeed: number = 0.005;
     private smoothing: number = 0.1;
     private minDistance: number = 3;
     private maxDistance: number = 30;
+    private minPitch: number = -Math.PI / 10; // -60 degrees (steep downward)
+    private maxPitch: number = Math.PI / 2.5;  // +15 degrees (slight upward)
     
     // Smoothing
     private targetPosition: BABYLON.Vector3 = BABYLON.Vector3.Zero();
-    private isMouseDown: boolean = false;
-    private azimuth: number = 0; // Camera rotation angle around target (only changes on mouse input)
+    private azimuth: number = 0; // Camera rotation angle around target (horizontal)
+    private pitch: number = 0;    // Camera pitch angle (vertical, + is up, - is down)
     
-    constructor(scene: BABYLON.Scene, canvas: HTMLCanvasElement, config?: CameraConfig) {
+    constructor(scene: BABYLON.Scene, canvas: HTMLCanvasElement, inputSystem: InputSystem, config?: CameraConfig) {
         this.scene = scene;
         this.canvas = canvas;
+        this.inputSystem = inputSystem;
         
         // Apply config
         if (config) {
             this.distance = config.distance ?? this.distance;
             this.height = config.height ?? this.height;
+            this.rotationSpeed = config.rotationSpeed ?? this.rotationSpeed;
             this.smoothing = config.smoothing ?? this.smoothing;
             this.minDistance = config.minDistance ?? this.minDistance;
             this.maxDistance = config.maxDistance ?? this.maxDistance;
+            this.minPitch = config.minPitch ?? this.minPitch;
+            this.maxPitch = config.maxPitch ?? this.maxPitch;
         }
         
         // Create free camera
@@ -69,41 +80,12 @@ export class CameraController {
         // Initialize azimuth based on initial camera position
         this.azimuth = Math.PI; // Start behind the player (looking forward)
         
-        // Setup mouse rotation controls
-        this.setupMouseControls();
-        
         // Set as active camera
         this.scene.activeCamera = this.camera;
         
-        Logger.info('Camera controller initialized (FreeCamera mode)');
+        Logger.info('Camera controller initialized with pointer lock support');
     }
-    
-    /**
-     * Setup mouse controls for camera rotation
-     */
-    private setupMouseControls(): void {
-        this.scene.onPointerObservable.add((pointerInfo) => {
-            switch (pointerInfo.type) {
-                case BABYLON.PointerEventTypes.POINTERDOWN:
-                    if (pointerInfo.event.button === 0) { // Left mouse button
-                        this.isMouseDown = true;
-                    }
-                    break;
-                    
-                case BABYLON.PointerEventTypes.POINTERUP:
-                    this.isMouseDown = false;
-                    break;
-                    
-                case BABYLON.PointerEventTypes.POINTERMOVE:
-                    if (this.isMouseDown) {
-                        // Rotate azimuth based on mouse movement
-                        this.azimuth += pointerInfo.event.movementX * 0.005;
-                    }
-                    break;
-            }
-        });
-    }
-    
+
     /**
      * Set the entity to follow
      */
@@ -135,26 +117,39 @@ export class CameraController {
      */
     public update(deltaTime: number): void {
         if (!this.target) return;
+
+        // Update rotation from mouse delta (pointer lock)
+        const mouseDelta = this.inputSystem.getState().getMouseDelta();
+        this.azimuth += mouseDelta.x * this.rotationSpeed;
+        this.pitch -= mouseDelta.y * this.rotationSpeed; // Negative because mouse down = look down
+        
+        // Clamp pitch within limits
+        this.pitch = BABYLON.Scalar.Clamp(this.pitch, this.minPitch, this.maxPitch);
         
         const targetPos = this.target.position.clone();
-        
+
         // Smoothly lerp target position
         this.targetPosition = BABYLON.Vector3.Lerp(
             this.targetPosition,
             targetPos,
             this.smoothing
         );
+
+        // Calculate camera position using spherical coordinates
+        // Orbit around the player's center of mass (their position)
+        const orbitCenter = this.targetPosition.clone();
         
-        // Calculate camera position using fixed azimuth angle
-        const cameraX = this.targetPosition.x + Math.sin(this.azimuth) * this.distance;
-        const cameraZ = this.targetPosition.z + Math.cos(this.azimuth) * this.distance;
-        const cameraY = this.targetPosition.y + this.height;
+        // Calculate camera position relative to orbit center using spherical coordinates
+        const horizontalDistance = this.distance * Math.cos(this.pitch);
+        const cameraX = orbitCenter.x + Math.sin(this.azimuth) * horizontalDistance;
+        const cameraZ = orbitCenter.z + Math.cos(this.azimuth) * horizontalDistance;
+        const cameraY = orbitCenter.y + this.distance * Math.sin(this.pitch);
         
         // Set camera position (no lerp on position to avoid lag)
         this.camera.position.set(cameraX, cameraY, cameraZ);
         
-        // Always look at target
-        this.camera.setTarget(this.targetPosition);
+        // Always look at the orbit center (player's center of mass)
+        this.camera.setTarget(orbitCenter);
     }
     
     /**
