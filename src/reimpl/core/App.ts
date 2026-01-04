@@ -14,6 +14,8 @@ import { EntityManager } from '../entities/EntityManager';
 import { SimplePlayer } from '../entities/SimplePlayer';
 import { TestLevel } from '../entities/TestLevel';
 import Stats from 'stats-js';
+// @ts-ignore - webpack will handle this file
+import wache02Model from '../../assets/models/wache02.glb';
 
 /**
  * Main application class - handles BabylonJS engine and lifecycle
@@ -250,7 +252,7 @@ export class App {
     /**
      * Create player entity
      */
-    private createPlayer(): void {
+    private async createPlayer(): Promise<void> {
         this.player = new SimplePlayer(this.scene, this.inputSystem);
         this.player.init();
         this.entityManager.add(this.player);
@@ -260,6 +262,36 @@ export class App {
         
         // Make camera follow player
         this.cameraController.setTarget(this.player);
+        
+        // Load player visualization (wache02 model)
+        try {
+            await this.player.loadVisualization(
+                wache02Model,
+                {
+                    'idle': {
+                        loop: true,
+                        speed: 1.0,
+                        from: 0,
+                        to: 60,
+                    },
+                    'walk': {
+                        loop: true,
+                        speed: 1.0,
+                        from: 61,
+                        to: 120,
+                    },
+                    'run': {
+                        loop: true,
+                        speed: 1.5,
+                        from: 121,
+                        to: 180,
+                    }
+                }
+            );
+            Logger.info('🎨 Player model loaded successfully');
+        } catch (error) {
+            Logger.warn(`Could not load player model: ${error}`);
+        }
         
         // Expose player to window for console access
         (window as any).player = this.player;

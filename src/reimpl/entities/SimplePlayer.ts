@@ -3,6 +3,7 @@ import { Entity } from './Entity';
 import { InputSystem } from '../systems/InputSystem';
 import { CameraController } from '../systems/CameraController';
 import { Logger } from '../core/Logger';
+import { PlayerVisualization } from '../components/PlayerVisualization';
 
 /**
  * Simple player entity - capsule that moves with WASD/arrows
@@ -11,6 +12,7 @@ import { Logger } from '../core/Logger';
 export class SimplePlayer extends Entity {
     private inputSystem: InputSystem;
     private cameraController?: CameraController;
+    private visualization?: PlayerVisualization;
     
     // Movement configuration
     private moveSpeed: number = 5.0; // Units per second
@@ -65,10 +67,11 @@ export class SimplePlayer extends Entity {
         // Start at a reasonable height
         this.position = new BABYLON.Vector3(0, 2.0, 0);
         
-        // Add material with player color
+        // Add material with player color (semi-transparent for debug)
         const material = new BABYLON.StandardMaterial(`${this.name}_Material`, this.scene);
         material.diffuseColor = new BABYLON.Color3(0.2, 0.6, 1.0); // Blue player
         material.specularColor = new BABYLON.Color3(0.3, 0.3, 0.3);
+        material.alpha = 0.3; // Semi-transparent for debug visualization
         (this.mesh as BABYLON.Mesh).material = material;
         
         // Enable collision detection
@@ -359,6 +362,12 @@ export class SimplePlayer extends Entity {
         const velocity = this.currentVelocity.scale(deltaTimeSec);
         (this.mesh as BABYLON.Mesh).moveWithCollisions(velocity);
         
+        // Sync visualization with physics capsule (if loaded)
+        if (this.visualization && this.visualization.isLoaded()) {
+            this.visualization.setPosition(this.mesh.position);
+            this.visualization.setRotation(this.mesh.rotation);
+        }
+        
         // Update debug line visibility
         this.updateDebugLineVisibility();
         
@@ -463,6 +472,53 @@ export class SimplePlayer extends Entity {
     }
     
     /**
+     * Attach and load player visualization (character model, animations, sounds)
+     * This is optional and doesn't affect physics/movement
+     * @param modelPath Path to the 3D model file
+     * @param animationConfigs Animation configurations
+     */
+    public async loadVisualization(
+        modelPath: string,
+        animationConfigs: {[key: string]: any}
+    ): Promise<void> {
+        if (!this.visualization) {
+            this.visualization = new PlayerVisualization(this.scene);
+        }
+        
+        try {
+            await this.visualization.load(modelPath, animationConfigs);
+            // Sync initial position and rotation
+            if (this.mesh) {
+                this.visualization.setPosition(this.mesh.position);
+                this.visualization.setRotation(this.mesh.rotation);
+                // Hide physics capsule when visualization is loaded
+                (this.mesh as BABYLON.Mesh).isVisible = false;
+            }
+            Logger.info('✅ Player visualization attached and loaded');
+        } catch (error) {
+            Logger.error(`Failed to load player visualization: ${error}`);
+        }
+    }
+    
+    /**
+     * Get the visualization component (if loaded)
+     */
+    public getVisualization(): PlayerVisualization | undefined {
+        return this.visualization;
+    }
+    
+    /**
+     * Show or hide the physics capsule mesh
+     * Useful for debugging collision boundaries
+     */
+    public setPhysicsCapsuleVisible(visible: boolean): void {
+        if (this.mesh) {
+            (this.mesh as BABYLON.Mesh).isVisible = visible;
+            Logger.info(`Physics capsule ${visible ? 'shown' : 'hidden'}`);
+        }
+    }
+    
+    /**
      * Get current move speed
      */
     public getMoveSpeed(): number {
@@ -564,6 +620,12 @@ export class SimplePlayer extends Entity {
      * Dispose player and cleanup resources
      */
     public dispose(): void {
+        // Dispose visualization
+        if (this.visualization) {
+            this.visualization.dispose();
+            this.visualization = undefined;
+        }
+        
         // Dispose orientation axes
         if (this.axisX) this.axisX.dispose();
         if (this.axisY) this.axisY.dispose();
