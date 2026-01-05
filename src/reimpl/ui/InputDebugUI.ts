@@ -106,6 +106,22 @@ export class InputDebugUI {
             rect.isVisible = newVisibility;
         });
     }
+
+    /** Show all debug controls */
+    public show(): void {
+        this.mouseIndicator.isVisible = true;
+        this.keyIndicators.forEach((rect) => {
+            rect.isVisible = true;
+        });
+    }
+
+    /** Hide all debug controls */
+    public hide(): void {
+        this.mouseIndicator.isVisible = false;
+        this.keyIndicators.forEach((rect) => {
+            rect.isVisible = false;
+        });
+    }
     
     /**
      * Cleanup

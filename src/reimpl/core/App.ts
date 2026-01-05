@@ -7,6 +7,7 @@ import { LoadingScreen } from '../ui/LoadingScreen';
 import { InputDebugUI } from '../ui/InputDebugUI';
 import { PlayerDebugUI } from '../ui/PlayerDebugUI';
 import { FullscreenButton } from '../ui/FullscreenButton';
+import { DebugToggleButton } from '../ui/DebugToggleButton';
 import { InputSystem } from '../systems/InputSystem';
 import { CameraController } from '../systems/CameraController';
 import { PhysicsManager } from '../systems/PhysicsManager';
@@ -34,6 +35,8 @@ export class App {
     private inputDebugUI?: InputDebugUI;
     private playerDebugUI?: PlayerDebugUI;
     private fullscreenButton?: FullscreenButton;
+    private debugToggleButton?: DebugToggleButton;
+    private debugEnabled: boolean = true;
     private sharedDebugTexture?: BABYLONGUI.AdvancedDynamicTexture;
     private player?: SimplePlayer;
     private testLevel?: TestLevel;
@@ -87,6 +90,11 @@ export class App {
         
         // Initialize fullscreen button (F key to toggle)
         this.fullscreenButton = new FullscreenButton(this.inputSystem.getState());
+
+        // Debug toggle button (under fullscreen)
+        this.debugToggleButton = new DebugToggleButton((enabled) => {
+            this.setDebugEnabled(enabled);
+        }, this.debugEnabled);
         
         // Initialize physics manager
         this.physicsManager = new PhysicsManager(this.scene);
@@ -242,6 +250,9 @@ export class App {
                     } else {
                         Logger.warn('Player entity not found for debug UI!');
                     }
+
+                    // Apply current debug visibility preference
+                    this.applyDebugVisibility();
                     
                     resolve();
                 }
@@ -424,6 +435,11 @@ export class App {
         if (this.playerDebugUI) {
             this.playerDebugUI.dispose();
         }
+
+        // Dispose debug toggle button
+        if (this.debugToggleButton) {
+            this.debugToggleButton.dispose();
+        }
         
         // Dispose shared debug texture
         if (this.sharedDebugTexture) {
@@ -491,5 +507,29 @@ export class App {
      */
     public getPhysicsManager(): PhysicsManager {
         return this.physicsManager;
+    }
+
+    /**
+     * Enable/disable all debug visuals and overlays
+     */
+    private setDebugEnabled(enabled: boolean): void {
+        this.debugEnabled = enabled;
+        this.applyDebugVisibility();
+    }
+
+    /**
+     * Apply current debug visibility preference to visuals and UIs
+     */
+    private applyDebugVisibility(): void {
+        // 3D debug visuals (axes, rays)
+        SimplePlayer.setDebugVisualsEnabled(this.debugEnabled);
+
+        // GUI overlays
+        if (this.inputDebugUI) {
+            this.debugEnabled ? this.inputDebugUI.show?.() : this.inputDebugUI.hide?.();
+        }
+        if (this.playerDebugUI) {
+            this.debugEnabled ? this.playerDebugUI.show() : this.playerDebugUI.hide();
+        }
     }
 }

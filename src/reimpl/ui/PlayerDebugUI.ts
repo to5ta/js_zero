@@ -8,7 +8,6 @@ import { Logger } from '../core/Logger';
 export class PlayerDebugUI {
     private advancedTexture: BABYLONGUI.AdvancedDynamicTexture;
     private container: BABYLONGUI.Rectangle;
-    private slopeContainer?: BABYLONGUI.Rectangle;
     private positionText: BABYLONGUI.TextBlock;
     private velocityText: BABYLONGUI.TextBlock;
     private stateText: BABYLONGUI.TextBlock;
@@ -31,7 +30,7 @@ export class PlayerDebugUI {
         this.container.horizontalAlignment = BABYLONGUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
         this.container.verticalAlignment = BABYLONGUI.Control.VERTICAL_ALIGNMENT_TOP;
         this.container.top = 10;
-        this.container.left = -10;
+        this.container.left = -70;
         this.advancedTexture.addControl(this.container);
         
         // Create title
@@ -40,6 +39,7 @@ export class PlayerDebugUI {
         title.color = '#4CAF50';
         title.fontSize = 16;
         title.fontWeight = 'bold';
+        title.verticalAlignment = BABYLONGUI.Control.VERTICAL_ALIGNMENT_TOP;
         title.textHorizontalAlignment = BABYLONGUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
         title.textVerticalAlignment = BABYLONGUI.Control.VERTICAL_ALIGNMENT_TOP;
         title.top = 8;
@@ -53,6 +53,7 @@ export class PlayerDebugUI {
         this.positionText.text = 'Position: (0, 0, 0)';
         this.positionText.color = 'white';
         this.positionText.fontSize = 13;
+        this.positionText.verticalAlignment = BABYLONGUI.Control.VERTICAL_ALIGNMENT_TOP;
         this.positionText.textHorizontalAlignment = BABYLONGUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
         this.positionText.textVerticalAlignment = BABYLONGUI.Control.VERTICAL_ALIGNMENT_TOP;
         this.positionText.top = 28;
@@ -65,6 +66,7 @@ export class PlayerDebugUI {
         this.velocityText.text = 'Speed: 0.00';
         this.velocityText.color = 'white';
         this.velocityText.fontSize = 13;
+        this.velocityText.verticalAlignment = BABYLONGUI.Control.VERTICAL_ALIGNMENT_TOP;
         this.velocityText.textHorizontalAlignment = BABYLONGUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
         this.velocityText.textVerticalAlignment = BABYLONGUI.Control.VERTICAL_ALIGNMENT_TOP;
         this.velocityText.top = 50;
@@ -77,6 +79,7 @@ export class PlayerDebugUI {
         this.stateText.text = 'State: Idle';
         this.stateText.color = 'white';
         this.stateText.fontSize = 13;
+        this.stateText.verticalAlignment = BABYLONGUI.Control.VERTICAL_ALIGNMENT_TOP;
         this.stateText.textHorizontalAlignment = BABYLONGUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
         this.stateText.textVerticalAlignment = BABYLONGUI.Control.VERTICAL_ALIGNMENT_TOP;
         this.stateText.top = 72;
@@ -89,6 +92,7 @@ export class PlayerDebugUI {
         this.forceText.text = 'Force: (0, 0, 0)';
         this.forceText.color = '#FFD700';
         this.forceText.fontSize = 13;
+        this.forceText.verticalAlignment = BABYLONGUI.Control.VERTICAL_ALIGNMENT_TOP;
         this.forceText.textHorizontalAlignment = BABYLONGUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
         this.forceText.textVerticalAlignment = BABYLONGUI.Control.VERTICAL_ALIGNMENT_TOP;
         this.forceText.top = 94;
@@ -101,6 +105,7 @@ export class PlayerDebugUI {
         this.inputText.text = 'Input: None';
         this.inputText.color = '#90EE90';
         this.inputText.fontSize = 13;
+        this.inputText.verticalAlignment = BABYLONGUI.Control.VERTICAL_ALIGNMENT_TOP;
         this.inputText.textHorizontalAlignment = BABYLONGUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
         this.inputText.textVerticalAlignment = BABYLONGUI.Control.VERTICAL_ALIGNMENT_TOP;
         this.inputText.top = 116;
@@ -108,26 +113,19 @@ export class PlayerDebugUI {
         this.inputText.height = '20px';
         this.container.addControl(this.inputText);
         
-        // Create slope indicator with background (standalone, upper left)
-        this.slopeContainer = new BABYLONGUI.Rectangle();
-        this.slopeContainer.width = '250px';
-        this.slopeContainer.height = '50px';
-        this.slopeContainer.cornerRadius = 5;
-        this.slopeContainer.color = 'yellow'; // Bright color for debugging
-        this.slopeContainer.thickness = 2;
-        this.slopeContainer.background = 'rgba(0, 0, 0, 0.7)';
-        this.slopeContainer.horizontalAlignment = BABYLONGUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
-        this.slopeContainer.verticalAlignment = BABYLONGUI.Control.VERTICAL_ALIGNMENT_TOP;
-        this.slopeContainer.left = 80;
-        this.slopeContainer.top = 10;
-        this.advancedTexture.addControl(this.slopeContainer);
-        
+        // Slope info inside main container
         this.slopeText = new BABYLONGUI.TextBlock();
         this.slopeText.text = '⛰️ Slope: 0.0°';
-        this.slopeText.color = 'yellow'; // Bright color for debugging
+        this.slopeText.color = 'yellow';
         this.slopeText.fontSize = 14;
         this.slopeText.fontWeight = 'bold';
-        this.slopeContainer.addControl(this.slopeText);
+        this.slopeText.verticalAlignment = BABYLONGUI.Control.VERTICAL_ALIGNMENT_TOP;
+        this.slopeText.textHorizontalAlignment = BABYLONGUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+        this.slopeText.textVerticalAlignment = BABYLONGUI.Control.VERTICAL_ALIGNMENT_TOP;
+        this.slopeText.top = 138; // place below other rows inside container
+        this.slopeText.left = 10;
+        this.slopeText.height = '20px';
+        this.container.addControl(this.slopeText);
         
         Logger.debug('Player debug UI created - slope indicator added with container');
     }
@@ -160,22 +158,18 @@ export class PlayerDebugUI {
                 // Grounded - show yellow for walkable, red for too steep
                 if (slopeAngle <= maxSlope) {
                     this.slopeText.color = 'yellow';
-                    if (this.slopeContainer) this.slopeContainer.color = 'yellow';
                 } else {
                     this.slopeText.color = 'red';
-                    if (this.slopeContainer) this.slopeContainer.color = 'red';
                 }
                 this.slopeText.text = `⛰️ Slope: ${slopeAngle.toFixed(1)}° | Dist: ${groundDist.toFixed(3)}`;
             } else {
                 // Not grounded but hit detected - show in cyan/blue
                 this.slopeText.color = 'cyan';
-                if (this.slopeContainer) this.slopeContainer.color = 'cyan';
                 this.slopeText.text = `⛰️ Slope: ${slopeAngle.toFixed(1)}° | Dist: ${groundDist.toFixed(3)} (preview)`;
             }
         } else {
             // No hit detected
             this.slopeText.color = 'gray';
-            if (this.slopeContainer) this.slopeContainer.color = 'gray';
             this.slopeText.text = `⛰️ No Ground Detected`;
         }
         
@@ -196,7 +190,6 @@ export class PlayerDebugUI {
      */
     public show(): void {
         this.container.isVisible = true;
-        if (this.slopeContainer) this.slopeContainer.isVisible = true;
     }
     
     /**
@@ -204,7 +197,6 @@ export class PlayerDebugUI {
      */
     public hide(): void {
         this.container.isVisible = false;
-        if (this.slopeContainer) this.slopeContainer.isVisible = false;
     }
     
     /**
@@ -212,7 +204,6 @@ export class PlayerDebugUI {
      */
     public toggle(): void {
         this.container.isVisible = !this.container.isVisible;
-        if (this.slopeContainer) this.slopeContainer.isVisible = !this.slopeContainer.isVisible;
     }
     
     /**
@@ -222,8 +213,5 @@ export class PlayerDebugUI {
         Logger.debug('Disposing player debug UI');
         // Remove controls but don't dispose the shared texture
         this.advancedTexture.removeControl(this.container);
-        if (this.slopeContainer) {
-            this.advancedTexture.removeControl(this.slopeContainer);
-        }
     }
 }
