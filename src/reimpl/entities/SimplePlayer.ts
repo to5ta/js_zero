@@ -43,6 +43,7 @@ export class SimplePlayer extends Entity {
     private axisZ?: BABYLON.LinesMesh; // Blue - Left
     private slopeForwardLine?: BABYLON.LinesMesh; // Orange-red - Slope-adjusted forward
     private playerRotation: number = 0; // Current rotation angle
+    private visualizationYawOffset: number = Math.PI; // Model forward points opposite logical forward
     private groundRayLine?: BABYLON.LinesMesh; // Ground detection ray visualization
     
     constructor(scene: BABYLON.Scene, inputSystem: InputSystem) {
@@ -241,8 +242,11 @@ export class SimplePlayer extends Entity {
         // On slopes, the raycast distance is longer because contact point isn't directly below
         // Use a more generous tolerance to account for this
         const baseThreshold = this.capsuleHeight / 2;
-        const slopeTolerance = 0.1 + (this.slopeAngle / 90) * 0.2; // More tolerance on steeper slopes
-        const groundThreshold = baseThreshold + slopeTolerance;
+        // Account for increased vertical distance to the contact point on slopes (plane is angled)
+        const angleRad = this.slopeAngle * (Math.PI / 180);
+        const slopeFactor = 1 / Math.max(0.01, Math.cos(angleRad)); // Bigger factor on steeper slopes
+        const slopeTolerance = 0.05; // Small buffer to avoid flicker near the limit
+        const groundThreshold = baseThreshold * slopeFactor + slopeTolerance;
         
         this.isGrounded = (
             hit?.hit && 
@@ -261,10 +265,13 @@ export class SimplePlayer extends Entity {
             
             // Change color based on hit and slope
             if (this.isGrounded) {
-                // Yellow for flat/walkable, red for too steep
-                this.groundRayLine.color = this.slopeAngle <= this.maxWalkableSlope
-                    ? new BABYLON.Color3(1, 1, 0)  // Yellow when walkable
-                    : new BABYLON.Color3(1, 0, 0);  // Red when too steep
+                // Yellow when we consider grounded (walkable)
+                this.groundRayLine.color = new BABYLON.Color3(1, 1, 0);
+            } else if (hit?.hit) {
+                // Red for too-steep hits, otherwise orange for any detected surface
+                this.groundRayLine.color = this.slopeAngle > this.maxWalkableSlope
+                    ? new BABYLON.Color3(1, 0, 0)
+                    : new BABYLON.Color3(1, 0.5, 0); // Orange when hit but not grounded
             } else {
                 this.groundRayLine.color = new BABYLON.Color3(0.5, 0.5, 0.5); // Grey when no hit
             }
@@ -354,6 +361,11 @@ export class SimplePlayer extends Entity {
                     this.currentVelocity.y = -0.5; // Small constant downward velocity to stay grounded
                 }
             }
+
+            // If we've stopped moving, clear any leftover uphill velocity so we don't get dragged upward
+            if (movement.length() < 0.05 && this.currentVelocity.y > 0) {
+                this.currentVelocity.y = -0.5;
+            }
             
             // Anti-slide logic for slopes (only if not jumping)
             if (this.currentVelocity.y < 0.5 && this.slopeAngle > 0.1 && this.slopeAngle <= this.maxWalkableSlope) {
@@ -406,7 +418,7 @@ export class SimplePlayer extends Entity {
         if (this.visualization && this.visualization.isLoaded()) {
             const visualOffset = new BABYLON.Vector3(0, -this.capsuleHeight / 2, 0);
             this.visualization.setPosition(this._position.clone().add(visualOffset));
-            this.visualization.setOrientation(this.mesh.rotation.y);
+            this.visualization.setOrientation(this.mesh.rotation.y + this.visualizationYawOffset);
         }
         
         // Update debug line visibility
@@ -651,7 +663,7 @@ export class SimplePlayer extends Entity {
         const targetRotation = Math.atan2(moveDirection.x, moveDirection.z);
         
         // Smooth rotation interpolation
-        const rotationSpeed = 0.15;
+        const rotationSpeed = 0.35;
         this.playerRotation = this.playerRotation + (targetRotation - this.playerRotation) * rotationSpeed;
         
         // Apply rotation to the mesh (only Y axis rotation)
