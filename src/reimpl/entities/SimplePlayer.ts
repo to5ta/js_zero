@@ -13,6 +13,7 @@ export class SimplePlayer extends Entity {
     private inputSystem: InputSystem;
     private cameraController?: CameraController;
     private visualization?: PlayerVisualization;
+    private _position: BABYLON.Vector3 = BABYLON.Vector3.Zero(); // Explicit player position
     
     // Movement configuration
     private moveSpeed: number = 5.0; // Units per second
@@ -50,6 +51,21 @@ export class SimplePlayer extends Entity {
     }
     
     /**
+     * Override position getter - use explicit player position
+     */
+    public get position(): BABYLON.Vector3 {
+        return this._position;
+    }
+    
+    /**
+     * Override position setter - update logical position only
+     * Mesh position is synced in the update loop
+     */
+    public set position(value: BABYLON.Vector3) {
+        this._position = value.clone();
+    }
+    
+    /**
      * Initialize the player capsule mesh and material (NO PHYSICS)
      */
     public init(): void {
@@ -65,7 +81,8 @@ export class SimplePlayer extends Entity {
         );
         
         // Start at a reasonable height
-        this.position = new BABYLON.Vector3(0, 2.0, 0);
+        this._position = new BABYLON.Vector3(0, 2.0, 0);
+        // Mesh position will be synced in first update()
         
         // Add material with player color (semi-transparent for debug)
         const material = new BABYLON.StandardMaterial(`${this.name}_Material`, this.scene);
@@ -111,6 +128,8 @@ export class SimplePlayer extends Entity {
         );
         this.axisX.color = new BABYLON.Color3(1, 0, 0);
         this.axisX.alwaysSelectAsActiveMesh = true; // Prevent frustum culling
+        this.axisX.isPickable = false;
+        this.axisX.checkCollisions = false;
         
         // Y axis - Green (Up - always points up) - updatable
         this.axisY = BABYLON.MeshBuilder.CreateLines(
@@ -123,6 +142,8 @@ export class SimplePlayer extends Entity {
         );
         this.axisY.color = new BABYLON.Color3(0, 1, 0);
         this.axisY.alwaysSelectAsActiveMesh = true; // Prevent frustum culling
+        this.axisY.isPickable = false;
+        this.axisY.checkCollisions = false;
         
         // Z axis - Blue (Left/Sideways) - updatable
         this.axisZ = BABYLON.MeshBuilder.CreateLines(
@@ -135,6 +156,8 @@ export class SimplePlayer extends Entity {
         );
         this.axisZ.color = new BABYLON.Color3(0, 0, 1);
         this.axisZ.alwaysSelectAsActiveMesh = true; // Prevent frustum culling
+        this.axisZ.isPickable = false;
+        this.axisZ.checkCollisions = false;
         
         // Ground detection ray visualization
         const rayLength = (this.capsuleHeight / 2) + this.groundCheckDistance;
@@ -148,6 +171,8 @@ export class SimplePlayer extends Entity {
         );
         this.groundRayLine.color = new BABYLON.Color3(0.5, 0.5, 0.5); // Grey by default
         this.groundRayLine.alwaysSelectAsActiveMesh = true;
+        this.groundRayLine.isPickable = false;
+        this.groundRayLine.checkCollisions = false;
         
         // Slope-adjusted forward direction - updatable
         this.slopeForwardLine = BABYLON.MeshBuilder.CreateLines(
@@ -160,6 +185,8 @@ export class SimplePlayer extends Entity {
         );
         this.slopeForwardLine.color = new BABYLON.Color3(1, 0.4, 0.2); // Orange-red
         this.slopeForwardLine.alwaysSelectAsActiveMesh = true;
+        this.slopeForwardLine.isPickable = false;
+        this.slopeForwardLine.checkCollisions = false;
     }
     
     /**
@@ -181,14 +208,17 @@ export class SimplePlayer extends Entity {
         if (!this.mesh) return;
         
         // Cast ray from player position downwards
-        const rayOrigin = this.mesh.position.clone();
+        const rayOrigin = this._position.clone();
         const rayDirection = new BABYLON.Vector3(0, -1, 0);
         const rayLength = (this.capsuleHeight / 2) + this.groundCheckDistance;
         
         const ray = new BABYLON.Ray(rayOrigin, rayDirection, rayLength);
         const hit = this.scene.pickWithRay(ray, (mesh) => {
             // Don't collide with self
-            return mesh !== this.mesh;
+            if (mesh === this.mesh) return false;
+            // Also ignore the player's visualization meshes so ground checks never hit the character model
+            if (this.visualization && this.visualization.isOwnedMesh(mesh)) return false;
+            return true;
         });
         
         // Store ground distance for debugging
@@ -248,6 +278,9 @@ export class SimplePlayer extends Entity {
         if (!this.isActive || !this.mesh) {
             return;
         }
+        
+        // Sync mesh to logical position at start of frame
+        this.mesh.position = this._position.clone();
         
         const input = this.inputSystem.getState();
         const movement = input.getMovementInput();
@@ -362,10 +395,18 @@ export class SimplePlayer extends Entity {
         const velocity = this.currentVelocity.scale(deltaTimeSec);
         (this.mesh as BABYLON.Mesh).moveWithCollisions(velocity);
         
-        // Sync visualization with physics capsule (if loaded)
+        // Update logical position from mesh after collision resolution
+        this._position = this.mesh.position.clone();
+        
+        // Drive animations according to movement state
+        this.updateAnimationState(movement, input.isSprintPressed());
+
+        // Sync visualization with player position and orientation (if loaded)
+        // Apply vertical offset: model origin is at bottom-center, player position is at mid-center
         if (this.visualization && this.visualization.isLoaded()) {
-            this.visualization.setPosition(this.mesh.position);
-            this.visualization.setRotation(this.mesh.rotation);
+            const visualOffset = new BABYLON.Vector3(0, -this.capsuleHeight / 2, 0);
+            this.visualization.setPosition(this._position.clone().add(visualOffset));
+            this.visualization.setOrientation(this.mesh.rotation.y);
         }
         
         // Update debug line visibility
@@ -383,7 +424,7 @@ export class SimplePlayer extends Entity {
         if (!this.axisX || !this.axisY || !this.axisZ || !this.mesh) return;
         
         // Get player's current world position
-        const playerWorldPos = this.mesh.getAbsolutePosition();
+        const playerWorldPos = this._position;
         
         // Calculate scale based on velocity
         const speed = this.currentVelocity.length();
@@ -487,11 +528,12 @@ export class SimplePlayer extends Entity {
         
         try {
             await this.visualization.load(modelPath, animationConfigs);
-            // Sync initial position and rotation
+            // Sync initial position with vertical offset and rotation
+            const visualOffset = new BABYLON.Vector3(0, -this.capsuleHeight / 2, 0);
+            this.visualization.setPosition(this._position.clone().add(visualOffset));
+            this.visualization.setOrientation(this.playerRotation);
+            // Hide physics capsule when visualization is loaded
             if (this.mesh) {
-                this.visualization.setPosition(this.mesh.position);
-                this.visualization.setRotation(this.mesh.rotation);
-                // Hide physics capsule when visualization is loaded
                 (this.mesh as BABYLON.Mesh).isVisible = false;
             }
             Logger.info('✅ Player visualization attached and loaded');
@@ -614,6 +656,39 @@ export class SimplePlayer extends Entity {
         
         // Apply rotation to the mesh (only Y axis rotation)
         this.mesh.rotation.y = this.playerRotation;
+    }
+
+    /**
+     * Selects the appropriate animation group based on movement/physics state
+     */
+    private updateAnimationState(movement: BABYLON.Vector2, isSprinting: boolean): void {
+        if (!this.visualization || !this.visualization.isLoaded()) return;
+
+        if (!this.isGrounded) {
+            if (this.currentVelocity.y > 0.3) {
+                this.visualization.play('jump');
+            } else {
+                this.visualization.play('fall');
+            }
+            return;
+        }
+
+        const horizontalVelocity = new BABYLON.Vector3(this.currentVelocity.x, 0, this.currentVelocity.z);
+        const horizontalSpeed = horizontalVelocity.length();
+        const movementIntent = movement.length() > 0.1;
+        const isMoving = movementIntent || horizontalSpeed > 0.1;
+
+        if (isMoving) {
+            if (isSprinting) {
+                this.visualization.play('sprint');
+            } else if (horizontalSpeed > this.moveSpeed * 1.1) {
+                this.visualization.play('run');
+            } else {
+                this.visualization.play('walk');
+            }
+        } else {
+            this.visualization.play('idle');
+        }
     }
     
     /**

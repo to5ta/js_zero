@@ -282,12 +282,32 @@ export class App {
                     },
                     'run': {
                         loop: true,
-                        speed: 1.5,
+                        speed: 1.2,
                         from: 121,
                         to: 180,
+                    },
+                    'jump': {
+                        loop: false,
+                        speed: 1.0
+                    },
+                    'fall': {
+                        loop: true,
+                        speed: 1.2
+                    },
+                    'sprint': {
+                        loop: true,
+                        speed: 1.5
+                    },
+                    'dieOnFall': {
+                        loop: false,
+                        speed: 1.0
                     }
                 }
             );
+
+            const visualization = this.player.getVisualization();
+            visualization?.play('idle');
+
             Logger.info('🎨 Player model loaded successfully');
         } catch (error) {
             Logger.warn(`Could not load player model: ${error}`);

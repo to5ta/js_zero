@@ -8,8 +8,8 @@ import { Logger } from '../core/Logger';
 interface AnimationConfig {
     loop: boolean;
     speed: number;
-    from: number;
-    to: number;
+    from?: number;
+    to?: number;
     soundfile?: string;
 }
 
@@ -19,11 +19,12 @@ interface AnimationConfig {
  * Decoupled from physics - only handles visual representation
  */
 export class PlayerVisualization {
-    private mesh?: BABYLON.Mesh;
+    private mesh?: BABYLON.AbstractMesh;
     private scene: BABYLON.Scene;
     private animations: Map<string, BABYLON.AnimationGroup> = new Map();
     private animationConfigs: Map<string, AnimationConfig> = new Map();
     private sounds: Map<string, BABYLON.Sound> = new Map();
+    private ownedMeshIds: Set<number> = new Set();
     private meshLoaded: boolean = false;
     private soundsLoaded: boolean = false;
     private currentAnimation?: string;
@@ -82,18 +83,24 @@ export class PlayerVisualization {
             
             // Get the root mesh
             if (result.meshes.length > 0) {
-                this.mesh = result.meshes[0] as BABYLON.Mesh;
+                this.mesh = result.meshes[0];
                 this.mesh.rotation = BABYLON.Vector3.Zero();
                 
-                // Ensure all child meshes are visible
+                // Ensure all meshes are visible but never interfere with gameplay queries.
+                // Visualization must not affect ground checks or collision-based movement.
                 result.meshes.forEach((mesh, index) => {
                     mesh.isVisible = true;
+                    mesh.isPickable = false;
+                    mesh.checkCollisions = false;
+                    this.ownedMeshIds.add(mesh.uniqueId);
                     Logger.debug(`  Mesh ${index}: ${mesh.name} (visible: ${mesh.isVisible})`);
                 });
                 
-                // Extract animation groups
+                // Extract animation groups and stop any automatic playback
                 result.animationGroups.forEach((aniGroup) => {
                     this.animations.set(aniGroup.name, aniGroup);
+                    aniGroup.stop();
+                    aniGroup.reset();
                     Logger.debug(`  Animation: ${aniGroup.name}`);
                 });
                 
@@ -180,7 +187,7 @@ export class PlayerVisualization {
         const config = this.animationConfigs.get(animationName);
         
         if (config) {
-            // Start animation with config
+            // Start animation with config (frames optional)
             animation.start(
                 config.loop,
                 config.speed,
@@ -275,8 +282,16 @@ export class PlayerVisualization {
     /**
      * Get the root mesh
      */
-    public getMesh(): BABYLON.Mesh | undefined {
+    public getMesh(): BABYLON.AbstractMesh | undefined {
         return this.mesh;
+    }
+
+    /**
+     * Returns true if the given mesh belongs to this visualization.
+     * Useful to exclude the player model from raycasts/picking.
+     */
+    public isOwnedMesh(mesh: BABYLON.AbstractMesh): boolean {
+        return this.ownedMeshIds.has(mesh.uniqueId);
     }
     
     /**
@@ -318,6 +333,8 @@ export class PlayerVisualization {
             this.mesh.dispose();
             this.mesh = undefined;
         }
+
+        this.ownedMeshIds.clear();
         
         this.meshLoaded = false;
         this.soundsLoaded = false;
