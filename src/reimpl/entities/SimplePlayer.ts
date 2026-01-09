@@ -4,6 +4,7 @@ import { InputSystem } from '../systems/InputSystem';
 import { CameraController } from '../systems/CameraController';
 import { Logger } from '../core/Logger';
 import { PlayerVisualization } from '../components/PlayerVisualization';
+import { EventBus } from '../core/EventBus';
 
 /**
  * Simple player entity - capsule that moves with WASD/arrows
@@ -13,6 +14,7 @@ export class SimplePlayer extends Entity {
     private inputSystem: InputSystem;
     private cameraController?: CameraController;
     private visualization?: PlayerVisualization;
+    private eventBus: EventBus;
     private _position: BABYLON.Vector3 = BABYLON.Vector3.Zero(); // Explicit player position
     
     // Movement configuration
@@ -21,7 +23,7 @@ export class SimplePlayer extends Entity {
     private currentVelocity: BABYLON.Vector3 = BABYLON.Vector3.Zero();
     
     // Physics properties
-    private gravity: number = -19.62; // m/s^2 (2x normal gravity for snappier feel)
+    private gravity: number = -22.0; // Stronger gravity for snappier landings
     private jumpSpeed: number = 8; // Initial jump velocity (increased to compensate for stronger gravity)
     private isGrounded: boolean = false;
     private hasJumped: boolean = false; // Prevents re-jumping while space is held
@@ -33,9 +35,20 @@ export class SimplePlayer extends Entity {
     private maxWalkableSlope: number = 45; // Maximum slope angle in degrees that player can walk on
     private groundDistance: number = 0; // Distance to ground from raycast hit
     
+    // Health system
+    private health: number = 100;
+    private readonly MAX_HEALTH: number = 100;
+    private readonly FALL_DAMAGE_THRESHOLD: number = 12; // Safe landing speed (units/s) - ~3-4m fall
+    private readonly FALL_DAMAGE_FACTOR: number = 15; // Damage multiplier for excess speed
+    private isDead: boolean = false;
+    
+    // Fall damage detection
+    private previousVelocity: BABYLON.Vector3 = BABYLON.Vector3.Zero();
+    private previousGrounded: boolean = false;
+    
     // Debug properties
     private lastMoveDirection: BABYLON.Vector3 = BABYLON.Vector3.Zero();
-    private static debugVisualsEnabled: boolean = true; // Global debug toggle
+    private static debugVisualsEnabled: boolean = false; // Global debug toggle
     
     // Orientation axis visualization
     private axisX?: BABYLON.LinesMesh; // Red - Forward
@@ -46,9 +59,10 @@ export class SimplePlayer extends Entity {
     private visualizationYawOffset: number = Math.PI; // Model forward points opposite logical forward
     private groundRayLine?: BABYLON.LinesMesh; // Ground detection ray visualization
     
-    constructor(scene: BABYLON.Scene, inputSystem: InputSystem) {
+    constructor(scene: BABYLON.Scene, inputSystem: InputSystem, eventBus: EventBus) {
         super('Player', scene);
         this.inputSystem = inputSystem;
+        this.eventBus = eventBus;
     }
     
     /**
@@ -289,6 +303,11 @@ export class SimplePlayer extends Entity {
         // Sync mesh to logical position at start of frame
         this.mesh.position = this._position.clone();
         
+        // Disable input when dead
+        if (this.isDead) {
+            return;
+        }
+        
         const input = this.inputSystem.getState();
         const movement = input.getMovementInput();
         const deltaTimeSec = deltaTime / 1000; // Convert ms to seconds
@@ -296,12 +315,15 @@ export class SimplePlayer extends Entity {
         // Check if grounded
         this.checkGrounded();
         
+        let jumpedThisFrame = false;
+
         // Handle jump input - only allow one jump per key press
         if (input.isJumpPressed()) {
             if (this.isGrounded && !this.hasJumped) {
                 this.currentVelocity.y = this.jumpSpeed;
                 this.isGrounded = false; // Immediately mark as not grounded so gravity applies next frame
                 this.hasJumped = true; // Mark that we've jumped
+                jumpedThisFrame = true;
                 Logger.debug(`Jump initiated! velocity.y = ${this.currentVelocity.y}`);
             }
         } else {
@@ -348,9 +370,11 @@ export class SimplePlayer extends Entity {
         
         // Apply gravity when not grounded
         if (!this.isGrounded) {
-            this.currentVelocity.y += this.gravity * deltaTimeSec;
-            if (this.currentVelocity.y > 5) {
-                Logger.debug(`In air: velocity.y = ${this.currentVelocity.y.toFixed(2)}, gravity applied = ${(this.gravity * deltaTimeSec).toFixed(2)}`);
+            if (!jumpedThisFrame) {
+                this.currentVelocity.y += this.gravity * deltaTimeSec;
+                if (this.currentVelocity.y > 5) {
+                    Logger.debug(`In air: velocity.y = ${this.currentVelocity.y.toFixed(2)}, gravity applied = ${(this.gravity * deltaTimeSec).toFixed(2)}`);
+                }
             }
         } else {
             // When grounded, only apply downward force if not jumping
@@ -410,8 +434,17 @@ export class SimplePlayer extends Entity {
         // Update logical position from mesh after collision resolution
         this._position = this.mesh.position.clone();
         
-        // Drive animations according to movement state
-        this.updateAnimationState(movement, input.isSprintPressed());
+        // Check for landing and apply fall damage
+        this.checkFallDamage();
+        
+        // Store previous state for next frame
+        this.previousVelocity.copyFrom(this.currentVelocity);
+        this.previousGrounded = this.isGrounded;
+        
+        // Drive animations according to movement state (but not when dead)
+        if (!this.isDead) {
+            this.updateAnimationState(movement, input.isSprintPressed());
+        }
 
         // Sync visualization with player position and orientation (if loaded)
         // Apply vertical offset: model origin is at bottom-center, player position is at mid-center
@@ -515,8 +548,14 @@ export class SimplePlayer extends Entity {
      */
     public getCurrentVelocity(): BABYLON.Vector3 {
         return this.currentVelocity;
-    }
-    
+    }    
+    /**
+     * Reset velocity to zero
+     */
+    public resetVelocity(): void {
+        this.currentVelocity.set(0, 0, 0);
+        this.previousVelocity.set(0, 0, 0);
+    }    
     /**
      * Set the camera controller for camera-relative movement
      */
@@ -701,6 +740,93 @@ export class SimplePlayer extends Entity {
         } else {
             this.visualization.play('idle');
         }
+    }
+    
+    /**
+     * Check for landing and calculate fall damage
+     */
+    private checkFallDamage(): void {
+        if (this.isDead) return;
+        
+        // Detect landing: was airborne, now grounded
+        const justLanded = !this.previousGrounded && this.isGrounded;
+        
+        if (justLanded) {
+            // Get the fall velocity (absolute Y velocity from previous frame)
+            const fallSpeed = Math.abs(this.previousVelocity.y);
+            
+            // Calculate damage if fall speed exceeds threshold
+            if (fallSpeed > this.FALL_DAMAGE_THRESHOLD) {
+                const excessSpeed = fallSpeed - this.FALL_DAMAGE_THRESHOLD;
+                const damage = Math.floor(excessSpeed * this.FALL_DAMAGE_FACTOR);
+                
+                if (damage > 0) {
+                    this.takeDamage(damage);
+                    Logger.info(`💥 Fall damage: ${damage} HP (speed: ${fallSpeed.toFixed(1)} units/s)`);
+                }
+            }
+        }
+    }
+    
+    /**
+     * Apply damage to player
+     */
+    private takeDamage(amount: number): void {
+        if (this.isDead) return;
+        
+        this.health = Math.max(0, this.health - amount);
+        this.eventBus.emit('player:health-changed', { 
+            health: this.health, 
+            maxHealth: this.MAX_HEALTH 
+        });
+        
+        if (this.health <= 0) {
+            this.die();
+        }
+    }
+    
+    /**
+     * Handle player death
+     */
+    private die(): void {
+        if (this.isDead) return;
+        
+        this.isDead = true;
+        
+        // Play death animation if visualization is loaded
+        if (this.visualization && this.visualization.isLoaded()) {
+            this.visualization.play('dieOnFall');
+        }
+        
+        Logger.warn('💀 Player died');
+        this.eventBus.emit('player:died', {});
+    }
+    
+    /**
+     * Reset player to full health and initial state
+     */
+    public resetHealth(): void {
+        this.health = this.MAX_HEALTH;
+        this.isDead = false;
+        this.eventBus.emit('player:health-changed', { 
+            health: this.health, 
+            maxHealth: this.MAX_HEALTH 
+        });
+        Logger.info('❤️ Player health restored');
+    }
+    
+    /**
+     * Get current health value
+     */
+    public getHealth(): number {
+        return this.health;
+    }
+    
+    /**
+     * Check if player is dead
+     */
+    public getIsDead(): boolean {
+        return this.isDead;
     }
     
     /**

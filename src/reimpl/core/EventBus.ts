@@ -8,6 +8,8 @@ export type EventMap = {
     'loading:started': { total: number };
     'loading:progress': { loaded: number; total: number };
     'loading:complete': {};
+    'player:health-changed': { health: number; maxHealth: number };
+    'player:died': {};
 };
 
 type EventCallback<T> = (data: T) => void;

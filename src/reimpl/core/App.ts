@@ -6,6 +6,7 @@ import { Logger } from './Logger';
 import { LoadingScreen } from '../ui/LoadingScreen';
 import { InputDebugUI } from '../ui/InputDebugUI';
 import { PlayerDebugUI } from '../ui/PlayerDebugUI';
+import { HealthDisplay } from '../ui/HealthDisplay';
 import { FullscreenButton } from '../ui/FullscreenButton';
 import { DebugToggleButton } from '../ui/DebugToggleButton';
 import { InputSystem } from '../systems/InputSystem';
@@ -34,9 +35,10 @@ export class App {
     private physicsManager: PhysicsManager;
     private inputDebugUI?: InputDebugUI;
     private playerDebugUI?: PlayerDebugUI;
+    private healthDisplay?: HealthDisplay;
     private fullscreenButton?: FullscreenButton;
     private debugToggleButton?: DebugToggleButton;
-    private debugEnabled: boolean = true;
+    private debugEnabled: boolean = false;
     private sharedDebugTexture?: BABYLONGUI.AdvancedDynamicTexture;
     private player?: SimplePlayer;
     private testLevel?: TestLevel;
@@ -146,6 +148,11 @@ export class App {
             this.isRunning = false; // Pause rendering
             this.inputSystem.getState().clear(); // Clear input state
         });
+        
+        // Player death event
+        this.eventBus.on('player:died', () => {
+            this.handlePlayerDeath();
+        });
     }
     
     /**
@@ -250,6 +257,10 @@ export class App {
                     } else {
                         Logger.warn('Player entity not found for debug UI!');
                     }
+                    
+                    // Create health display with shared texture
+                    this.healthDisplay = new HealthDisplay(this.eventBus, this.sharedDebugTexture);
+                    Logger.info('Health display created');
 
                     // Apply current debug visibility preference
                     this.applyDebugVisibility();
@@ -264,7 +275,7 @@ export class App {
      * Create player entity
      */
     private async createPlayer(): Promise<void> {
-        this.player = new SimplePlayer(this.scene, this.inputSystem);
+        this.player = new SimplePlayer(this.scene, this.inputSystem, this.eventBus);
         this.player.init();
         this.entityManager.add(this.player);
         
@@ -311,7 +322,9 @@ export class App {
                     },
                     'dieOnFall': {
                         loop: false,
-                        speed: 1.0
+                        speed: 1.0,
+                        from: 0,
+                        to: 100
                     }
                 }
             );
@@ -435,6 +448,11 @@ export class App {
         if (this.playerDebugUI) {
             this.playerDebugUI.dispose();
         }
+        
+        // Dispose health display
+        if (this.healthDisplay) {
+            this.healthDisplay.dispose();
+        }
 
         // Dispose debug toggle button
         if (this.debugToggleButton) {
@@ -531,5 +549,40 @@ export class App {
         if (this.playerDebugUI) {
             this.debugEnabled ? this.playerDebugUI.show() : this.playerDebugUI.hide();
         }
+    }
+    
+    /**
+     * Handle player death event
+     */
+    private handlePlayerDeath(): void {
+        Logger.warn('💀 Player died - respawning in 3 seconds...');
+        
+        // Wait 3 seconds before respawning
+        setTimeout(() => {
+            this.resetPlayer();
+        }, 3000);
+    }
+    
+    /**
+     * Reset player to initial state
+     */
+    private resetPlayer(): void {
+        if (!this.player) {
+            Logger.error('Cannot reset player - player entity not found');
+            return;
+        }
+        
+        Logger.info('🔄 Resetting player...');
+        
+        // Reset health
+        this.player.resetHealth();
+        
+        // Reset position to spawn point
+        this.player.position = new BABYLON.Vector3(0, 2.0, 0);
+        
+        // Clear velocity
+        this.player.resetVelocity();
+        
+        Logger.info('✅ Player reset complete');
     }
 }
