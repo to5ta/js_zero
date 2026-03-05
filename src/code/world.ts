@@ -14,6 +14,7 @@ import * as BABYLON from "@babylonjs/core";
 import "@babylonjs/loaders";
 
 import { Logging } from "./common/Logging";
+import { PhysicsConfig } from "./config/PhysicsConfig";
 
 
 interface Pausable {
@@ -41,7 +42,7 @@ class GameWorld implements Pausable {
         // Create the scene space
         this.scene = scene;
 
-        this.gravity = -9.81;
+        this.gravity = PhysicsConfig.gravity;
 
         this.player_start_position = new BABYLON.Vector3(0,1.2,0);
         this.camera_start_position = new BABYLON.Vector3(30,30,30);
@@ -121,7 +122,6 @@ class GameWorld implements Pausable {
                 if (music.default) {
                     this.music = this.music_tracks[music.name];
                     this.music.play();
-                    while(!this.music){}
                     Logging.info("playing music track: ", this.music );
                     Logging.info("available music tracks: ", Object.keys(this.music_tracks));
                 }

@@ -14,6 +14,10 @@ export default class GameUI {
     leftJoystick: BABYLON.VirtualJoystick;
     rightJoystick: BABYLON.VirtualJoystick;
     
+    private boundOnEvent: (gameEvent: GameEvent) => void;
+    private boundOnDebugValueShow: (gameEvent: GameEvent) => void;
+    private boundOnDebugValueRemove: (gameEvent: GameEvent) => void;
+    
     constructor(engine: BABYLON.Engine, canvas: HTMLCanvasElement, player: Player, isMobile: boolean) {
         var fullScreenUI = BABYLONGUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
         var fullScreenDebugUI = BABYLONGUI.AdvancedDynamicTexture.CreateFullscreenUI("DebugUI");
@@ -72,9 +76,13 @@ export default class GameUI {
             this.leftJoystick.limitToContainer = true;
         }
         
-        GameEventHandler.addGameEventsListener([GameEventType.PlayerHealthChanged, GameEventType.PlayerDied], this.onEvent.bind(this));
-        GameEventHandler.addGameEventListener(GameEventType.DebuggingShowValue, this.onDebugValueShow.bind(this));
-        GameEventHandler.addGameEventListener(GameEventType.DebuggingRemoveValue, this.onDebugValueRemove.bind(this));
+        this.boundOnEvent = this.onEvent.bind(this);
+        this.boundOnDebugValueShow = this.onDebugValueShow.bind(this);
+        this.boundOnDebugValueRemove = this.onDebugValueRemove.bind(this);
+        
+        GameEventHandler.addGameEventsListener([GameEventType.PlayerHealthChanged, GameEventType.PlayerDied], this.boundOnEvent);
+        GameEventHandler.addGameEventListener(GameEventType.DebuggingShowValue, this.boundOnDebugValueShow);
+        GameEventHandler.addGameEventListener(GameEventType.DebuggingRemoveValue, this.boundOnDebugValueRemove);
     }
     
     handleMobileInput(player: Player) {
@@ -130,6 +138,21 @@ export default class GameUI {
         this.debug_values_textblock.text = text;
     }
 
+    dispose() {
+        // Cleanup event listeners
+        GameEventHandler.removeGameEventListener(GameEventType.PlayerHealthChanged, this.boundOnEvent);
+        GameEventHandler.removeGameEventListener(GameEventType.PlayerDied, this.boundOnEvent);
+        GameEventHandler.removeGameEventListener(GameEventType.DebuggingShowValue, this.boundOnDebugValueShow);
+        GameEventHandler.removeGameEventListener(GameEventType.DebuggingRemoveValue, this.boundOnDebugValueRemove);
+        
+        // Dispose joysticks
+        if (this.leftJoystick) {
+            this.leftJoystick.releaseCanvas();
+        }
+        if (this.rightJoystick) {
+            this.rightJoystick.releaseCanvas();
+        }
+    }
 }
 
 

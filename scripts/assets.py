@@ -27,7 +27,8 @@ BASE_URL = "staib.dev"
 
 def find_paths(file):
     paths = []
-    with open(file, 'r') as f:
+    # Read as UTF-8; ignore undecodable bytes to avoid crashes on mixed encodings
+    with open(file, 'r', encoding='utf-8', errors='ignore') as f:
         for line in f:
             matches = re.findall(r'["\'](.*?\.\w{2,4})["\']', line)
             for match in matches:

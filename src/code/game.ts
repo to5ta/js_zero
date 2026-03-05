@@ -16,7 +16,7 @@ import { SphereSensor } from "./Sensors";
 
 import { Logging } from "./common/Logging";
 import { Environment } from "./environment";
-import { motionBlurPixelShader } from "@babylonjs/core/Shaders/motionBlur.fragment";
+import { PlayerConfig } from "./config/PlayerConfig";
 
 class Game implements Pausable  {
     engine: BABYLON.Engine;
@@ -218,7 +218,7 @@ class Game implements Pausable  {
     start() {
         this.app.onStarted();
         Logging.info("Game started!");
-        this.player.mHealth.setHealthPoints(100);
+        this.player.mHealth.setHealthPoints(PlayerConfig.health.total);
         this.resume();
     }
 
