@@ -4,3 +4,6 @@ dist/*
 .vscode/*
 src/assets/
 !src/assets/assets.json
+
+.env/
+.venv/

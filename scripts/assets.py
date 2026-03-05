@@ -116,8 +116,20 @@ def upload_assets(dry_run=False):
     path_to_url = {path: hash_to_upload_url(hash) for path, hash in hashed_assets.items()}
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    private_key = paramiko.RSAKey.from_private_key_file(SFTP_SSH_KEY_PATH)
-    client.connect(hostname=BASE_URL, port=22, username=SFTP_USERNAME, pkey=private_key)
+    private_key = None
+    for key_class in [paramiko.RSAKey, paramiko.Ed25519Key, paramiko.ECDSAKey]:
+        try:
+            private_key = key_class.from_private_key_file(SFTP_SSH_KEY_PATH)
+            logger.info(f'Loaded SSH key as {key_class.__name__}')
+            break
+        except Exception:
+            pass
+    if private_key is None:
+        logger.error(f'Failed to load SSH key from {SFTP_SSH_KEY_PATH}')
+        return
+
+    client.connect(hostname=BASE_URL, port=22, username=SFTP_USERNAME, pkey=private_key,
+                   allow_agent=False, look_for_keys=False)
     sftp_session = client.open_sftp()
     logger.info(os.getcwd())
 
@@ -184,6 +196,7 @@ def main():
     if args.upload:
         if not BASE_URL or not SFTP_SSH_KEY_PATH or not SFTP_USERNAME:
             logger.error('Base URL, SFTP username or SSH key not set. Cannot upload assets.')
+            return
         upload_assets(dry_run=False)
 
     if args.download:
