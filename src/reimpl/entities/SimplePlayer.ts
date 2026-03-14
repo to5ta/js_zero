@@ -364,6 +364,9 @@ export class SimplePlayer extends Entity {
             
             // Update player rotation based on movement direction
             this.updatePlayerOrientation(moveDirection);
+        } else if (this.cameraController && input.getLookInput().length() > 0.05) {
+            const facingDirection = this.cameraController.getForwardDirection().scale(-1);
+            this.updatePlayerOrientation(facingDirection);
         } else {
             this.lastMoveDirection = BABYLON.Vector3.Zero();
         }

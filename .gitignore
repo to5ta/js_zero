@@ -1,6 +1,7 @@
 node_modules*
 _*
 dist/*
+dist-reimpl/*
 .vscode/*
 src/assets/
 !src/assets/assets.json

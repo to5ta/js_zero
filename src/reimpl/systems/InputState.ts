@@ -1,4 +1,5 @@
 import * as BABYLON from '@babylonjs/core';
+import { Environment } from '../core/Environment';
 
 /**
  * Tracks current input state (keyboard, mouse, touch)
@@ -6,6 +7,10 @@ import * as BABYLON from '@babylonjs/core';
 export class InputState {
     // Keyboard state
     private keysDown = new Set<string>();
+    private virtualMovementInput: BABYLON.Vector2 = BABYLON.Vector2.Zero();
+    private virtualLookInput: BABYLON.Vector2 = BABYLON.Vector2.Zero();
+    private virtualJumpPressed: boolean = false;
+    private virtualActionPressed: boolean = false;
     
     // Mouse state
     private mousePosition: BABYLON.Vector2 = BABYLON.Vector2.Zero();
@@ -20,7 +25,9 @@ export class InputState {
     
     constructor(private canvas: HTMLCanvasElement) {
         this.setupEventListeners();
-        this.setupPointerLock();
+        if (!Environment.isMobile) {
+            this.setupPointerLock();
+        }
     }
     
     /**
@@ -147,8 +154,11 @@ export class InputState {
         if (this.isAnyKeyDown('s', 'arrowdown')) input.y -= 1;
         
         // Left/Right
-        if (this.isAnyKeyDown('d', 'arrowright')) input.x -= 1;  // D/Right = positive
-        if (this.isAnyKeyDown('a', 'arrowleft')) input.x += 1;   // A/Left = negative
+        if (this.isAnyKeyDown('d', 'arrowright')) input.x -= 1;
+        if (this.isAnyKeyDown('a', 'arrowleft')) input.x += 1;
+
+        // Virtual joystick input follows the same convention as keyboard input
+        input.addInPlace(this.virtualMovementInput);
         
         // Normalize diagonal movement
         if (input.length() > 1) {
@@ -162,7 +172,14 @@ export class InputState {
      * Check if jump key is pressed (Space)
      */
     public isJumpPressed(): boolean {
-        return this.isKeyDown(' ') || this.isKeyDown('space');
+        return this.isKeyDown(' ') || this.isKeyDown('space') || this.virtualJumpPressed;
+    }
+
+    /**
+     * Check if action input is pressed (mobile action button for now)
+     */
+    public isActionPressed(): boolean {
+        return this.virtualActionPressed;
     }
     
     /**
@@ -170,6 +187,41 @@ export class InputState {
      */
     public isSprintPressed(): boolean {
         return this.isKeyDown('shift');
+    }
+
+    /**
+     * Get current virtual look stick input
+     */
+    public getLookInput(): BABYLON.Vector2 {
+        return this.virtualLookInput.clone();
+    }
+
+    /**
+     * Set movement input from virtual/mobile controls
+     */
+    public setVirtualMovementInput(input: BABYLON.Vector2): void {
+        this.virtualMovementInput.copyFrom(input);
+    }
+
+    /**
+     * Set look input from virtual/mobile controls
+     */
+    public setVirtualLookInput(input: BABYLON.Vector2): void {
+        this.virtualLookInput.copyFrom(input);
+    }
+
+    /**
+     * Set mobile jump button state
+     */
+    public setVirtualJumpPressed(pressed: boolean): void {
+        this.virtualJumpPressed = pressed;
+    }
+
+    /**
+     * Set mobile action button state
+     */
+    public setVirtualActionPressed(pressed: boolean): void {
+        this.virtualActionPressed = pressed;
     }
     
     /**
@@ -282,6 +334,10 @@ export class InputState {
         this.mouseButtons.clear();
         this.touches.clear();
         this.mouseDelta.set(0, 0);
+        this.virtualMovementInput.set(0, 0);
+        this.virtualLookInput.set(0, 0);
+        this.virtualJumpPressed = false;
+        this.virtualActionPressed = false;
     }
     
     /**

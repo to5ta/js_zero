@@ -9,6 +9,8 @@ import { PlayerDebugUI } from '../ui/PlayerDebugUI';
 import { HealthDisplay } from '../ui/HealthDisplay';
 import { FullscreenButton } from '../ui/FullscreenButton';
 import { DebugToggleButton } from '../ui/DebugToggleButton';
+import { MobileControlsOverlay } from '../ui/MobileControlsOverlay';
+import { MobileTestPanel } from '../ui/MobileTestPanel';
 import { InputSystem } from '../systems/InputSystem';
 import { CameraController } from '../systems/CameraController';
 import { PhysicsManager } from '../systems/PhysicsManager';
@@ -38,6 +40,8 @@ export class App {
     private healthDisplay?: HealthDisplay;
     private fullscreenButton?: FullscreenButton;
     private debugToggleButton?: DebugToggleButton;
+    private mobileControls?: MobileControlsOverlay;
+    private mobileTestPanel?: MobileTestPanel;
     private debugEnabled: boolean = false;
     private sharedDebugTexture?: BABYLONGUI.AdvancedDynamicTexture;
     private player?: SimplePlayer;
@@ -97,6 +101,14 @@ export class App {
         this.debugToggleButton = new DebugToggleButton((enabled) => {
             this.setDebugEnabled(enabled);
         }, this.debugEnabled);
+
+        if (Environment.isMobile) {
+            this.mobileControls = new MobileControlsOverlay(this.inputSystem.getState());
+        }
+
+        if (!Environment.isPhysicalMobile) {
+            this.mobileTestPanel = new MobileTestPanel();
+        }
         
         // Initialize physics manager
         this.physicsManager = new PhysicsManager(this.scene);
@@ -457,6 +469,16 @@ export class App {
         // Dispose debug toggle button
         if (this.debugToggleButton) {
             this.debugToggleButton.dispose();
+        }
+
+        // Dispose mobile controls
+        if (this.mobileControls) {
+            this.mobileControls.dispose();
+        }
+
+        // Dispose mobile test panel
+        if (this.mobileTestPanel) {
+            this.mobileTestPanel.dispose();
         }
         
         // Dispose shared debug texture

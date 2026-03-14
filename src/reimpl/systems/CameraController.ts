@@ -1,5 +1,6 @@
 import * as BABYLON from '@babylonjs/core';
 import { Entity } from '../entities/Entity';
+import { Environment } from '../core/Environment';
 import { Logger } from '../core/Logger';
 import { InputSystem } from './InputSystem';
 
@@ -41,11 +42,14 @@ export class CameraController {
     private angularSensibilityY: number = 1500;
     private upperBetaLimit: number = 1.5;  // ~97° (near horizon)
     private lowerBetaLimit: number = 0.1;  // slight restriction from looking straight up
+    private mobileLookSpeed: number = 2.6;
+    private isMobile: boolean;
     
     constructor(scene: BABYLON.Scene, canvas: HTMLCanvasElement, inputSystem: InputSystem, config?: CameraConfig) {
         this.scene = scene;
         this.canvas = canvas;
         this.inputSystem = inputSystem;
+        this.isMobile = Environment.isMobile;
         
         // Apply config
         if (config) {
@@ -68,7 +72,9 @@ export class CameraController {
         );
         
         // Configure camera
-        this.camera.attachControl(this.canvas, true);
+        if (!this.isMobile) {
+            this.camera.attachControl(this.canvas, true);
+        }
         this.camera.inputs.remove(this.camera.inputs.attached.keyboard);
         this.camera.inputs.remove(this.camera.inputs.attached.mousewheel);
         
@@ -117,8 +123,22 @@ export class CameraController {
      * Update camera each frame - ArcRotateCamera handles rotation automatically
      */
     public update(deltaTime: number): void {
-        // ArcRotateCamera handles following and rotation automatically
-        // No manual updates needed
+        if (!this.isMobile) {
+            return;
+        }
+
+        const lookInput = this.inputSystem.getState().getLookInput();
+        if (lookInput.lengthSquared() < 0.0001) {
+            return;
+        }
+
+        const deltaSeconds = deltaTime / 1000;
+        this.camera.alpha -= lookInput.x * this.mobileLookSpeed * deltaSeconds;
+        this.camera.beta = BABYLON.Scalar.Clamp(
+            this.camera.beta - lookInput.y * this.mobileLookSpeed * deltaSeconds,
+            this.lowerBetaLimit,
+            this.upperBetaLimit
+        );
     }
     
     /**
