@@ -4,6 +4,7 @@ const webpack = require('webpack');
 
 module.exports = (env, argv) => {
   const isDev = argv.mode === 'development';
+  const level = env?.level || 'level1';
 
   return {
     entry: './src/reimpl/main.ts',
@@ -63,6 +64,9 @@ module.exports = (env, argv) => {
     plugins: [
       new HtmlWebpackPlugin({
         title: "JS_Zero - Reimplementation",
+      }),
+      new webpack.DefinePlugin({
+        __REIMPL_LEVEL__: JSON.stringify(level),
       }),
       isDev && new webpack.HotModuleReplacementPlugin(),
     ].filter(Boolean),

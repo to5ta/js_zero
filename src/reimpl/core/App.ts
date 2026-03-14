@@ -16,10 +16,15 @@ import { CameraController } from '../systems/CameraController';
 import { PhysicsManager } from '../systems/PhysicsManager';
 import { EntityManager } from '../entities/EntityManager';
 import { SimplePlayer } from '../entities/SimplePlayer';
-import { TestLevel } from '../entities/TestLevel';
 import Stats from 'stats-js';
+import { getLevelDefinition, LevelId } from '../config/LevelCatalog';
+import { ReimplLevel } from '../levels/ReimplLevel';
 // @ts-ignore - webpack will handle this file
 import wache02Model from '../../assets/models/wache02.glb';
+
+interface AppOptions {
+    levelId: LevelId;
+}
 
 /**
  * Main application class - handles BabylonJS engine and lifecycle
@@ -45,10 +50,14 @@ export class App {
     private debugEnabled: boolean = false;
     private sharedDebugTexture?: BABYLONGUI.AdvancedDynamicTexture;
     private player?: SimplePlayer;
-    private testLevel?: TestLevel;
+    private activeLevel?: ReimplLevel;
+    private readonly levelDefinition;
+    private playerSpawnPoint: BABYLON.Vector3 = new BABYLON.Vector3(0, 2.0, 0);
     
-    constructor() {
+    constructor(options: AppOptions) {
         Logger.info('Initializing application...');
+        this.levelDefinition = getLevelDefinition(options.levelId);
+        Logger.info(`Selected level: ${this.levelDefinition.displayName} (${this.levelDefinition.id})`);
         
         // Initialize environment
         Environment.init();
@@ -76,8 +85,10 @@ export class App {
         );
         light.intensity = 0.7;
         
-        // Create ground with grid
-        this.createGround();
+        // Create optional default ground for sandbox/test levels
+        if (this.levelDefinition.useDefaultGround) {
+            this.createGround();
+        }
         
         Logger.debug('Scene setup complete with light and ground');
         
@@ -184,12 +195,10 @@ export class App {
         // Initialize physics engine
         await this.physicsManager.init();
         
-        // Initialize ground physics now that physics is ready
-        this.initGroundPhysics();
-        
-        // Create test level with obstacles
-        this.testLevel = new TestLevel(this.scene, this.physicsManager);
-        this.testLevel.create();
+        // Initialize optional ground physics now that physics is ready
+        if (this.levelDefinition.useDefaultGround) {
+            this.initGroundPhysics();
+        }
         
         // Simulate async loading
         await this.load();
@@ -237,50 +246,60 @@ export class App {
      * Simulate loading resources
      */
     private async load(): Promise<void> {
-        return new Promise((resolve) => {
-            Logger.info('Loading resources...');
-            this.eventBus.emit('loading:started', { total: 100 });
-            
-            let progress = 0;
-            const interval = setInterval(() => {
-                progress += 10;
-                this.eventBus.emit('loading:progress', { loaded: progress, total: 100 });
-                
-                if (progress >= 100) {
-                    clearInterval(interval);
-                    this.eventBus.emit('loading:complete', {});
-                    Logger.info('Loading complete');
-                    
-                    // Create player after loading
-                    this.createPlayer();
-                    
-                    // Create shared debug UI texture (foreground layer)
-                    this.sharedDebugTexture = BABYLONGUI.AdvancedDynamicTexture.CreateFullscreenUI('DebugUI', true);
-                    Logger.info('Shared debug texture created (foreground)');
-                    
-                    // Create input debug UI with shared texture
-                    this.inputDebugUI = new InputDebugUI(this.inputSystem, this.sharedDebugTexture);
-                    Logger.info('Input debug UI created, controls on texture: ' + this.sharedDebugTexture.rootContainer.children.length);
-                    
-                    // Create player debug UI with shared texture using stored player reference
-                    if (this.player) {
-                        this.playerDebugUI = new PlayerDebugUI(this.player, this.sharedDebugTexture);
-                        Logger.info('Player debug UI created, total controls on texture: ' + this.sharedDebugTexture.rootContainer.children.length);
-                    } else {
-                        Logger.warn('Player entity not found for debug UI!');
-                    }
-                    
-                    // Create health display with shared texture
-                    this.healthDisplay = new HealthDisplay(this.eventBus, this.sharedDebugTexture);
-                    Logger.info('Health display created');
+        Logger.info('Loading resources...');
+        const totalSteps = 3;
+        let completedSteps = 0;
 
-                    // Apply current debug visibility preference
-                    this.applyDebugVisibility();
-                    
-                    resolve();
-                }
-            }, 200);
-        });
+        this.eventBus.emit('loading:started', { total: totalSteps });
+
+        const markProgress = (): void => {
+            completedSteps += 1;
+            this.eventBus.emit('loading:progress', { loaded: completedSteps, total: totalSteps });
+        };
+
+        await this.loadLevel();
+        markProgress();
+
+        await this.createPlayer();
+        markProgress();
+
+        this.createOverlayUi();
+        markProgress();
+
+        this.eventBus.emit('loading:complete', {});
+        Logger.info('Loading complete');
+    }
+
+    private async loadLevel(): Promise<void> {
+        this.activeLevel = this.levelDefinition.createLevel(this.scene, this.physicsManager);
+        await this.activeLevel.init();
+        this.playerSpawnPoint = this.activeLevel.spawnPosition.clone();
+        Logger.info(`🌍 Active level ready: ${this.activeLevel.displayName}`);
+    }
+
+    private createOverlayUi(): void {
+        // Create shared debug UI texture (foreground layer)
+        this.sharedDebugTexture = BABYLONGUI.AdvancedDynamicTexture.CreateFullscreenUI('DebugUI', true);
+        Logger.info('Shared debug texture created (foreground)');
+        
+        // Create input debug UI with shared texture
+        this.inputDebugUI = new InputDebugUI(this.inputSystem, this.sharedDebugTexture);
+        Logger.info('Input debug UI created, controls on texture: ' + this.sharedDebugTexture.rootContainer.children.length);
+        
+        // Create player debug UI with shared texture using stored player reference
+        if (this.player) {
+            this.playerDebugUI = new PlayerDebugUI(this.player, this.sharedDebugTexture);
+            Logger.info('Player debug UI created, total controls on texture: ' + this.sharedDebugTexture.rootContainer.children.length);
+        } else {
+            Logger.warn('Player entity not found for debug UI!');
+        }
+        
+        // Create health display with shared texture
+        this.healthDisplay = new HealthDisplay(this.eventBus, this.sharedDebugTexture);
+        Logger.info('Health display created');
+
+        // Apply current debug visibility preference
+        this.applyDebugVisibility();
     }
     
     /**
@@ -289,6 +308,7 @@ export class App {
     private async createPlayer(): Promise<void> {
         this.player = new SimplePlayer(this.scene, this.inputSystem, this.eventBus);
         this.player.init();
+        this.player.position = this.playerSpawnPoint.clone();
         this.entityManager.add(this.player);
         
         // Set camera controller for camera-relative movement
@@ -356,6 +376,7 @@ export class App {
             if (this.playerDebugUI) this.playerDebugUI.toggle();
             if (this.inputDebugUI) this.inputDebugUI.toggle();
         };
+        (window as any).activeLevel = this.activeLevel;
         
         Logger.info('Player added to entity manager');
         Logger.info('💡 Console commands:');
@@ -443,9 +464,9 @@ export class App {
         // Dispose all entities
         this.entityManager.dispose();
         
-        // Dispose test level
-        if (this.testLevel) {
-            this.testLevel.dispose();
+        // Dispose active level
+        if (this.activeLevel) {
+            this.activeLevel.dispose();
         }
         
         // Dispose camera controller
@@ -600,7 +621,7 @@ export class App {
         this.player.resetHealth();
         
         // Reset position to spawn point
-        this.player.position = new BABYLON.Vector3(0, 2.0, 0);
+        this.player.position = this.playerSpawnPoint.clone();
         
         // Clear velocity
         this.player.resetVelocity();

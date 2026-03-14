@@ -1,0 +1,1 @@
+declare const __REIMPL_LEVEL__: 'level1' | 'test-obstacles';

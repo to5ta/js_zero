@@ -5,10 +5,14 @@
   "main": "index.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "webpack-dev-server --mode development",
-    "build": "webpack --mode production",
-    "dev:reimpl": "webpack-dev-server --mode development --config webpack.reimpl.config.js",
-    "build:reimpl": "webpack --mode production --config webpack.reimpl.config.js",
+    "dev": "webpack-dev-server --mode development --config webpack.reimpl.config.js --env level=level1",
+    "build": "webpack --mode production --config webpack.reimpl.config.js --env level=level1",
+    "dev:legacy": "webpack-dev-server --mode development",
+    "build:legacy": "webpack --mode production",
+    "dev:reimpl": "webpack-dev-server --mode development --config webpack.reimpl.config.js --env level=level1",
+    "build:reimpl": "webpack --mode production --config webpack.reimpl.config.js --env level=level1",
+    "dev:test_obstacles": "webpack-dev-server --mode development --config webpack.reimpl.config.js --env level=test-obstacles",
+    "build:test_obstacles": "webpack --mode production --config webpack.reimpl.config.js --env level=test-obstacles",
     "download-and-build": "python3 scripts/assets.py --download && webpack --mode production",
     "build-online": "webpack --config webpack.config.js"
   },

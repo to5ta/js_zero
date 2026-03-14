@@ -1,12 +1,16 @@
 import * as BABYLON from '@babylonjs/core';
 import { PhysicsManager } from '../systems/PhysicsManager';
 import { Logger } from '../core/Logger';
+import { ReimplLevel } from '../levels/ReimplLevel';
 
 /**
  * TestLevel - Creates test geometry for physics testing
  * Includes cubes, ramps, and various obstacles
  */
-export class TestLevel {
+export class TestLevel implements ReimplLevel {
+    public readonly id: string = 'test-obstacles';
+    public readonly displayName: string = 'Obstacle Test Level';
+    public readonly spawnPosition: BABYLON.Vector3 = new BABYLON.Vector3(0, 2.0, 0);
     private scene: BABYLON.Scene;
     private physicsManager: PhysicsManager;
     private meshes: BABYLON.Mesh[] = [];
@@ -32,6 +36,10 @@ export class TestLevel {
         this.createStepPlatform();
         
         Logger.info(`✅ Test level created with ${this.meshes.length} objects`);
+    }
+
+    public async init(): Promise<void> {
+        this.create();
     }
     
     /**

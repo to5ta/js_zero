@@ -16,6 +16,7 @@ const DEVICE_PRESETS: DevicePreset[] = [
 
 export class MobileTestPanel {
     private container?: HTMLDivElement;
+    private toggleButton?: HTMLButtonElement;
     private statusLabel?: HTMLDivElement;
     private presetSelect?: HTMLSelectElement;
     private orientationButton?: HTMLButtonElement;
@@ -23,6 +24,7 @@ export class MobileTestPanel {
     private desktopButton?: HTMLButtonElement;
     private activePreset: DevicePreset;
     private portrait: boolean = true;
+    private isVisible: boolean = true;
 
     constructor() {
         const current = Environment.simulatedViewport;
@@ -40,9 +42,23 @@ export class MobileTestPanel {
     }
 
     private createUI(): void {
+        this.toggleButton = this.createButton('🧪 Mobile Test');
+        this.toggleButton.style.position = 'fixed';
+        this.toggleButton.style.bottom = '12px';
+        this.toggleButton.style.left = '12px';
+        this.toggleButton.style.zIndex = '10002';
+        this.toggleButton.style.padding = '10px 14px';
+        this.toggleButton.style.background = 'rgba(12, 16, 24, 0.92)';
+        this.toggleButton.style.boxShadow = '0 12px 32px rgba(0, 0, 0, 0.28)';
+        this.toggleButton.addEventListener('click', () => {
+            this.isVisible = !this.isVisible;
+            this.applyVisibility();
+        });
+        document.body.appendChild(this.toggleButton);
+
         this.container = document.createElement('div');
         this.container.style.position = 'fixed';
-        this.container.style.top = '12px';
+        this.container.style.bottom = '64px';
         this.container.style.left = '12px';
         this.container.style.zIndex = '10001';
         this.container.style.width = '260px';
@@ -136,6 +152,7 @@ export class MobileTestPanel {
         this.container.appendChild(hint);
 
         document.body.appendChild(this.container);
+        this.applyVisibility();
     }
 
     private createButton(label: string): HTMLButtonElement {
@@ -149,6 +166,16 @@ export class MobileTestPanel {
         button.style.color = '#ffffff';
         button.style.cursor = 'pointer';
         return button;
+    }
+
+    private applyVisibility(): void {
+        if (this.container) {
+            this.container.style.display = this.isVisible ? 'block' : 'none';
+        }
+
+        if (this.toggleButton) {
+            this.toggleButton.textContent = this.isVisible ? '🧪 Hide Mobile Test' : '🧪 Mobile Test';
+        }
     }
 
     private getSelectedViewport(): { width: number; height: number; label: string } {
@@ -200,6 +227,7 @@ export class MobileTestPanel {
     }
 
     public dispose(): void {
+        this.toggleButton?.remove();
         this.container?.remove();
         Logger.info('🧪 Mobile test panel disposed');
     }

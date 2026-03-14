@@ -1,4 +1,5 @@
 import { App } from './core/App';
+import { getRuntimeLevelId } from './config/LevelCatalog';
 import { Logger, LogLevel } from './core/Logger';
 import './styles.css';
 
@@ -17,7 +18,7 @@ Logger.info('=== JS_Zero Reimplementation ===');
 Logger.info('Starting application...');
 
 // Create and start the application
-const app = new App();
+const app = new App({ levelId: getRuntimeLevelId() });
 
 // Subscribe to focus events for debugging
 const eventBus = app.getEventBus();
