@@ -42,16 +42,13 @@ jobs:
         chmod 644 ~/.ssh/known_hosts
 
     - name: Replace placeholders in PHP files
+      env:
+        DB_SERVER: ${{ secrets.DB_SERVER }}
+        DB_USER: ${{ secrets.DB_USER }}
+        DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        DB_NAME: ${{ secrets.DB_NAME }}
       run: |
-        sed -i "s|<db-server>|${{ secrets.DB_SERVER }}|g" dist/session_start.php
-        sed -i "s|<db-user>|${{ secrets.DB_USER }}|g" dist/session_start.php
-        sed -i "s|<db-pass>|${{ secrets.DB_PASSWORD }}|g" dist/session_start.php
-        sed -i "s|<db-name>|${{ secrets.DB_NAME }}|g" dist/session_start.php
-
-        sed -i "s|<db-server>|${{ secrets.DB_SERVER }}|g" dist/session_end.php
-        sed -i "s|<db-user>|${{ secrets.DB_USER }}|g" dist/session_end.php
-        sed -i "s|<db-pass>|${{ secrets.DB_PASSWORD }}|g" dist/session_end.php
-        sed -i "s|<db-name>|${{ secrets.DB_NAME }}|g" dist/session_end.php
+        python scripts/fill_db_credentials.py dist/session_start.php dist/session_end.php
 
     - name: Deploy via SFTP 🚀
       if: github.ref == 'refs/heads/main'
