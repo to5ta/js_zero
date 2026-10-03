@@ -17,11 +17,18 @@ import { Sfx } from '../audio/Sfx';
 
 /** Plateau footprint, measured from the level mesh. */
 const FLOOR_Y = 1.9;
-const WALL_HEIGHT = 3.2;
+/** Tall enough to leave a real lintel above the gate for the runes and the timer. */
+const WALL_HEIGHT = 4.4;
 const WALL_THICKNESS = 0.6;
 
-/** How long the gate takes to seat after a plate is released. */
-export const GATE_GRACE_SECONDS = 4.0;
+/**
+ * How long the gate takes to seat after a plate is released.
+ *
+ * Six rather than four because there is no sprint on mobile: the run from the
+ * far plate is about 17 units, which a walking player covers in under three
+ * seconds. The puzzle should be a puzzle, not a reaction test.
+ */
+export const GATE_GRACE_SECONDS = 6.0;
 const GATE_TRAVEL_SECONDS = 1.1;
 const GATE_HEIGHT = 3.0;
 
@@ -57,7 +64,14 @@ export class PuzzleChamber {
     private solved = false;
     private held?: Carryable;
 
+    private timerBar?: BABYLON.Mesh;
+    private timerBarWidth = 2.9;
+    private timerBarBaseX = 6.0;
+
     private stoneMat!: BABYLON.StandardMaterial;
+    private gateMat!: BABYLON.StandardMaterial;
+    private bandMat!: BABYLON.StandardMaterial;
+    private timerMat!: BABYLON.StandardMaterial;
     private plateMat!: BABYLON.StandardMaterial;
     private plateLitMat!: BABYLON.StandardMaterial;
     private blockMat!: BABYLON.StandardMaterial;
@@ -73,6 +87,7 @@ export class PuzzleChamber {
         this.createMaterials();
         this.createWalls();
         this.createGate();
+        this.createTimerBar();
         this.createPlates();
         this.createBlocks();
         Logger.info('Puzzle chamber built');
@@ -92,6 +107,12 @@ export class PuzzleChamber {
         };
 
         this.stoneMat = mat('chamberStone', new BABYLON.Color3(0.60, 0.57, 0.51), new BABYLON.Color3(0.20, 0.19, 0.17));
+        // The gate needs its own, markedly darker stone. Sharing the wall material
+        // made it read as a continuous wall, so a player could stand in the room
+        // without registering there was a door in it at all.
+        this.gateMat = mat('chamberGate', new BABYLON.Color3(0.26, 0.24, 0.22), new BABYLON.Color3(0.07, 0.065, 0.06));
+        this.bandMat = mat('chamberBand', new BABYLON.Color3(0.17, 0.16, 0.15), new BABYLON.Color3(0.05, 0.05, 0.05));
+        this.timerMat = mat('chamberTimer', new BABYLON.Color3(0.80, 0.63, 0.30), new BABYLON.Color3(0.85, 0.60, 0.18));
         this.plateMat = mat('chamberPlate', new BABYLON.Color3(0.42, 0.39, 0.35), new BABYLON.Color3(0.11, 0.10, 0.09));
         this.plateLitMat = mat('chamberPlateLit', new BABYLON.Color3(0.56, 0.44, 0.24), new BABYLON.Color3(0.50, 0.33, 0.10));
         this.blockMat = mat('chamberBlock', new BABYLON.Color3(0.66, 0.56, 0.40), new BABYLON.Color3(0.20, 0.16, 0.11));
@@ -143,12 +164,55 @@ export class PuzzleChamber {
             { width: 2.9, height: GATE_HEIGHT, depth: WALL_THICKNESS * 0.8 },
             this.scene
         );
-        gate.material = this.stoneMat;
+        gate.material = this.gateMat;
         gate.checkCollisions = true;
         gate.position.set(6.0, FLOOR_Y + GATE_HEIGHT / 2, -70.5);
         this.gateClosedY = gate.position.y;
         this.gate = gate;
         this.meshes.push(gate);
+
+        // Iron bands across the slab. They are what makes it read as a door from
+        // across the room rather than as a slightly different patch of wall.
+        [-0.85, 0.0, 0.85].forEach((offsetY, index) => {
+            const band = BABYLON.MeshBuilder.CreateBox(
+                `chamberGateBand${index}`,
+                { width: 3.0, height: 0.16, depth: WALL_THICKNESS * 0.95 },
+                this.scene
+            );
+            band.material = this.bandMat;
+            band.checkCollisions = false;
+            band.position.set(0, offsetY, 0);
+            band.parent = gate;
+            this.meshes.push(band);
+        });
+
+        // Jambs framing the opening, so the doorway has an edge even while the
+        // slab is raised out of sight.
+        [4.35, 7.65].forEach((x, index) => {
+            this.box(`chamberJamb${index}`, 0.3, GATE_HEIGHT, WALL_THICKNESS * 1.1, x, -70.5, this.bandMat);
+        });
+    }
+
+    /**
+     * A brass bar over the gate that drains while the grace window runs.
+     *
+     * Without it the four seconds after stepping off a plate are invisible, and
+     * the natural reading of the gate closing is "I need a third block" — a
+     * search for something that does not exist. Showing the countdown turns that
+     * into "I need to run", which is the actual puzzle.
+     */
+    private createTimerBar(): void {
+        const bar = BABYLON.MeshBuilder.CreateBox(
+            'chamberTimerBar',
+            { width: this.timerBarWidth, height: 0.14, depth: 0.1 },
+            this.scene
+        );
+        bar.material = this.timerMat;
+        bar.checkCollisions = false;
+        bar.position.set(this.timerBarBaseX, FLOOR_Y + GATE_HEIGHT + 0.32, -70.14);
+        bar.isVisible = false;
+        this.timerBar = bar;
+        this.meshes.push(bar);
     }
 
     private createPlates(): void {
@@ -181,7 +245,7 @@ export class PuzzleChamber {
                 this.scene
             );
             rune.material = this.runeMat;
-            rune.position.set(5.0 + index * 1.0, FLOOR_Y + GATE_HEIGHT + 0.35, -70.15);
+            rune.position.set(5.0 + index * 1.0, FLOOR_Y + GATE_HEIGHT + 0.88, -70.14);
             rune.checkCollisions = false;
             this.meshes.push(rune);
 
@@ -303,7 +367,31 @@ export class PuzzleChamber {
             shouldBeOpen ? this.sfx.gateOpen() : this.sfx.gateClose();
         }
 
+        this.updateTimerBar(allWeighted);
         this.animateGate(deltaSeconds, shouldBeOpen);
+    }
+
+    /**
+     * Show the grace window draining. Hidden while every plate is still held,
+     * because then there is nothing to count down.
+     */
+    private updateTimerBar(allWeighted: boolean): void {
+        if (!this.timerBar) return;
+
+        const counting = !allWeighted && this.graceRemaining > 0;
+        this.timerBar.isVisible = counting;
+        if (!counting) return;
+
+        const fraction = this.graceRemaining / GATE_GRACE_SECONDS;
+        this.timerBar.scaling.x = fraction;
+        // Shift as it shrinks so the bar drains towards one end instead of
+        // closing in on its own centre.
+        this.timerBar.position.x = this.timerBarBaseX - (1 - fraction) * (this.timerBarWidth / 2);
+    }
+
+    /** How much of the grace window is left, 0 to 1. */
+    public get graceFraction(): number {
+        return this.graceRemaining / GATE_GRACE_SECONDS;
     }
 
     /** A plate is held down by the player standing on it or by a block resting on it. */

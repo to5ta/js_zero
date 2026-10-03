@@ -21,6 +21,8 @@ import { getLevelDefinition, LevelId } from '../config/LevelCatalog';
 import { ReimplLevel } from '../levels/ReimplLevel';
 import { PuzzleChamber } from '../gameplay/PuzzleChamber';
 import { Sfx } from '../audio/Sfx';
+import { Cutscene, createChamberIntro } from '../gameplay/Cutscene';
+import { HintLine } from '../ui/HintLine';
 // @ts-ignore - webpack will handle this file
 import wache02Model from '../../assets/models/wache02.glb';
 
@@ -54,6 +56,10 @@ export class App {
     private player?: SimplePlayer;
     private activeLevel?: ReimplLevel;
     private puzzleChamber?: PuzzleChamber;
+    private cutscene?: Cutscene;
+    private hintLine?: HintLine;
+    private stuckSeconds = 0;
+    private hintShown = false;
     private readonly sfx = new Sfx();
     private readonly levelDefinition;
     private playerSpawnPoint: BABYLON.Vector3 = new BABYLON.Vector3(0, 2.0, 0);
@@ -292,6 +298,8 @@ export class App {
         if (this.levelDefinition.id === 'level1') {
             this.puzzleChamber = new PuzzleChamber(this.scene, this.sfx);
             this.puzzleChamber.build();
+            this.cutscene = new Cutscene(this.scene, createChamberIntro());
+            this.hintLine = new HintLine();
             // Spawn at the foot of the stairs instead of the map origin, which is
             // a seventy unit walk away from the only thing to do.
             this.playerSpawnPoint = new BABYLON.Vector3(15.0, 0.6, -56.0);
@@ -657,6 +665,13 @@ export class App {
         if (!this.puzzleChamber || !this.player) return;
 
         const position = this.player.position;
+
+        if (this.updateCutscene(deltaTimeMs / 1000, position)) {
+            return;
+        }
+
+        this.updateStuckHint(deltaTimeMs / 1000, position);
+
         const facing = this.player.getLastMoveDirection
             ? this.player.getLastMoveDirection()
             : BABYLON.Vector3.Forward();
@@ -681,6 +696,77 @@ export class App {
                     ? 'Pick up'
                     : null;
             this.mobileControls.setActionHint(hint);
+        }
+    }
+
+    /**
+     * Fires the intro once the player is actually inside the antechamber, not on
+     * load: starting it at spawn would play over the walk up the stairs, and the
+     * room it describes would not be on screen yet.
+     *
+     * @returns true while the cutscene owns the frame, so the puzzle does not
+     *          also advance behind it.
+     */
+    private updateCutscene(deltaSeconds: number, position: BABYLON.Vector3): boolean {
+        if (!this.cutscene) return false;
+
+        if (this.cutscene.isRunning) {
+            // Checked before the input is cleared, otherwise the skip can never
+            // be seen.
+            const state = this.inputSystem.getState();
+            const wantsSkip =
+                state.isActionPressed() ||
+                state.isJumpPressed() ||
+                state.getMovementInput().lengthSquared() > 0.01;
+
+            if (wantsSkip) {
+                this.cutscene.skip();
+            } else {
+                this.cutscene.update(deltaSeconds);
+                // Freeze the player for the duration; it is on rails and a
+                // walking character under the camera would be a distraction.
+                state.clear();
+                return true;
+            }
+        }
+
+        if (!this.cutscene.hasPlayed && this.isInsideChamber(position)) {
+            this.sfx.unlock();
+            this.cutscene.start();
+            return true;
+        }
+
+        return false;
+    }
+
+    private isInsideChamber(position: BABYLON.Vector3): boolean {
+        return (
+            position.x > 3.5 && position.x < 23.5 &&
+            position.z > -82.0 && position.z < -62.0 &&
+            position.y > 1.0
+        );
+    }
+
+    /**
+     * The fallback under the visual cues. It only speaks up once the player has
+     * seen the gate open and still has not gone through, which is when the wrong
+     * reading takes hold.
+     */
+    private updateStuckHint(deltaSeconds: number, position: BABYLON.Vector3): void {
+        if (!this.puzzleChamber || !this.hintLine || this.hintShown) return;
+
+        // Past the cross wall means they solved it; nothing left to hint at.
+        if (position.z < -70.5) {
+            this.hintShown = true;
+            return;
+        }
+
+        if (!this.puzzleChamber.isSolved) return;
+
+        this.stuckSeconds += deltaSeconds;
+        if (this.stuckSeconds > 25) {
+            this.hintShown = true;
+            this.hintLine.show('The gate does not drop at once. Weigh the last plate, then run.', 9);
         }
     }
 
