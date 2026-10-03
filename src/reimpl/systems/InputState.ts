@@ -11,7 +11,9 @@ export class InputState {
     private virtualLookInput: BABYLON.Vector2 = BABYLON.Vector2.Zero();
     private virtualJumpPressed: boolean = false;
     private virtualActionPressed: boolean = false;
-    
+    /** Previous frame's action state, for edge detection in consumeActionPress. */
+    private actionWasPressed: boolean = false;
+
     // Mouse state
     private mousePosition: BABYLON.Vector2 = BABYLON.Vector2.Zero();
     private mouseButtons = new Set<number>();
@@ -176,10 +178,24 @@ export class InputState {
     }
 
     /**
-     * Check if action input is pressed (mobile action button for now)
+     * Check if action input is held (E key, or the mobile action button)
      */
     public isActionPressed(): boolean {
-        return this.virtualActionPressed;
+        return this.isKeyDown('e') || this.virtualActionPressed;
+    }
+
+    /**
+     * True only on the frame the action input went down.
+     *
+     * Picking up and setting down are one-shot actions. Reading the held state
+     * instead would fire them on every frame the button stays pressed, so the
+     * player would grab and drop a block sixty times a second.
+     */
+    public consumeActionPress(): boolean {
+        const pressed = this.isActionPressed();
+        const justPressed = pressed && !this.actionWasPressed;
+        this.actionWasPressed = pressed;
+        return justPressed;
     }
     
     /**
@@ -338,8 +354,9 @@ export class InputState {
         this.virtualLookInput.set(0, 0);
         this.virtualJumpPressed = false;
         this.virtualActionPressed = false;
+        this.actionWasPressed = false;
     }
-    
+
     /**
      * Cleanup event listeners
      */

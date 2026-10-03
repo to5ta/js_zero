@@ -19,6 +19,8 @@ import { SimplePlayer } from '../entities/SimplePlayer';
 import Stats from 'stats-js';
 import { getLevelDefinition, LevelId } from '../config/LevelCatalog';
 import { ReimplLevel } from '../levels/ReimplLevel';
+import { PuzzleChamber } from '../gameplay/PuzzleChamber';
+import { Sfx } from '../audio/Sfx';
 // @ts-ignore - webpack will handle this file
 import wache02Model from '../../assets/models/wache02.glb';
 
@@ -51,6 +53,8 @@ export class App {
     private sharedDebugTexture?: BABYLONGUI.AdvancedDynamicTexture;
     private player?: SimplePlayer;
     private activeLevel?: ReimplLevel;
+    private puzzleChamber?: PuzzleChamber;
+    private readonly sfx = new Sfx();
     private readonly levelDefinition;
     private playerSpawnPoint: BABYLON.Vector3 = new BABYLON.Vector3(0, 2.0, 0);
     
@@ -96,10 +100,17 @@ export class App {
         this.loadingScreen = new LoadingScreen(this.eventBus);
         this.engine.loadingScreen = this.loadingScreen;
         
-        // Setup FPS counter
+        // Setup FPS counter. It still runs in production because the render loop
+        // calls begin/end, but only development puts its panel on screen — in a
+        // release build it would sit on top of the health bar.
         this.stats = new Stats();
         this.stats.showPanel(0); // 0: fps, 1: ms, 2: mb
-        document.body.appendChild(this.stats.dom);
+        if (__DEV__) {
+            // Below the health bar, which owns the top left corner.
+            this.stats.dom.style.top = '52px';
+            this.stats.dom.style.left = '10px';
+            document.body.appendChild(this.stats.dom);
+        }
         Logger.debug('FPS counter added');
         
         // Initialize input system
@@ -222,6 +233,8 @@ export class App {
                 
                 // Update all entities
                 this.entityManager.update(deltaTime);
+
+                this.updatePuzzle(deltaTime);
                 
                 // Update input debug UI
                 if (this.inputDebugUI) {
@@ -275,6 +288,14 @@ export class App {
         await this.activeLevel.init();
         this.playerSpawnPoint = this.activeLevel.spawnPosition.clone();
         Logger.info(`🌍 Active level ready: ${this.activeLevel.displayName}`);
+
+        if (this.levelDefinition.id === 'level1') {
+            this.puzzleChamber = new PuzzleChamber(this.scene, this.sfx);
+            this.puzzleChamber.build();
+            // Spawn at the foot of the stairs instead of the map origin, which is
+            // a seventy unit walk away from the only thing to do.
+            this.playerSpawnPoint = new BABYLON.Vector3(15.0, 0.6, -56.0);
+        }
     }
 
     private createOverlayUi(): void {
@@ -628,4 +649,39 @@ export class App {
         
         Logger.info('✅ Player reset complete');
     }
+
+    /**
+     * Drive the chamber and keep the action prompt in sync with what is in reach.
+     */
+    private updatePuzzle(deltaTimeMs: number): void {
+        if (!this.puzzleChamber || !this.player) return;
+
+        const position = this.player.position;
+        const facing = this.player.getLastMoveDirection
+            ? this.player.getLastMoveDirection()
+            : BABYLON.Vector3.Forward();
+        const flatFacing = new BABYLON.Vector3(facing.x, 0, facing.z);
+        const direction = flatFacing.lengthSquared() > 0.0001
+            ? flatFacing.normalize()
+            : new BABYLON.Vector3(0, 0, 1);
+
+        if (this.inputSystem.getState().consumeActionPress()) {
+            // Browsers only allow audio to start from a gesture, and this is the
+            // first one the game can be sure of.
+            this.sfx.unlock();
+            this.puzzleChamber.toggleCarry(position, direction);
+        }
+
+        this.puzzleChamber.update(deltaTimeMs / 1000, position, direction);
+
+        if (this.mobileControls) {
+            const hint = this.puzzleChamber.holding
+                ? 'Set down'
+                : this.puzzleChamber.findInteractable(position)
+                    ? 'Pick up'
+                    : null;
+            this.mobileControls.setActionHint(hint);
+        }
+    }
+
 }
