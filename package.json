@@ -5,6 +5,8 @@
   "main": "index.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "assets": "node scripts/assets.mjs",
+    "assets:check": "node scripts/assets.mjs --check",
     "dev": "webpack-dev-server --mode development --config webpack.reimpl.config.js --env level=level1",
     "build": "webpack --mode production --config webpack.reimpl.config.js --env level=level1",
     "dev:legacy": "webpack-dev-server --mode development",
@@ -13,7 +15,7 @@
     "build:reimpl": "webpack --mode production --config webpack.reimpl.config.js --env level=level1",
     "dev:test_obstacles": "webpack-dev-server --mode development --config webpack.reimpl.config.js --env level=test-obstacles",
     "build:test_obstacles": "webpack --mode production --config webpack.reimpl.config.js --env level=test-obstacles",
-    "download-and-build": "python3 scripts/assets.py --download && webpack --mode production",
+    "download-and-build": "node scripts/assets.mjs && webpack --mode production",
     "build-online": "webpack --config webpack.config.js"
   },
   "author": "",
