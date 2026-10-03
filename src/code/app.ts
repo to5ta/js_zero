@@ -36,13 +36,12 @@ class App {
     let userId = localStorage.getItem('userId') || crypto.randomUUID();
     localStorage.setItem('userId', userId);
 
-    let sessionStart = new Date().toISOString().slice(0, 19).replace('T', ' ');
-
-    // Start session
+    // Both timestamps are set by the database with NOW(); the client only says
+    // who it is and which session it is closing.
     fetch('session_start.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId, sessionStart })
+      body: JSON.stringify({ userId })
     })
       .then(res => res.json())
       .then(data => {
@@ -56,13 +55,7 @@ class App {
       const token = localStorage.getItem('sessionToken');
       if (!sessionId || !token) return;
 
-      const data = JSON.stringify({
-        sessionId,
-        token,
-        sessionEnd: new Date().toISOString().slice(0, 19).replace('T', ' ')
-      });
-
-      navigator.sendBeacon('session_end.php', data);
+      navigator.sendBeacon('session_end.php', JSON.stringify({ sessionId, token }));
     };
 
     // beforeunload is unreliable on mobile: iOS Safari commonly skips it when
