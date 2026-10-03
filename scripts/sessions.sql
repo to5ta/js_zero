@@ -16,7 +16,7 @@ ALTER TABLE sessions ADD COLUMN token CHAR(32) NULL;
 -- CREATE TABLE sessions (
 --     sessionId    INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
 --     userId       CHAR(36)     NOT NULL,
---     sessionStart DATETIME     NOT NULL,
---     sessionEnd   DATETIME     NULL,
+--     sessionStart DATETIME     NOT NULL,   -- set by NOW() in session_start.php
+--     sessionEnd   DATETIME     NULL,       -- set by NOW() in session_end.php
 --     token        CHAR(32)     NULL
 -- );
