@@ -8,6 +8,7 @@
     "assets": "node scripts/assets.mjs",
     "assets:check": "node scripts/assets.mjs --check",
     "dev": "webpack-dev-server --mode development --config webpack.reimpl.config.js --env level=level1",
+    "dev:mobile": "webpack-dev-server --mode development --config webpack.reimpl.config.js --env level=level1 --host 0.0.0.0 --allowed-hosts all",
     "build": "webpack --mode production --config webpack.reimpl.config.js --env level=level1",
     "dev:legacy": "webpack-dev-server --mode development",
     "build:legacy": "webpack --mode production",

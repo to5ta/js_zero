@@ -29,6 +29,13 @@ download URL (the URL is the file's sha256, so every download is verified).
 
 Uploading new assets still goes through `python scripts/assets.py --upload` (needs Python + paramiko).
 
+### Testing on a phone
+
+`npm run dev:mobile` serves the same dev build on every network interface, so a
+phone on the same network can reach it at `http://<your-ip>:8080`. It passes
+`--allowed-hosts all`, which turns off the dev server’s host check — fine on a
+home network, not something to expose beyond one.
+
 ## Credits
 
 * Some of the used Texture Sets are from https://texturehaven.com/textures/ and https://hdrihaven.com.
