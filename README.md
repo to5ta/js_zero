@@ -14,9 +14,27 @@
 
 1. Install NPM from https://nodejs.org/de/
 2. Run `npm install` to install all dependencies
-3. Run `python scripts/assets.py --download` to download all assets (Requires Python 3.6+)
+3. Run `npm run assets` to download all assets (Node only, verifies every file via sha256)
 4. Run `npm run dev` to build and host the app locally
 5. Open `localhost:8080` in your Browser
+
+Assets are not stored in the repo; `src/assets/assets.json` maps each asset path to its
+download URL (the URL is the file's sha256, so every download is verified).
+
+| command | does |
+| --- | --- |
+| `npm run assets` | download everything that is missing or corrupt |
+| `npm run assets -- --force` | re-download all assets |
+| `npm run assets:check` | report what is missing, download nothing |
+
+Uploading new assets still goes through `python scripts/assets.py --upload` (needs Python + paramiko).
+
+### Testing on a phone
+
+`npm run dev:mobile` serves the same dev build on every network interface, so a
+phone on the same network can reach it at `http://<your-ip>:8080`. It passes
+`--allowed-hosts all`, which turns off the dev server’s host check — fine on a
+home network, not something to expose beyond one.
 
 ## Credits
 
