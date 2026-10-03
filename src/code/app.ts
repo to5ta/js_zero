@@ -39,7 +39,7 @@ class App {
     let sessionStart = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
     // Start session
-    fetch('/games/session_start.php', {
+    fetch('session_start.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ userId, sessionStart })
@@ -59,7 +59,7 @@ class App {
       });
       
       // Use sendBeacon for reliable tracking on page unload
-      navigator.sendBeacon('/games/session_end.php', data);
+      navigator.sendBeacon('session_end.php', data);
     });
   }
 
