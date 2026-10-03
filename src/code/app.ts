@@ -46,21 +46,36 @@ class App {
     })
       .then(res => res.json())
       .then(data => {
-        // Save sessionId returned by PHP
+        // sessionId names the row, token authorizes writing to it
         localStorage.setItem('sessionId', data.sessionId);
+        localStorage.setItem('sessionToken', data.token);
       });
-    window.addEventListener('beforeunload', () => {
-      let sessionId = localStorage.getItem('sessionId');
-      if (!sessionId) return;
 
-      const data = JSON.stringify({ 
-        sessionId, 
+    const reportSessionEnd = () => {
+      const sessionId = localStorage.getItem('sessionId');
+      const token = localStorage.getItem('sessionToken');
+      if (!sessionId || !token) return;
+
+      const data = JSON.stringify({
+        sessionId,
+        token,
         sessionEnd: new Date().toISOString().slice(0, 19).replace('T', ' ')
       });
-      
-      // Use sendBeacon for reliable tracking on page unload
+
       navigator.sendBeacon('session_end.php', data);
+    };
+
+    // beforeunload is unreliable on mobile: iOS Safari commonly skips it when
+    // the app is backgrounded or swiped away, which would leave sessionEnd NULL
+    // for exactly the devices the mobile controls target. visibilitychange
+    // covers backgrounding, pagehide the remaining navigations. Reporting more
+    // than once is harmless, it only moves sessionEnd forward.
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') {
+        reportSessionEnd();
+      }
     });
+    window.addEventListener('pagehide', reportSessionEnd);
   }
 
   addEventlisteners() {
