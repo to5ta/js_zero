@@ -117,7 +117,7 @@ export class App {
             this.mobileControls = new MobileControlsOverlay(this.inputSystem.getState());
         }
 
-        if (!Environment.isPhysicalMobile) {
+        if (__DEV__ && !Environment.isPhysicalMobile) {
             this.mobileTestPanel = new MobileTestPanel();
         }
         

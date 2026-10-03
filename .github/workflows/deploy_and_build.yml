@@ -30,7 +30,7 @@ jobs:
 
     - name: Build Web Application 🔨
       run: |
-        npm run build
+        npm run build:legacy
 
     - name: Add Key and Server to Known Hosts 🔑    # only if main
       if: github.ref == 'refs/heads/main'

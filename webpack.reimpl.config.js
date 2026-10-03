@@ -67,6 +67,7 @@ module.exports = (env, argv) => {
       }),
       new webpack.DefinePlugin({
         __REIMPL_LEVEL__: JSON.stringify(level),
+        __DEV__: JSON.stringify(isDev),
       }),
       isDev && new webpack.HotModuleReplacementPlugin(),
     ].filter(Boolean),
