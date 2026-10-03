@@ -6,7 +6,7 @@ import "@babylonjs/loaders";
 
 import steps_sound from '../assets/sound/simple_steps.mp3';
 import sprint_sound from '../assets/sound/simple_sprint.mp3';
-import player_model from '../assets/models/wache02.gltf';
+import player_model from '../assets/models/wache02.glb';
 
 import { GameWorld } from './world';
 
@@ -17,6 +17,7 @@ import { CharacterHealth } from "./CharacterHealth";
 import { Logging } from "./common/Logging";
 import { GameEvent, GameEventHandler, GameEventType } from "./common/GameEvent";
 import { Environment } from "./environment";
+import { PlayerConfig } from "./config/PlayerConfig";
 
 class Player {
 
@@ -39,6 +40,8 @@ class Player {
    
     died = false;
     weight: any;
+
+    private boundOnEvent: (gameEvent: GameEvent) => void;
 
     getPosition() : BABYLON.Vector3 {
         return this.mPhysics.getPosition();
@@ -83,7 +86,7 @@ class Player {
         this.died = false;
         this.camera.alpha = -Math.PI/2;
         this.setOrientation(-Math.PI);
-        this.mHealth.setHealthPoints(100);
+        this.mHealth.setHealthPoints(PlayerConfig.health.total);
         this.inputDirectionBuffer = BABYLON.Vector3.Zero();
         this.setPosition(this.world.player_start_position.clone());
     }
@@ -98,9 +101,10 @@ class Player {
 
         this.debug_mode = false;
         
-        this.mHealth = new CharacterHealth(100);
+        this.mHealth = new CharacterHealth(PlayerConfig.health.total);
 
-        GameEventHandler.addGameEventsListener([GameEventType.PlayerHealthChanged, GameEventType.PlayerDied], this.onEvent.bind(this));
+        this.boundOnEvent = this.onEvent.bind(this);
+        GameEventHandler.addGameEventsListener([GameEventType.PlayerHealthChanged, GameEventType.PlayerDied], this.boundOnEvent);
 
         this.mCharacter = new CharacterVisualization(
             player_model,
@@ -117,13 +121,13 @@ class Player {
             
             
             var ctrlConfig: ControllerConfig = {
-                jumpSpeed: 10,
-                moveSpeed: 6,
-                sprintSpeed: 10,
-                width: 0.7,
-                depth: 0.3,
-                height: 1.9,
-                weight: 75.0 //kg
+                jumpSpeed: PlayerConfig.physics.jumpSpeed,
+                moveSpeed: PlayerConfig.physics.moveSpeed,
+                sprintSpeed: PlayerConfig.physics.sprintSpeed,
+                width: PlayerConfig.physics.width,
+                depth: PlayerConfig.physics.depth,
+                height: PlayerConfig.physics.height,
+                weight: PlayerConfig.physics.weight
             };
             this.mPhysics = new CharacterController(ctrlConfig, this, world, this.mCharacter);
             
@@ -148,7 +152,11 @@ class Player {
                 // // this.camera.attachControl(this.canvas, true);
                 
                 // we can tweak that value later for narrow parts of the map / indoor scenes
-                this.distanceToCharacter = 4.5;
+                if (Environment.isMobile) {
+                    this.distanceToCharacter = PlayerConfig.camera.distanceMobile;
+                } else {
+                    this.distanceToCharacter = PlayerConfig.camera.distanceDesktop;
+                }
                 
                 
                 this.camera = new BABYLON.ArcRotateCamera(
@@ -160,15 +168,17 @@ class Player {
                     this.scene,
                     true);
                     
-                    this.camera.attachControl(this.canvas, true);
+                    if(!Environment.isMobile) {
+                        this.camera.attachControl(this.canvas, true);
+                    }
                     this.camera.inputs.remove(this.camera.inputs.attached.keyboard);
                     this.camera.inputs.remove(this.camera.inputs.attached.mousewheel);
                     
-                    this.camera.angularSensibilityX = 1500;
-                    this.camera.angularSensibilityY = 1500;
+                    this.camera.angularSensibilityX = PlayerConfig.camera.angularSensibilityX;
+                    this.camera.angularSensibilityY = PlayerConfig.camera.angularSensibilityY;
                     
-                    this.camera.upperBetaLimit = 1.7;       // ca. horizont
-                    this.camera.lowerBetaLimit = 0;         // zenit
+                    this.camera.upperBetaLimit = PlayerConfig.camera.upperBetaLimit;       // ca. horizont
+                    this.camera.lowerBetaLimit = PlayerConfig.camera.lowerBetaLimit;         // zenit
                     
                     // works but not completely satisfying 
         // this.camera.checkCollisions = true;
@@ -197,7 +207,7 @@ class Player {
     // process player input ---------------------------------------------------
     handleInput(keyEvent: KeyboardEvent) {
         if (!this.died) {
-            this.mPhysics.handleInput(keyEvent);
+            this.mPhysics.handleKeyEvent(keyEvent);
         }
     }
 
@@ -221,6 +231,23 @@ class Player {
     }
 
     deactivate() {  
+    }
+
+    dispose() {
+        // Cleanup event listeners
+        GameEventHandler.removeGameEventListener(GameEventType.PlayerHealthChanged, this.boundOnEvent);
+        GameEventHandler.removeGameEventListener(GameEventType.PlayerDied, this.boundOnEvent);
+        
+        // Dispose 3D objects
+        if (this.mPhysics) {
+            this.mPhysics.dispose();
+        }
+        if (this.mCharacter) {
+            this.mCharacter.dispose();
+        }
+        if (this.camera) {
+            this.camera.dispose();
+        }
     }
 }
 

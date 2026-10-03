@@ -28,22 +28,58 @@ class App {
     this.stats = new Stats();
     this.stats.showPanel(0);
     document.body.appendChild(this.stats.dom);
+    this.sessionCommunication();
   }
-  
+
+
+  sessionCommunication() {
+    let userId = localStorage.getItem('userId') || crypto.randomUUID();
+    localStorage.setItem('userId', userId);
+
+    let sessionStart = new Date().toISOString().slice(0, 19).replace('T', ' ');
+
+    // Start session
+    fetch('session_start.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, sessionStart })
+    })
+      .then(res => res.json())
+      .then(data => {
+        // sessionId names the row, token authorizes writing to it
+        localStorage.setItem('sessionId', data.sessionId);
+        localStorage.setItem('sessionToken', data.token);
+      });
+
+    const reportSessionEnd = () => {
+      const sessionId = localStorage.getItem('sessionId');
+      const token = localStorage.getItem('sessionToken');
+      if (!sessionId || !token) return;
+
+      const data = JSON.stringify({
+        sessionId,
+        token,
+        sessionEnd: new Date().toISOString().slice(0, 19).replace('T', ' ')
+      });
+
+      navigator.sendBeacon('session_end.php', data);
+    };
+
+    // beforeunload is unreliable on mobile: iOS Safari commonly skips it when
+    // the app is backgrounded or swiped away, which would leave sessionEnd NULL
+    // for exactly the devices the mobile controls target. visibilitychange
+    // covers backgrounding, pagehide the remaining navigations. Reporting more
+    // than once is harmless, it only moves sessionEnd forward.
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') {
+        reportSessionEnd();
+      }
+    });
+    window.addEventListener('pagehide', reportSessionEnd);
+  }
 
   addEventlisteners() {
     window.addEventListener("resize", () => { this.engine.resize() });
-    
-        window.addEventListener('focusin', () => {
-          Logging.info('App gets focus again...');
-          this.game.resume();
-        });
-    
-        window.addEventListener('focusout', () => {
-          Logging.info('App lost focus...');
-          this.game.pause();
-        });
-    
     
         window.addEventListener('focus', () => {
           Logging.info('App gets focus again...');

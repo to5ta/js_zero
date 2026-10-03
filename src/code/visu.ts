@@ -11,3 +11,5 @@ class VectorVisuHelper {
         this.vectorLine.setVerticesData(BABYLON.VertexBuffer.PositionKind, [0,0,0, vector.x, vector.y, vector.z]);
     }
 }
+
+export { VectorVisuHelper };

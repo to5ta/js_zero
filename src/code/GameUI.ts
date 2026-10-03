@@ -4,32 +4,42 @@ import { Logging } from "./common/Logging";
 import { Player } from "./Player";
 import { GameEvent, GameEventHandler, GameEventType } from "./common/GameEvent";
 export default class GameUI {
-
+    
     playerHealth: BABYLONGUI.TextBlock;
     movement_button_pressed: boolean = false;
-
+    
     // key-value store for debug values
     debug_values_textblock: BABYLONGUI.TextBlock;
     debug_values: Map<string, string> = new Map();
-
+    leftJoystick: BABYLON.VirtualJoystick;
+    rightJoystick: BABYLON.VirtualJoystick;
+    
+    private boundOnEvent: (gameEvent: GameEvent) => void;
+    private boundOnDebugValueShow: (gameEvent: GameEvent) => void;
+    private boundOnDebugValueRemove: (gameEvent: GameEvent) => void;
+    
     constructor(engine: BABYLON.Engine, canvas: HTMLCanvasElement, player: Player, isMobile: boolean) {
         var fullScreenUI = BABYLONGUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
         var fullScreenDebugUI = BABYLONGUI.AdvancedDynamicTexture.CreateFullscreenUI("DebugUI");
-
+        
         this.playerHealth = new BABYLONGUI.TextBlock();
         this.playerHealth.text = "\u2764 100";
         this.playerHealth.color = "white";
-        this.playerHealth.fontSize = 45;
+        if (isMobile) {
+            this.playerHealth.fontSize = 30;
+        } else {
+            this.playerHealth.fontSize = 45;
+        }
         this.playerHealth.textHorizontalAlignment = BABYLONGUI.TextBlock.HORIZONTAL_ALIGNMENT_LEFT;
         this.playerHealth.textVerticalAlignment = BABYLONGUI.TextBlock.VERTICAL_ALIGNMENT_TOP;
         this.playerHealth.horizontalAlignment = BABYLONGUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
         this.playerHealth.verticalAlignment = BABYLONGUI.Control.VERTICAL_ALIGNMENT_TOP;
         this.playerHealth.paddingTop = 60;
         this.playerHealth.paddingLeft = 20;
-
+        
         fullScreenUI.addControl(this.playerHealth);
         if(process.env.NODE_ENV === "development") {
-
+            
             this.debug_values_textblock = new BABYLONGUI.TextBlock();
             this.debug_values_textblock.text = "Debug values";
             this.debug_values_textblock.color = "red";
@@ -42,80 +52,75 @@ export default class GameUI {
             fullScreenDebugUI.addControl(this.debug_values_textblock);
         }
         // fullScreenDebugUI.layer!.isEnabled = false;
-
-        // TODO image button for walking directionally
-        // var button = BABYLONGUI.Button.CreateImageButton
-
-        // TODO image button for jumping
-
-        // TODO image button for sprinting
-
-        // TODO image button for interacting? maybe dynamically shown
-
+        
         if (isMobile) {
-            var button = BABYLONGUI.Button.CreateSimpleButton("Knopf", "<Move>");
-            button.width = "150px";
-            button.height = "150px";
-            button.color = "white";
-            button.background = "green";
-            button.cornerRadius = 20;
-            button.alpha = 0.3;
+            // virtual joystick
+            this.leftJoystick = new BABYLON.VirtualJoystick(true);
+            this.rightJoystick = new BABYLON.VirtualJoystick(false);
+            // set z
+            this.leftJoystick.setJoystickSensibility(0.1);
+            BABYLON.VirtualJoystick.Canvas!.style.zIndex = "4";
+            
+            // set color
+            this.leftJoystick.setJoystickColor("rgba(0, 255, 0, 0.5)");
+            this.rightJoystick.setJoystickColor("rgba(255, 0, 0, 0.5)");
 
-            // get screen size from document
-            var width = window.innerWidth;
-            var height = window.innerHeight;
-            button.left = 0;
-            button.top = engine.getRenderHeight() / 4;
-            Logging.info("Screen size: ", width, height);
+            // set sensitivity
+            this.leftJoystick.setJoystickSensibility(50);
+            this.leftJoystick.containerSize = 100;
+            this.rightJoystick.setJoystickSensibility(50);
+            this.rightJoystick.containerSize = 100;
 
-            function relative_position_in_button(screen_x: number, screen_y: number, element: BABYLONGUI.Button) {
-                return new BABYLON.Vector2(
-                    2 * (screen_x - button.centerX) / button._width.getValueInPixel(fullScreenUI, 100),
-                    2 * (screen_y - button.centerY) / button._height.getValueInPixel(fullScreenUI, 100));
-            }
 
-            this.movement_button_pressed = false;
-
-            button.onPointerDownObservable.add((eventData, eventState) => {
-                this.movement_button_pressed = true;
-                var relative_position = relative_position_in_button(eventData.x, eventData.y, button);
-                player.mPhysics.handleMoveButtonInput(new BABYLON.Vector2(relative_position.x, -relative_position.y));
-            });
-            button.onPointerUpObservable.add((eventData, eventState) => {
-                this.movement_button_pressed = false;
-                player.mPhysics.handleMoveButtonInput(BABYLON.Vector2.Zero());
-            });
-
-            button.onPointerMoveObservable.add((eventData, eventState) => {
-                if (this.movement_button_pressed) {
-                    var relative_position = relative_position_in_button(eventData.x, eventData.y, button);
-                    Logging.info("Relative position: ", relative_position);
-                    player.mPhysics.handleMoveButtonInput(new BABYLON.Vector2(relative_position.x, -relative_position.y));
-                    GameEventHandler.dispatchEvent(GameEventType.DebuggingShowValue, this, { key: "Relative position", value: relative_position.toString() });
-                }
-            });
-
-            // Button zur AdvancedDynamicTexture hinzufügen
-            fullScreenUI.addControl(button);
+            // set limit
+            this.leftJoystick.limitToContainer = true;
         }
         
-        GameEventHandler.addGameEventsListener([GameEventType.PlayerHealthChanged, GameEventType.PlayerDied], this.onEvent.bind(this));
-        GameEventHandler.addGameEventListener(GameEventType.DebuggingShowValue, this.onDebugValueShow.bind(this));
-        GameEventHandler.addGameEventListener(GameEventType.DebuggingRemoveValue, this.onDebugValueRemove.bind(this));
+        this.boundOnEvent = this.onEvent.bind(this);
+        this.boundOnDebugValueShow = this.onDebugValueShow.bind(this);
+        this.boundOnDebugValueRemove = this.onDebugValueRemove.bind(this);
+        
+        GameEventHandler.addGameEventsListener([GameEventType.PlayerHealthChanged, GameEventType.PlayerDied], this.boundOnEvent);
+        GameEventHandler.addGameEventListener(GameEventType.DebuggingShowValue, this.boundOnDebugValueShow);
+        GameEventHandler.addGameEventListener(GameEventType.DebuggingRemoveValue, this.boundOnDebugValueRemove);
     }
+    
+    handleMobileInput(player: Player) {
+        if (this.leftJoystick.pressed) {
+            // get joystick values
+            let left = this.leftJoystick.deltaPosition;
+            
+            // move player
+            player.mPhysics.handleDirectionalMovementInput(new BABYLON.Vector2(left.x, left.y));
+            
+            // set rotation based on direction
+            var anzimuth = Math.atan2(left.x, left.y);
 
+            player.setOrientation(anzimuth);
+            
+        } else {
+            player.mPhysics.handleDirectionalMovementInput(new BABYLON.Vector2(0, 0));
+        }
 
+        if (this.rightJoystick.pressed) {
+            var right = this.rightJoystick.deltaPosition;
+            player.camera.alpha -= right.x / 25;
+            player.camera.beta -= right.y / 150;
+            // player.setOrientation(player.camera.alpha);
+        }
+    }
+    
     onEvent = (gameEvent: GameEvent) => {
         let data = gameEvent.data as { health: string };
         this.playerHealth.text = "\u2764 " + data.health;
     }
-
+    
     onDebugValueShow(gameEvent: GameEvent) {
         let data = gameEvent.data as { key: string, value: string };
         this.debug_values.set(data.key, data.value);
         this.update_debug_values();
     }
-
+    
     onDebugValueRemove(gameEvent: GameEvent) {
         let data = gameEvent.data as { key: string, value: string };
         this.debug_values.delete(data.key);
@@ -133,6 +138,21 @@ export default class GameUI {
         this.debug_values_textblock.text = text;
     }
 
+    dispose() {
+        // Cleanup event listeners
+        GameEventHandler.removeGameEventListener(GameEventType.PlayerHealthChanged, this.boundOnEvent);
+        GameEventHandler.removeGameEventListener(GameEventType.PlayerDied, this.boundOnEvent);
+        GameEventHandler.removeGameEventListener(GameEventType.DebuggingShowValue, this.boundOnDebugValueShow);
+        GameEventHandler.removeGameEventListener(GameEventType.DebuggingRemoveValue, this.boundOnDebugValueRemove);
+        
+        // Dispose joysticks
+        if (this.leftJoystick) {
+            this.leftJoystick.releaseCanvas();
+        }
+        if (this.rightJoystick) {
+            this.rightJoystick.releaseCanvas();
+        }
+    }
 }
 
 

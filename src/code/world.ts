@@ -8,14 +8,13 @@ import sky_pz from  "../assets/textures/skybox/skybox0000_pz.png";
 import sky_nz from  "../assets/textures/skybox/skybox0000_nz.png";
 import medieval_theme_01 from  '../assets/music/medieval_theme_01.mp3';
 import medieval_theme_02 from  '../assets/music/medieval_theme_02.mp3';
-import test_level_model from '../assets/models/level0.gltf';
-import test_level_model_bin from  '../assets/models/level0.bin';
-import box_model from  '../assets/models/box.gltf';
+import test_level_model from '../assets/models/level1.glb';
 
 import * as BABYLON from "@babylonjs/core";
 import "@babylonjs/loaders";
 
 import { Logging } from "./common/Logging";
+import { PhysicsConfig } from "./config/PhysicsConfig";
 
 
 interface Pausable {
@@ -43,7 +42,7 @@ class GameWorld implements Pausable {
         // Create the scene space
         this.scene = scene;
 
-        this.gravity = -9.81;
+        this.gravity = PhysicsConfig.gravity;
 
         this.player_start_position = new BABYLON.Vector3(0,1.2,0);
         this.camera_start_position = new BABYLON.Vector3(30,30,30);
@@ -123,7 +122,6 @@ class GameWorld implements Pausable {
                 if (music.default) {
                     this.music = this.music_tracks[music.name];
                     this.music.play();
-                    while(!this.music){}
                     Logging.info("playing music track: ", this.music );
                     Logging.info("available music tracks: ", Object.keys(this.music_tracks));
                 }

@@ -76,7 +76,7 @@ export class CharacterVisualization {
             this.isPlaying(animationName)) {
             return;
         } else {
-            Object.keys(this.mNamedAnimationProperties).forEach(animationName => { this.mNamedAnimations[animationName].stop() });
+            Object.values(this.mNamedAnimations).forEach(animation => { animation.stop() });
             this.mNamedAnimations[animationName].start(
                 this.mNamedAnimationProperties[animationName].loop,
                 this.mNamedAnimationProperties[animationName].speed,
@@ -132,4 +132,23 @@ export class CharacterVisualization {
     }
 
     finishedLoading(): boolean {return this.meshLoaded && this.soundsLoaded};
+
+    dispose() {
+        // Stop and dispose all animations
+        Object.values(this.mNamedAnimations).forEach(animation => {
+            animation.stop();
+            animation.dispose();
+        });
+        
+        // Dispose all sounds
+        Object.values(this.sounds).forEach(sound => {
+            sound.stop();
+            sound.dispose();
+        });
+        
+        // Dispose mesh
+        if (this.mMesh) {
+            this.mMesh.dispose();
+        }
+    }
 } 
