@@ -1,86 +1,61 @@
 import * as BABYLON from '@babylonjs/core';
 import { Logger } from '../core/Logger';
 import { InputState } from '../systems/InputState';
+import { applyIronSurface, icon, SAFE_BOTTOM, Theme } from './theme';
 
 interface JoystickOptions {
     side: 'left' | 'right';
     label: string;
-    icon: string;
+    iconMarkup: string;
     onChange: (axis: BABYLON.Vector2) => void;
 }
+
+const RING_SIZE = 96;
+const KNOB_SIZE = 44;
+const MAX_DISTANCE = (RING_SIZE - KNOB_SIZE) / 2;
 
 class TouchJoystick {
     private readonly container: HTMLDivElement;
     private readonly knob: HTMLDivElement;
     private activePointerId: number | null = null;
-    private readonly maxDistance: number = 42;
     private readonly currentAxis: BABYLON.Vector2 = BABYLON.Vector2.Zero();
 
     constructor(parent: HTMLElement, private readonly options: JoystickOptions) {
         this.container = document.createElement('div');
+        this.container.setAttribute('aria-label', options.label);
         this.container.style.position = 'absolute';
-        this.container.style.bottom = '28px';
-        this.container.style.width = '148px';
-        this.container.style.height = '148px';
+        this.container.style.bottom = `calc(24px + ${SAFE_BOTTOM})`;
+        this.container.style.width = `${RING_SIZE}px`;
+        this.container.style.height = `${RING_SIZE}px`;
         this.container.style.borderRadius = '50%';
-        this.container.style.border = '2px solid rgba(255, 255, 255, 0.4)';
-        this.container.style.background = 'rgba(20, 24, 34, 0.4)';
-        this.container.style.backdropFilter = 'blur(6px)';
-        this.container.style.boxShadow = '0 10px 30px rgba(0, 0, 0, 0.2)';
+        this.container.style.border = `1px solid ${Theme.edgeSoft}`;
+        this.container.style.background = 'rgba(14, 13, 11, 0.42)';
         this.container.style.pointerEvents = 'auto';
         this.container.style.touchAction = 'none';
         this.container.style.userSelect = 'none';
         this.container.style.display = 'flex';
         this.container.style.alignItems = 'center';
         this.container.style.justifyContent = 'center';
-        this.container.style.opacity = '1';
 
         if (options.side === 'left') {
-            this.container.style.left = '24px';
+            this.container.style.left = '20px';
         } else {
-            this.container.style.right = '24px';
+            this.container.style.right = '20px';
         }
-
-        const guideRing = document.createElement('div');
-        guideRing.style.width = '92px';
-        guideRing.style.height = '92px';
-        guideRing.style.borderRadius = '50%';
-        guideRing.style.border = '1px dashed rgba(255, 255, 255, 0.28)';
-        guideRing.style.pointerEvents = 'none';
-        this.container.appendChild(guideRing);
 
         this.knob = document.createElement('div');
         this.knob.style.position = 'absolute';
-        this.knob.style.width = '64px';
-        this.knob.style.height = '64px';
-        this.knob.style.borderRadius = '50%';
-        this.knob.style.background = 'rgba(255, 255, 255, 0.4)';
-        this.knob.style.border = '2px solid rgba(255, 255, 255, 0.45)';
+        this.knob.style.width = `${KNOB_SIZE}px`;
+        this.knob.style.height = `${KNOB_SIZE}px`;
         this.knob.style.display = 'flex';
         this.knob.style.alignItems = 'center';
         this.knob.style.justifyContent = 'center';
-        this.knob.style.fontSize = '28px';
         this.knob.style.pointerEvents = 'none';
         this.knob.style.transform = 'translate(0px, 0px)';
-        this.knob.textContent = options.icon;
+        this.knob.style.transition = 'color 90ms linear';
+        this.knob.innerHTML = options.iconMarkup;
+        applyIronSurface(this.knob, '50%');
         this.container.appendChild(this.knob);
-
-        const label = document.createElement('div');
-        label.style.position = 'absolute';
-        label.style.bottom = '156px';
-        label.style.left = '50%';
-        label.style.transform = 'translateX(-50%)';
-        label.style.padding = '6px 10px';
-        label.style.borderRadius = '999px';
-        label.style.background = 'rgba(20, 24, 34, 0.4)';
-        label.style.border = '1px solid rgba(255, 255, 255, 0.22)';
-        label.style.color = '#ffffff';
-        label.style.fontSize = '12px';
-        label.style.fontWeight = '700';
-        label.style.letterSpacing = '0.08em';
-        label.style.pointerEvents = 'none';
-        label.textContent = `${options.icon} ${options.label}`;
-        this.container.appendChild(label);
 
         this.container.addEventListener('pointerdown', this.handlePointerDown);
         this.container.addEventListener('pointermove', this.handlePointerMove);
@@ -98,6 +73,7 @@ class TouchJoystick {
 
         this.activePointerId = event.pointerId;
         this.container.setPointerCapture(event.pointerId);
+        this.knob.style.color = Theme.brassBright;
         this.updateAxisFromPointer(event.clientX, event.clientY);
     };
 
@@ -117,6 +93,7 @@ class TouchJoystick {
 
         event.preventDefault();
         this.activePointerId = null;
+        this.knob.style.color = Theme.text;
         this.currentAxis.set(0, 0);
         this.options.onChange(this.currentAxis.clone());
         this.renderKnob();
@@ -128,20 +105,16 @@ class TouchJoystick {
 
     private updateAxisFromPointer(clientX: number, clientY: number): void {
         const rect = this.container.getBoundingClientRect();
-        const centerX = rect.left + rect.width / 2;
-        const centerY = rect.top + rect.height / 2;
-        const offsetX = clientX - centerX;
-        const offsetY = clientY - centerY;
+        const offsetX = clientX - (rect.left + rect.width / 2);
+        const offsetY = clientY - (rect.top + rect.height / 2);
 
         const distance = Math.sqrt(offsetX * offsetX + offsetY * offsetY);
-        const clampedDistance = Math.min(distance, this.maxDistance);
+        const clamped = Math.min(distance, MAX_DISTANCE);
         const angle = Math.atan2(offsetY, offsetX);
-        const clampedX = Math.cos(angle) * clampedDistance;
-        const clampedY = Math.sin(angle) * clampedDistance;
 
         this.currentAxis.set(
-            clampedX / this.maxDistance,
-            -clampedY / this.maxDistance
+            (Math.cos(angle) * clamped) / MAX_DISTANCE,
+            -(Math.sin(angle) * clamped) / MAX_DISTANCE
         );
 
         this.options.onChange(this.currentAxis.clone());
@@ -149,8 +122,8 @@ class TouchJoystick {
     }
 
     private renderKnob(): void {
-        const x = this.currentAxis.x * this.maxDistance;
-        const y = -this.currentAxis.y * this.maxDistance;
+        const x = this.currentAxis.x * MAX_DISTANCE;
+        const y = -this.currentAxis.y * MAX_DISTANCE;
         this.knob.style.transform = `translate(${x}px, ${y}px)`;
     }
 
@@ -167,24 +140,21 @@ export class MobileControlsOverlay {
     private readonly root: HTMLDivElement;
     private readonly movementJoystick: TouchJoystick;
     private readonly lookJoystick: TouchJoystick;
-    private readonly jumpButton: HTMLButtonElement;
     private readonly actionButton: HTMLButtonElement;
+    private readonly actionHint: HTMLDivElement;
 
     constructor(private readonly inputState: InputState) {
         this.root = document.createElement('div');
         this.root.style.position = 'fixed';
-        this.root.style.left = '0';
-        this.root.style.top = '0';
-        this.root.style.right = '0';
-        this.root.style.bottom = '0';
+        this.root.style.inset = '0';
         this.root.style.zIndex = '9998';
         this.root.style.pointerEvents = 'none';
         this.root.style.touchAction = 'none';
 
         this.movementJoystick = new TouchJoystick(this.root, {
             side: 'left',
-            label: 'MOVE',
-            icon: '🧭',
+            label: 'Move',
+            iconMarkup: icon('move'),
             onChange: (axis) => {
                 this.inputState.setVirtualMovementInput(new BABYLON.Vector2(-axis.x, axis.y));
             }
@@ -192,73 +162,90 @@ export class MobileControlsOverlay {
 
         this.lookJoystick = new TouchJoystick(this.root, {
             side: 'right',
-            label: 'LOOK',
-            icon: '👁️',
+            label: 'Look',
+            iconMarkup: icon('look'),
             onChange: (axis) => {
                 this.inputState.setVirtualLookInput(axis);
             }
         });
 
-        const centerButtons = document.createElement('div');
-        centerButtons.style.position = 'absolute';
-        centerButtons.style.left = '50%';
-        centerButtons.style.bottom = '38px';
-        centerButtons.style.transform = 'translateX(-50%)';
-        centerButtons.style.display = 'flex';
-        centerButtons.style.flexDirection = 'column';
-        centerButtons.style.gap = '14px';
-        centerButtons.style.pointerEvents = 'auto';
+        // Jump and action stack between the sticks, inside right thumb reach and
+        // clear of the middle of the screen.
+        const centreColumn = document.createElement('div');
+        centreColumn.style.position = 'absolute';
+        centreColumn.style.right = '128px';
+        centreColumn.style.bottom = `calc(24px + ${SAFE_BOTTOM})`;
+        centreColumn.style.display = 'flex';
+        centreColumn.style.flexDirection = 'column';
+        centreColumn.style.gap = '10px';
+        centreColumn.style.pointerEvents = 'auto';
 
-        this.jumpButton = this.createActionButton('⬆️', 'JUMP');
-        this.actionButton = this.createActionButton('⚔️', 'ACTION');
+        const jumpButton = this.createActionButton(icon('jump'), 'Jump');
+        this.actionButton = this.createActionButton(icon('action'), 'Action');
 
-        this.bindPressState(this.jumpButton, (pressed) => {
-            this.inputState.setVirtualJumpPressed(pressed);
-        });
-        this.bindPressState(this.actionButton, (pressed) => {
-            this.inputState.setVirtualActionPressed(pressed);
-        });
+        this.bindPressState(jumpButton, (pressed) => this.inputState.setVirtualJumpPressed(pressed));
+        this.bindPressState(this.actionButton, (pressed) => this.inputState.setVirtualActionPressed(pressed));
 
-        centerButtons.appendChild(this.jumpButton);
-        centerButtons.appendChild(this.actionButton);
-        this.root.appendChild(centerButtons);
+        centreColumn.appendChild(this.actionButton);
+        centreColumn.appendChild(jumpButton);
+        this.root.appendChild(centreColumn);
+
+        // Says the action button will do something right now, so it is not a
+        // mystery control when nothing is in reach.
+        this.actionHint = document.createElement('div');
+        this.actionHint.style.position = 'absolute';
+        this.actionHint.style.right = '128px';
+        this.actionHint.style.bottom = `calc(136px + ${SAFE_BOTTOM})`;
+        this.actionHint.style.padding = '5px 10px';
+        this.actionHint.style.fontSize = '12px';
+        this.actionHint.style.letterSpacing = '0.04em';
+        this.actionHint.style.whiteSpace = 'nowrap';
+        this.actionHint.style.opacity = '0';
+        this.actionHint.style.transition = 'opacity 120ms linear';
+        this.actionHint.style.pointerEvents = 'none';
+        applyIronSurface(this.actionHint, '999px');
+        this.root.appendChild(this.actionHint);
 
         document.body.appendChild(this.root);
-
-        Logger.info('📱 Mobile controls overlay created');
+        Logger.info('Mobile controls overlay created');
     }
 
-    private createActionButton(icon: string, label: string): HTMLButtonElement {
+    /** Shown while something is in reach; null hides it again. */
+    public setActionHint(text: string | null): void {
+        if (text) {
+            this.actionHint.textContent = text;
+            this.actionHint.style.opacity = '1';
+            this.actionButton.style.borderColor = Theme.brass;
+        } else {
+            this.actionHint.style.opacity = '0';
+            this.actionButton.style.borderColor = Theme.edge;
+        }
+    }
+
+    private createActionButton(iconMarkup: string, label: string): HTMLButtonElement {
         const button = document.createElement('button');
         button.type = 'button';
-        button.style.width = '104px';
-        button.style.height = '58px';
-        button.style.borderRadius = '18px';
-        button.style.border = '2px solid rgba(255, 255, 255, 0.4)';
-        button.style.background = 'rgba(20, 24, 34, 0.4)';
-        button.style.color = '#ffffff';
-        button.style.fontWeight = '700';
-        button.style.fontSize = '14px';
-        button.style.letterSpacing = '0.06em';
+        button.setAttribute('aria-label', label);
+        button.style.width = '72px';
+        button.style.height = '48px';
         button.style.display = 'flex';
         button.style.alignItems = 'center';
         button.style.justifyContent = 'center';
-        button.style.gap = '8px';
         button.style.touchAction = 'none';
         button.style.userSelect = 'none';
         button.style.pointerEvents = 'auto';
-        button.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.18)';
-        button.style.backdropFilter = 'blur(6px)';
-        button.innerHTML = `<span>${icon}</span><span>${label}</span>`;
+        button.style.cursor = 'pointer';
+        button.style.transition = 'background 90ms linear, color 90ms linear';
+        button.innerHTML = iconMarkup;
+        applyIronSurface(button, '12px');
         return button;
     }
 
     private bindPressState(button: HTMLButtonElement, onPressedChanged: (pressed: boolean) => void): void {
         const setPressedState = (pressed: boolean): void => {
             onPressedChanged(pressed);
-            button.style.transform = pressed ? 'scale(0.96)' : 'scale(1)';
-            button.style.background = pressed ? 'rgba(255, 255, 255, 0.4)' : 'rgba(20, 24, 34, 0.4)';
-            button.style.color = pressed ? '#111827' : '#ffffff';
+            button.style.background = pressed ? Theme.ironPressed : Theme.ironRaised;
+            button.style.color = pressed ? Theme.brassBright : Theme.text;
         };
 
         button.addEventListener('pointerdown', (event) => {
@@ -287,6 +274,6 @@ export class MobileControlsOverlay {
         this.movementJoystick.dispose();
         this.lookJoystick.dispose();
         this.root.remove();
-        Logger.info('📱 Mobile controls overlay disposed');
+        Logger.info('Mobile controls overlay disposed');
     }
 }
